@@ -1,0 +1,66 @@
+*ddu-ui-filer.txt*	File listing UI for ddu.vim
+
+Author: Shougo <Shougo.Matsu at gmail.com>
+License: MIT license
+
+CONTENTS					*ddu-ui-filer-contents*
+
+Introduction		|ddu-ui-filer-introduction|
+Install			|ddu-ui-filer-install|
+Interface		|ddu-ui-filer-interface|
+  Functions		  |ddu-ui-filer-functions|
+  Actions		  |ddu-ui-filer-actions|
+  Params		  |ddu-ui-filer-params|
+Examples		|ddu-ui-filer-examples|
+FAQ			|ddu-ui-filer-faq|
+Compatibility		|ddu-ui-filer-compatibility|
+
+
+==============================================================================
+INTRODUCTION					*ddu-ui-filer-introduction*
+
+This UI is standard file explorer.
+
+
+==============================================================================
+INSTALL						*ddu-ui-filer-install*
+
+Please install both "ddu.vim" and "denops.vim".
+
+https://github.com/Shougo/ddu.vim
+https://github.com/vim-denops/denops.vim
+
+
+==============================================================================
+INTERFACE					*ddu-ui-filer-interface*
+
+
+------------------------------------------------------------------------------
+FUNCTIONS					*ddu-ui-filer-functions*
+
+
+------------------------------------------------------------------------------
+ACTIONS						*ddu-ui-filer-actions*
+
+
+==============================================================================
+PARAMS						*ddu-ui-filer-params*
+
+
+==============================================================================
+EXAMPLES					*ddu-ui-filer-examples*
+>
+	call ddu#custom#patch_global({
+	    \ 'ui': 'filer',
+	    \ })
+
+
+==============================================================================
+FREQUENTLY ASKED QUESTIONS (FAQ)			*ddu-ui-filer-faq*
+
+
+==============================================================================
+COMPATIBILITY					*ddu-ui-filer-compatibility*
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:fen:noet:
