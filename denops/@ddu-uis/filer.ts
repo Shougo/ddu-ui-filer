@@ -7,17 +7,43 @@ import {
   UiActions,
   UiOptions,
 } from "https://deno.land/x/ddu_vim@v0.13/types.ts";
-import { Denops, fn } from "https://deno.land/x/ddu_vim@v0.13/deps.ts";
+import {
+  batch,
+  Denops,
+  fn,
+  op,
+} from "https://deno.land/x/ddu_vim@v0.13/deps.ts";
 
-type Params = {};
+type HighlightGroup = {
+  floating?: string;
+};
+
+type Params = {
+  highlights: HighlightGroup;
+  split: "horizontal" | "vertical" | "floating" | "no";
+  splitDirection: "botright" | "topleft";
+  winCol: number;
+  winHeight: number;
+  winRow: number;
+  winWidth: number;
+};
 
 export class Ui extends BaseUi<Params> {
+  private buffers: Record<string, number> = {};
   private items: DduItem[] = [];
+  private selectedItems: Set<number> = new Set();
+  private saveTitle = "";
+  private saveCursor: number[] = [];
+  private refreshed = false;
+  private prevLength = -1;
 
   refreshItems(args: {
     items: DduItem[];
   }): void {
+    this.prevLength = this.items.length;
     this.items = args.items;
+    this.selectedItems.clear();
+    this.refreshed = true;
   }
 
   async redraw(args: {
@@ -27,6 +53,118 @@ export class Ui extends BaseUi<Params> {
     uiOptions: UiOptions;
     uiParams: Params;
   }): Promise<void> {
+    const bufferName = `ddu-ff-${args.options.name}`;
+    const initialized = this.buffers[args.options.name];
+    const bufnr = initialized
+      ? this.buffers[args.options.name]
+      : await this.initBuffer(args.denops, bufferName);
+    this.buffers[args.options.name] = bufnr;
+
+    await fn.setbufvar(args.denops, bufnr, "&modifiable", 1);
+
+    await this.setDefaultParams(args.denops, args.uiParams);
+
+    const hasNvim = args.denops.meta.host == "nvim";
+    const floating = args.uiParams.split == "floating" && hasNvim;
+    const ids = await fn.win_findbuf(args.denops, bufnr) as number[];
+    const winHeight = Number(args.uiParams.winHeight);
+    if (ids.length == 0) {
+      const direction = args.uiParams.splitDirection;
+      if (args.uiParams.split == "horizontal") {
+        const header = `silent keepalt ${direction} `;
+        await args.denops.cmd(
+          header + `sbuffer +resize\\ ${winHeight} ${bufnr}`,
+        );
+      } else if (args.uiParams.split == "vertical") {
+        const header = `silent keepalt vertical ${direction} `;
+        await args.denops.cmd(
+          header + `sbuffer +resize\\ ${args.uiParams.winWidth} ${bufnr}`,
+        );
+      } else if (floating) {
+        await args.denops.call("nvim_open_win", bufnr, true, {
+          "relative": "editor",
+          "row": Number(args.uiParams.winRow),
+          "col": Number(args.uiParams.winCol),
+          "width": Number(args.uiParams.winWidth),
+          "height": winHeight,
+        });
+
+        if (args.uiParams.highlights?.floating) {
+          await fn.setwinvar(
+            args.denops,
+            await fn.bufwinnr(args.denops, bufnr),
+            "&winhighlight",
+            args.uiParams.highlights.floating,
+          );
+        }
+      } else if (args.uiParams.split == "no") {
+        await args.denops.cmd(`silent keepalt buffer ${bufnr}`);
+      } else {
+        await args.denops.call(
+          "ddu#util#print_error",
+          `Invalid split param: ${args.uiParams.split}`,
+        );
+        return;
+      }
+    }
+
+    if (this.refreshed) {
+      await this.initOptions(args.denops, args.options, bufnr);
+    }
+
+    const header =
+      `[ddu-${args.options.name}] ${this.items.length}/${args.context.maxItems}`;
+    const linenr = "printf('%'.(len(line('$'))+2).'d/%d',line('.'),line('$'))";
+    const async = `${args.context.done ? "" : "[async]"}`;
+    const laststatus = await op.laststatus.get(args.denops);
+    if (hasNvim && (floating || laststatus == 0)) {
+      if (this.saveTitle == "") {
+        this.saveTitle = await args.denops.call(
+          "nvim_get_option",
+          "titlestring",
+        ) as string;
+      }
+
+      args.denops.call(
+        "nvim_set_option",
+        "titlestring",
+        header + " %{" + linenr + "}%*" + async,
+      );
+    } else {
+      await fn.setwinvar(
+        args.denops,
+        await fn.bufwinnr(args.denops, bufnr),
+        "&statusline",
+        header + " %#LineNR#%{" + linenr + "}%*" + async,
+      );
+    }
+
+    // Update main buffer
+    await args.denops.call(
+      "ddu#ui#filer#_update_buffer",
+      args.uiParams,
+      bufnr,
+      [...this.selectedItems],
+      this.items.map((c, i) => {
+        return {
+          highlights: c.highlights ?? [],
+          row: i + 1,
+          prefix: "",
+        };
+      }).filter((c) => c.highlights),
+      this.items.map((c) => c.display ?? c.word),
+      this.refreshed &&
+      (this.prevLength > 0 && this.items.length < this.prevLength),
+      0,
+    );
+
+    if (args.options.resume && this.saveCursor.length != 0) {
+      await fn.cursor(args.denops, this.saveCursor[1], this.saveCursor[2]);
+      this.saveCursor = [];
+    }
+
+    this.saveCursor = await fn.getcurpos(args.denops) as number[];
+    this.refreshed = false;
   }
 
   async quit(args: {
@@ -85,7 +223,69 @@ export class Ui extends BaseUi<Params> {
   };
 
   params(): Params {
-    return {};
+    return {
+      highlights: {},
+      split: "horizontal",
+      splitDirection: "botright",
+      winCol: 0,
+      winHeight: 20,
+      winRow: 0,
+      winWidth: 0,
+    };
+  }
+
+  private async initBuffer(
+    denops: Denops,
+    bufferName: string,
+  ): Promise<number> {
+    const bufnr = await fn.bufadd(denops, bufferName);
+    await fn.bufload(denops, bufnr);
+
+    return Promise.resolve(bufnr);
+  }
+
+  private async initOptions(
+    denops: Denops,
+    options: DduOptions,
+    bufnr: number,
+  ): Promise<void> {
+    const winid = await fn.bufwinid(denops, bufnr);
+
+    await batch(denops, async (denops: Denops) => {
+      await fn.setbufvar(denops, bufnr, "ddu_ui_name", options.name);
+
+      // Set options
+      await fn.setwinvar(denops, winid, "&list", 0);
+      await fn.setwinvar(denops, winid, "&colorcolumn", "");
+      await fn.setwinvar(denops, winid, "&cursorline", 1);
+      await fn.setwinvar(denops, winid, "&foldcolumn", 0);
+      await fn.setwinvar(denops, winid, "&foldenable", 0);
+      await fn.setwinvar(denops, winid, "&number", 0);
+      await fn.setwinvar(denops, winid, "&relativenumber", 0);
+      await fn.setwinvar(denops, winid, "&signcolumn", "no");
+      await fn.setwinvar(denops, winid, "&spell", 0);
+      await fn.setwinvar(denops, winid, "&wrap", 0);
+      await fn.setwinvar(denops, winid, "&signcolumn", "no");
+
+      await fn.setbufvar(denops, bufnr, "&filetype", "ddu-filer");
+      await fn.setbufvar(denops, bufnr, "&swapfile", 0);
+    });
+  }
+
+  private async setDefaultParams(denops: Denops, uiParams: Params) {
+    if (uiParams.winRow == 0) {
+      uiParams.winRow = Math.trunc(
+        (await denops.call("eval", "&lines") as number) / 2 - 10,
+      );
+    }
+    if (uiParams.winCol == 0) {
+      uiParams.winCol = Math.trunc(
+        (await op.columns.getGlobal(denops)) / 4,
+      );
+    }
+    if (uiParams.winWidth == 0) {
+      uiParams.winWidth = Math.trunc((await op.columns.getGlobal(denops)) / 2);
+    }
   }
 
   private async getIndex(

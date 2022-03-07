@@ -46,6 +46,66 @@ ACTIONS						*ddu-ui-filer-actions*
 ==============================================================================
 PARAMS						*ddu-ui-filer-params*
 
+				    	*ddu-ui-filer-param-highlights*
+highlights	(dictionary)
+		It specifies ddu-ui-filer buffer highlights.
+		It can contain following keys
+
+		floating			(string)
+		Specify floating window background highlight.
+		Default: "NormalFloat"
+
+		Default: {}
+
+				    		*ddu-ui-filer-param-split*
+split		(string)
+		Specify split mode. Following values are available:
+
+		"horizontal": horizontal split
+		"vertical": vertical split
+		"floating": use neovim floating window feature
+		"no": no split
+
+		Default: "horizontal"
+
+				    	*ddu-ui-filer-param-splitDirection*
+splitDirection	(string)
+		Specify split direction.
+
+		Default: "botright"
+
+						*ddu-ui-filer-param-winCol*
+winCol		(number)
+		Set the column position of the window if
+		|ddu-ui-filer-param-split| is "floating".
+
+		Default: &columns / 4
+
+						*ddu-ui-filer-param-winHeight*
+winHeight	(number)
+		Set the height of the window if |ddu-ui-filer-param-split| is
+		"horizontal".
+		if |ddu-ui-filer-param-split| is "floating",
+		set the height of the floating window.
+
+		Default: 20
+
+						*ddu-ui-filer-param-winRow*
+winRow		(number)
+		Set the row position of the window if
+		|ddu-ui-filer-param-split| is "floating".
+
+		Default: &lines / 2 - 10
+
+						*ddu-ui-filer-param-winwidth*
+winWidth	(number)
+		Set the width of the window if |ddu-ui-filer-param-split| is
+		"vertical".
+		if |ddu-ui-filer-param-split| is "floating", set the width of
+		the floating window.
+
+		Default: &columns / 2
+
 
 ==============================================================================
 EXAMPLES					*ddu-ui-filer-examples*
@@ -53,6 +113,10 @@ EXAMPLES					*ddu-ui-filer-examples*
 	call ddu#custom#patch_global({
 	    \ 'ui': 'filer',
 	    \ })
+
+	autocmd FileType ddu-filer call s:ddu_filer_my_settings()
+	function! s:ddu_filer_my_settings() abort
+	endfunction
 
 
 ==============================================================================
