@@ -6,13 +6,14 @@ import {
   DduOptions,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v0.13/types.ts";
+} from "https://deno.land/x/ddu_vim@v1.2.0/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
-} from "https://deno.land/x/ddu_vim@v0.13/deps.ts";
+} from "https://deno.land/x/ddu_vim@v1.2.0/deps.ts";
+import { ActionData } from "https://deno.land/x/ddu_kind_file@v0.3.0/file.ts";
 
 type HighlightGroup = {
   floating?: string;
@@ -41,7 +42,7 @@ export class Ui extends BaseUi<Params> {
     items: DduItem[];
   }): void {
     this.prevLength = this.items.length;
-    this.items = args.items;
+    this.items = this.getSortedItems(args.items);
     this.selectedItems.clear();
     this.refreshed = true;
   }
@@ -154,7 +155,7 @@ export class Ui extends BaseUi<Params> {
       }).filter((c) => c.highlights),
       this.items.map((c) => c.display ?? c.word),
       this.refreshed &&
-      (this.prevLength > 0 && this.items.length < this.prevLength),
+        (this.prevLength > 0 && this.items.length < this.prevLength),
       0,
     );
 
@@ -292,5 +293,35 @@ export class Ui extends BaseUi<Params> {
     denops: Denops,
   ): Promise<number> {
     return (await fn.line(denops, ".")) - 1;
+  }
+
+  private getSortedItems(
+    items: DduItem[],
+  ): DduItem[] {
+    const sourceItems: Record<number, DduItem[]> = {};
+    let sourceIndexes: number[] = [];
+    for (const item of items) {
+      if (!sourceItems[item.__sourceIndex]) {
+        sourceItems[item.__sourceIndex] = [];
+      }
+      sourceItems[item.__sourceIndex].push(item);
+      sourceIndexes.push(item.__sourceIndex);
+    }
+
+    // Uniq
+    sourceIndexes = [...new Set(sourceIndexes)];
+
+    let ret: DduItem[] = [];
+    for (const index of sourceIndexes) {
+      const dirs = sourceItems[index].filter(
+        (item) => (item.action as ActionData)?.isDirectory,
+      );
+      const files = sourceItems[index].filter(
+        (item) => !(item.action as ActionData)?.isDirectory,
+      );
+      ret = ret.concat(dirs);
+      ret = ret.concat(files);
+    }
+    return ret;
   }
 }
