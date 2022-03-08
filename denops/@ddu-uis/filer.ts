@@ -313,10 +313,15 @@ export class Ui extends BaseUi<Params> {
 
     let ret: DduItem[] = [];
     for (const index of sourceIndexes) {
-      const dirs = sourceItems[index].filter(
+      const sortedSourceItems = sourceItems[index].sort((a, b) => {
+        const nameA = (a.action as ActionData).path ?? a.word;
+        const nameB = (b.action as ActionData).path ?? b.word;
+        return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
+      });
+      const dirs = sortedSourceItems.filter(
         (item) => (item.action as ActionData)?.isDirectory,
       );
-      const files = sourceItems[index].filter(
+      const files = sortedSourceItems.filter(
         (item) => !(item.action as ActionData)?.isDirectory,
       );
       ret = ret.concat(dirs);
