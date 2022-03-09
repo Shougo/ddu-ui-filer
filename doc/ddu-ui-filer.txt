@@ -38,9 +38,27 @@ INTERFACE					*ddu-ui-filer-interface*
 ------------------------------------------------------------------------------
 FUNCTIONS					*ddu-ui-filer-functions*
 
+						*ddu#ui#filer#do_action()*
+ddu#ui#filer#do_action({action-name}[, {params}])
+		Fire {action-name} action with {params}.  You can find the
+		actions list in |ddu-ui-filer-actions|.
+		{args} behavior depends on {action-name}.
+
 
 ------------------------------------------------------------------------------
 ACTIONS						*ddu-ui-filer-actions*
+
+					*ddu-ui-filer-action-itemAction*
+itemAction
+		params:
+			{name}: action name
+			{params}: action params dictionary
+
+		Close the UI window and fire {name} action for items.
+		You can find the actions list in item's kind documentation.
+		If {name} is empty, "default" will be used.
+
+		Note: You cannot mix multiple kinds/sources.
 
 
 ==============================================================================
@@ -116,6 +134,8 @@ EXAMPLES					*ddu-ui-filer-examples*
 
 	autocmd FileType ddu-filer call s:ddu_filer_my_settings()
 	function! s:ddu_filer_my_settings() abort
+	  nnoremap <buffer> <CR>
+	  \ <Cmd>call ddu#ui#filer#do_action('itemAction')<CR>
 	endfunction
 
 

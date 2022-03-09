@@ -15,6 +15,12 @@ import {
 } from "https://deno.land/x/ddu_vim@v1.2.0/deps.ts";
 import { ActionData } from "https://deno.land/x/ddu_kind_file@v0.3.0/file.ts";
 
+type DoActionParams = {
+  name?: string;
+  items?: DduItem[];
+  params?: unknown;
+};
+
 type HighlightGroup = {
   floating?: string;
 };
@@ -174,6 +180,47 @@ export class Ui extends BaseUi<Params> {
     options: DduOptions;
     uiParams: Params;
   }): Promise<void> {
+    this.saveCursor = await fn.getcurpos(args.denops) as number[];
+
+    if (args.uiParams.split == "no") {
+      await args.denops.cmd(`buffer ${args.context.bufNr}`);
+      return;
+    }
+
+    if ((await fn.winnr(args.denops, "$")) == 1) {
+      await args.denops.cmd("enew");
+    } else {
+      await args.denops.cmd("close!");
+      await fn.win_gotoid(args.denops, args.context.winId);
+    }
+
+    // Restore options
+    if (this.saveTitle != "") {
+      args.denops.call(
+        "nvim_set_option",
+        "titlestring",
+        this.saveTitle,
+      );
+
+      this.saveTitle = "";
+    }
+
+    // Close preview window
+    await args.denops.cmd("pclose!");
+
+    await args.denops.call("ddu#event", args.options.name, "close");
+  }
+
+  private async getItems(denops: Denops): Promise<DduItem[]> {
+    let items: DduItem[];
+    if (this.selectedItems.size == 0) {
+      const idx = await this.getIndex(denops);
+      items = [this.items[idx]];
+    } else {
+      items = [...this.selectedItems].map((i) => this.items[i]);
+    }
+
+    return items.filter((item) => item);
   }
 
   actions: UiActions<Params> = {
@@ -183,6 +230,20 @@ export class Ui extends BaseUi<Params> {
       uiParams: Params;
       actionParams: unknown;
     }) => {
+      const params = args.actionParams as DoActionParams;
+      const items = params.items ?? await this.getItems(args.denops);
+      if (items.length == 0) {
+        return Promise.resolve(ActionFlags.None);
+      }
+
+      await args.denops.call(
+        "ddu#item_action",
+        args.options.name,
+        params.name ?? "default",
+        items,
+        params.params ?? {},
+      );
+
       return Promise.resolve(ActionFlags.None);
     },
     preview: async (args: {
@@ -192,12 +253,6 @@ export class Ui extends BaseUi<Params> {
       uiParams: Params;
     }) => {
       return Promise.resolve(ActionFlags.Persist);
-    },
-    // deno-lint-ignore require-await
-    refreshItems: async (_: {
-      denops: Denops;
-    }) => {
-      return Promise.resolve(ActionFlags.RefreshItems);
     },
     quit: async (args: {
       denops: Denops;
@@ -213,6 +268,12 @@ export class Ui extends BaseUi<Params> {
       });
       await args.denops.call("ddu#pop", args.options.name);
       return Promise.resolve(ActionFlags.None);
+    },
+    // deno-lint-ignore require-await
+    refreshItems: async (_: {
+      denops: Denops;
+    }) => {
+      return Promise.resolve(ActionFlags.RefreshItems);
     },
     toggleSelectItem: async (args: {
       denops: Denops;
