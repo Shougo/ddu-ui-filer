@@ -224,6 +224,17 @@ export class Ui extends BaseUi<Params> {
   }
 
   actions: UiActions<Params> = {
+    getItem: async (args: {
+      denops: Denops;
+      options: DduOptions;
+    }) => {
+      const idx = await this.getIndex(args.denops);
+      const item = this.items[idx];
+      const bufnr = this.buffers[args.options.name];
+      await fn.setbufvar(args.denops, bufnr, "ddu_ui_filer_item", item);
+
+      return Promise.resolve(ActionFlags.None);
+    },
     itemAction: async (args: {
       denops: Denops;
       options: DduOptions;

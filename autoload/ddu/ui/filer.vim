@@ -1,9 +1,24 @@
 let s:namespace = has('nvim') ? nvim_create_namespace('ddu-ui-filer') : 0
 
 function! ddu#ui#filer#do_action(name, ...) abort
-  call ddu#ui_action(
-        \ get(b:, 'ddu_ui_name', ''),
-        \ a:name, get(a:000, 0, {}))
+  if !exists('b:ddu_ui_name')
+    return
+  endif
+
+  call ddu#ui_action(b:ddu_ui_name, a:name, get(a:000, 0, {}))
+endfunction
+
+function! ddu#ui#filer#get_item() abort
+  if !exists('b:ddu_ui_name')
+    return {}
+  endif
+
+  call ddu#ui_action(b:ddu_ui_name, 'getItem', {})
+  return get(b:, 'ddu_ui_filer_item', {})
+endfunction
+function! ddu#ui#filer#is_directory() abort
+  let action = get(ddu#ui#filer#get_item(), 'action', {})
+  return get(action, 'isDirectory', v:false)
 endfunction
 
 function! ddu#ui#filer#_update_buffer(
@@ -19,7 +34,7 @@ function! ddu#ui#filer#_update_buffer(
   if a:refreshed
     " Init the cursor
     call win_execute(bufwinid(a:bufnr),
-          \ printf('call cursor(%d, 0) | redraw', a:pos + 1)
+          \ printf('call cursor(%d, 0) | redraw', a:pos + 1))
   endif
 
   call win_execute(bufwinid(a:bufnr), 'normal! zb')

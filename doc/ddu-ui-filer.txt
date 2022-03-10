@@ -44,6 +44,23 @@ ddu#ui#filer#do_action({action-name}[, {params}])
 		actions list in |ddu-ui-filer-actions|.
 		{args} behavior depends on {action-name}.
 
+						*ddu#ui#filer#get_item()*
+ddu#ui#filer#get_item()
+		Return the current cursor item as |Dictionary|.
+
+						*ddu#ui#filer#is_directory()*
+ddu#ui#filer#is_directory()
+		Return |v:true| if the current cursor item is directory.
+
+		Example: >
+
+		nnoremap <buffer><expr> <CR>
+		\ ddu#ui#filer#is_directory() ?
+		\ "<Cmd>call ddu#ui#filer#do_action('itemAction',
+		\  {'name': 'narrow'})<CR>" :
+		\ "<Cmd>call ddu#ui#filer#do_action('itemAction',
+		\  {'name': 'open'})<CR>"
+
 
 ------------------------------------------------------------------------------
 ACTIONS						*ddu-ui-filer-actions*
