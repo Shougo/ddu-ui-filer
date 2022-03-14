@@ -146,7 +146,12 @@ winWidth	(number)
 EXAMPLES					*ddu-ui-filer-examples*
 >
 	call ddu#custom#patch_global({
-	    \ 'ui': 'filer',
+	    \   'ui': 'filer',
+	    \   'actionOptions': {
+	    \     'narrow': {
+	    \       'quit': v:false,
+	    \     },
+	    \   },
 	    \ })
 
 	autocmd FileType ddu-filer call s:ddu_filer_my_settings()

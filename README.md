@@ -16,6 +16,11 @@ https://github.com/Shougo/ddu.vim
 
 ```vim
 call ddu#custom#patch_global({
-    \ 'ui': 'filer',
+    \   'ui': 'filer',
+    \   'actionOptions': {
+    \     'narrow': {
+    \       'quit': v:false,
+    \     },
+    \   },
     \ })
 ```
