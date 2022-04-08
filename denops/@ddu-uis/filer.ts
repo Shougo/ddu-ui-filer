@@ -6,13 +6,13 @@ import {
   DduOptions,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v1.2.0/types.ts";
+} from "https://deno.land/x/ddu_vim@v1.5.0/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
-} from "https://deno.land/x/ddu_vim@v1.2.0/deps.ts";
+} from "https://deno.land/x/ddu_vim@v1.5.0/deps.ts";
 import { ActionData } from "https://deno.land/x/ddu_kind_file@v0.3.0/file.ts";
 
 type DoActionParams = {
@@ -26,6 +26,8 @@ type HighlightGroup = {
 };
 
 type Params = {
+  collapsedIcon: string;
+  expandedIcon: string;
   highlights: HighlightGroup;
   split: "horizontal" | "vertical" | "floating" | "no";
   splitDirection: "botright" | "topleft";
@@ -33,6 +35,11 @@ type Params = {
   winHeight: number;
   winRow: number;
   winWidth: number;
+};
+
+export type ActionData = {
+  isDirectory?: boolean;
+  path?: string;
 };
 
 export class Ui extends BaseUi<Params> {
@@ -51,6 +58,29 @@ export class Ui extends BaseUi<Params> {
     this.items = this.getSortedItems(args.items);
     this.selectedItems.clear();
     this.refreshed = true;
+  }
+
+  expandItem(args: {
+    parent: DduItem;
+    children: DduItem[];
+  }): void {
+    this.prevLength = this.items.length;
+
+    // Search parent.
+    const index = this.items.findIndex(
+      (item: DduItem) =>
+        item.word == args.parent.word &&
+        item.__sourceIndex == args.parent.__sourceIndex,
+    );
+    if (index >= 0) {
+      this.items = this.items.slice(0, index + 1).concat(args.children).concat(
+        this.items.slice(index + 1),
+      );
+    } else {
+      this.items = this.items.concat(args.children);
+    }
+
+    this.selectedItems.clear();
   }
 
   async redraw(args: {
@@ -159,7 +189,11 @@ export class Ui extends BaseUi<Params> {
           prefix: "",
         };
       }).filter((c) => c.highlights),
-      this.items.map((c) => c.display ?? c.word),
+      this.items.map((c) => " ".repeat(c.__level) +
+                     (!(c.action as ActionData).isDirectory ? " " :
+                      c.__expanded ? args.uiParams.expandedIcon :
+                      args.uiParams.collapsedIcon) +
+                      " " + (c.display ?? c.word)),
       this.refreshed &&
         (this.prevLength > 0 && this.items.length < this.prevLength),
       0,
@@ -182,13 +216,10 @@ export class Ui extends BaseUi<Params> {
   }): Promise<void> {
     this.saveCursor = await fn.getcurpos(args.denops) as number[];
 
-    if (args.uiParams.split == "no") {
+    if (
+      args.uiParams.split == "no" || (await fn.winnr(args.denops, "$")) == 1
+    ) {
       await args.denops.cmd(`buffer ${args.context.bufNr}`);
-      return;
-    }
-
-    if ((await fn.winnr(args.denops, "$")) == 1) {
-      await args.denops.cmd("enew");
     } else {
       await args.denops.cmd("close!");
       await fn.win_gotoid(args.denops, args.context.winId);
@@ -224,6 +255,52 @@ export class Ui extends BaseUi<Params> {
   }
 
   actions: UiActions<Params> = {
+    collapseItem: async (args: {
+      denops: Denops;
+      options: DduOptions;
+    }) => {
+      const startIndex = await this.getIndex(args.denops);
+      const closeItem = this.items[startIndex];
+
+      if (!(closeItem.action as ActionData).isDirectory) {
+        return Promise.resolve(ActionFlags.None);
+      }
+
+      closeItem.__expanded = false;
+
+      const endIndex = startIndex + this.items.slice(startIndex + 1).findIndex(
+        (item: DduItem) => item.__level <= closeItem.__level,
+      );
+
+      this.prevLength = this.items.length;
+      this.items = this.items.slice(0, startIndex + 1).concat(
+        this.items.slice(endIndex + 1),
+      );
+      this.selectedItems.clear();
+
+      return Promise.resolve(ActionFlags.Redraw);
+    },
+    expandItem: async (args: {
+      denops: Denops;
+      options: DduOptions;
+    }) => {
+      const idx = await this.getIndex(args.denops);
+      const item = this.items[idx];
+
+      if (item.__expanded) {
+        return;
+      }
+
+      await args.denops.call(
+        "ddu#expand_item",
+        args.options.name,
+        item,
+      );
+
+      item.__expanded = true;
+
+      return Promise.resolve(ActionFlags.None);
+    },
     getItem: async (args: {
       denops: Denops;
       options: DduOptions;
@@ -297,6 +374,8 @@ export class Ui extends BaseUi<Params> {
 
   params(): Params {
     return {
+      collapsedIcon: "+",
+      expandedIcon: "-",
       highlights: {},
       split: "horizontal",
       splitDirection: "botright",

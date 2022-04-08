@@ -37,8 +37,6 @@ function! ddu#ui#filer#_update_buffer(
           \ printf('call cursor(%d, 0) | redraw', a:pos + 1))
   endif
 
-  call win_execute(bufwinid(a:bufnr), 'normal! zb')
-
   " Clear all highlights
   if has('nvim')
     call nvim_buf_clear_namespace(0, s:namespace, 0, -1)

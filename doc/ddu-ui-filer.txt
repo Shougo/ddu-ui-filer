@@ -65,6 +65,14 @@ ddu#ui#filer#is_directory()
 ------------------------------------------------------------------------------
 ACTIONS						*ddu-ui-filer-actions*
 
+					*ddu-ui-filer-action-collapseItem*
+collapseItem
+		Collapse the item tree.
+
+					*ddu-ui-filer-action-expandItem*
+expandItem
+		Expand the item tree.
+
 					*ddu-ui-filer-action-itemAction*
 itemAction
 		params:
@@ -158,6 +166,8 @@ EXAMPLES					*ddu-ui-filer-examples*
 	function! s:ddu_filer_my_settings() abort
 	  nnoremap <buffer> <CR>
 	  \ <Cmd>call ddu#ui#filer#do_action('itemAction')<CR>
+	  nnoremap <buffer> o
+	  \ <Cmd>call ddu#ui#filer#do_action('expandItem')<CR>
 	endfunction
 
 
