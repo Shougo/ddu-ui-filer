@@ -13,7 +13,6 @@ import {
   fn,
   op,
 } from "https://deno.land/x/ddu_vim@v1.5.0/deps.ts";
-import { ActionData } from "https://deno.land/x/ddu_kind_file@v0.3.0/file.ts";
 
 type DoActionParams = {
   name?: string;
@@ -97,8 +96,6 @@ export class Ui extends BaseUi<Params> {
       : await this.initBuffer(args.denops, bufferName);
     this.buffers[args.options.name] = bufnr;
 
-    await fn.setbufvar(args.denops, bufnr, "&modifiable", 1);
-
     await this.setDefaultParams(args.denops, args.uiParams);
 
     const hasNvim = args.denops.meta.host == "nvim";
@@ -145,7 +142,8 @@ export class Ui extends BaseUi<Params> {
       }
     }
 
-    if (this.refreshed) {
+    // Note: buffers may be restored
+    if (!this.buffers[args.options.name]) {
       await this.initOptions(args.denops, args.options, bufnr);
     }
 
@@ -189,11 +187,13 @@ export class Ui extends BaseUi<Params> {
           prefix: "",
         };
       }).filter((c) => c.highlights),
-      this.items.map((c) => " ".repeat(c.__level) +
-                     (!(c.action as ActionData).isDirectory ? " " :
-                      c.__expanded ? args.uiParams.expandedIcon :
-                      args.uiParams.collapsedIcon) +
-                      " " + (c.display ?? c.word)),
+      this.items.map((c) =>
+        " ".repeat(c.__level) +
+        (!(c.action as ActionData).isDirectory ? " " : c.__expanded
+          ? args.uiParams.expandedIcon
+          : args.uiParams.collapsedIcon) +
+        " " + (c.display ?? c.word)
+      ),
       this.refreshed &&
         (this.prevLength > 0 && this.items.length < this.prevLength),
       0,
@@ -288,7 +288,7 @@ export class Ui extends BaseUi<Params> {
       const item = this.items[idx];
 
       if (item.__expanded) {
-        return;
+        return Promise.resolve(ActionFlags.None);
       }
 
       await args.denops.call(
