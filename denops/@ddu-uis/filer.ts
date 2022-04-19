@@ -100,9 +100,9 @@ export class Ui extends BaseUi<Params> {
 
     const hasNvim = args.denops.meta.host == "nvim";
     const floating = args.uiParams.split == "floating" && hasNvim;
-    const ids = await fn.win_findbuf(args.denops, bufnr) as number[];
     const winHeight = Number(args.uiParams.winHeight);
-    if (ids.length == 0) {
+    const winid = await fn.bufwinid(args.denops, bufnr);
+    if (winid < 0) {
       const direction = args.uiParams.splitDirection;
       if (args.uiParams.split == "horizontal") {
         const header = `silent keepalt ${direction} `;
@@ -143,7 +143,7 @@ export class Ui extends BaseUi<Params> {
     }
 
     // Note: buffers may be restored
-    if (!this.buffers[args.options.name]) {
+    if (!this.buffers[args.options.name] || winid < 0) {
       await this.initOptions(args.denops, args.options, bufnr);
     }
 
@@ -419,6 +419,8 @@ export class Ui extends BaseUi<Params> {
       await fn.setwinvar(denops, winid, "&wrap", 0);
       await fn.setwinvar(denops, winid, "&signcolumn", "no");
 
+      await fn.setbufvar(denops, bufnr, "&bufhidden", "unload");
+      await fn.setbufvar(denops, bufnr, "&buftype", "nofile");
       await fn.setbufvar(denops, bufnr, "&filetype", "ddu-filer");
       await fn.setbufvar(denops, bufnr, "&swapfile", 0);
     });
