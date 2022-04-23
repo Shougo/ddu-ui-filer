@@ -85,6 +85,10 @@ itemAction
 
 		Note: You cannot mix multiple kinds/sources.
 
+					*ddu-ui-filer-action-toggleSelectItem*
+toggleSelectItem
+		Toggle selected item.
+
 
 ==============================================================================
 PARAMS						*ddu-ui-filer-params*

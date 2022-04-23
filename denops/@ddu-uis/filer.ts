@@ -368,6 +368,17 @@ export class Ui extends BaseUi<Params> {
       options: DduOptions;
       uiParams: Params;
     }) => {
+      if (this.items.length == 0) {
+        return Promise.resolve(ActionFlags.None);
+      }
+
+      const idx = await this.getIndex(args.denops);
+      if (this.selectedItems.has(idx)) {
+        this.selectedItems.delete(idx);
+      } else {
+        this.selectedItems.add(idx);
+      }
+
       return Promise.resolve(ActionFlags.Redraw);
     },
   };
