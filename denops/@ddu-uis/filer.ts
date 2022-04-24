@@ -47,24 +47,20 @@ export class Ui extends BaseUi<Params> {
   private selectedItems: Set<number> = new Set();
   private saveTitle = "";
   private saveCursor: number[] = [];
-  private refreshed = false;
-  private prevLength = -1;
+  private prevPath = "";
 
   refreshItems(args: {
     items: DduItem[];
   }): void {
-    this.prevLength = this.items.length;
+    this.prevPath = this.items.length == 0 ? "" : this.items[0].word;
     this.items = this.getSortedItems(args.items);
     this.selectedItems.clear();
-    this.refreshed = true;
   }
 
   expandItem(args: {
     parent: DduItem;
     children: DduItem[];
   }): void {
-    this.prevLength = this.items.length;
-
     // Search parent.
     const index = this.items.findIndex(
       (item: DduItem) =>
@@ -189,23 +185,24 @@ export class Ui extends BaseUi<Params> {
       }).filter((c) => c.highlights),
       this.items.map((c) =>
         " ".repeat(c.__level) +
-        (!(c.action as ActionData).isDirectory ? " " : c.__expanded
+        (!(c.action as ActionData).isDirectory
+          ? " "
+          : c.__expanded
           ? args.uiParams.expandedIcon
           : args.uiParams.collapsedIcon) +
         " " + (c.display ?? c.word)
       ),
-      this.refreshed &&
-        (this.prevLength > 0 && this.items.length < this.prevLength),
+      false,
       0,
     );
 
-    if (args.options.resume && this.saveCursor.length != 0) {
+    const path = this.items.length == 0 ? "" : this.items[0].word;
+    if (path == this.prevPath && this.saveCursor.length != 0) {
       await fn.cursor(args.denops, this.saveCursor[1], this.saveCursor[2]);
       this.saveCursor = [];
     }
 
     this.saveCursor = await fn.getcurpos(args.denops) as number[];
-    this.refreshed = false;
   }
 
   async quit(args: {
