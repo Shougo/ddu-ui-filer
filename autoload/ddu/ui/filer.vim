@@ -25,14 +25,12 @@ function! ddu#ui#filer#_update_buffer(
       \ params, bufnr, selected_items, highlight_items, lines, refreshed, pos) abort
   call setbufvar(a:bufnr, '&modifiable', 1)
 
-  echomsg getpos('.')
   call setbufline(a:bufnr, 1, a:lines)
   silent call deletebufline(a:bufnr, len(a:lines) + 1, '$')
 
   call setbufvar(a:bufnr, '&modifiable', 0)
   call setbufvar(a:bufnr, '&modified', 0)
 
-  echomsg getpos('.')
   if a:refreshed
     " Init the cursor
     call win_execute(bufwinid(a:bufnr),
