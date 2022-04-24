@@ -203,6 +203,7 @@ export class Ui extends BaseUi<Params> {
     }
 
     this.saveCursor = await fn.getcurpos(args.denops) as number[];
+    this.prevPath = path;
   }
 
   async quit(args: {
