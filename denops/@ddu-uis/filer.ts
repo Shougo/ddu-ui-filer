@@ -108,7 +108,8 @@ export class Ui extends BaseUi<Params> {
       } else if (args.uiParams.split == "vertical") {
         const header = `silent keepalt vertical ${direction} `;
         await args.denops.cmd(
-          header + `sbuffer +resize\\ ${args.uiParams.winWidth} ${bufnr}`,
+          header +
+            `sbuffer +vertical\\ resize\\ ${args.uiParams.winWidth} ${bufnr}`,
         );
       } else if (floating) {
         await args.denops.call("nvim_open_win", bufnr, true, {
@@ -270,7 +271,6 @@ export class Ui extends BaseUi<Params> {
         (item: DduItem) => item.__level <= closeItem.__level,
       );
 
-      this.prevLength = this.items.length;
       this.items = this.items.slice(0, startIndex + 1).concat(
         this.items.slice(endIndex + 1),
       );
