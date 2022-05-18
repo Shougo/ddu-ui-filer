@@ -262,7 +262,7 @@ export class Ui extends BaseUi<Params> {
       const closeItem = this.items[startIndex];
 
       if (!(closeItem.action as ActionData).isDirectory) {
-        return Promise.resolve(ActionFlags.None);
+        return ActionFlags.None;
       }
 
       closeItem.__expanded = false;
@@ -276,7 +276,7 @@ export class Ui extends BaseUi<Params> {
       );
       this.selectedItems.clear();
 
-      return Promise.resolve(ActionFlags.Redraw);
+      return ActionFlags.Redraw;
     },
     expandItem: async (args: {
       denops: Denops;
@@ -286,7 +286,7 @@ export class Ui extends BaseUi<Params> {
       const item = this.items[idx];
 
       if (item.__expanded) {
-        return Promise.resolve(ActionFlags.None);
+        return ActionFlags.None;
       }
 
       await args.denops.call(
@@ -297,7 +297,7 @@ export class Ui extends BaseUi<Params> {
 
       item.__expanded = true;
 
-      return Promise.resolve(ActionFlags.None);
+      return ActionFlags.None;
     },
     getItem: async (args: {
       denops: Denops;
@@ -308,7 +308,7 @@ export class Ui extends BaseUi<Params> {
       const bufnr = this.buffers[args.options.name];
       await fn.setbufvar(args.denops, bufnr, "ddu_ui_filer_item", item);
 
-      return Promise.resolve(ActionFlags.None);
+      return ActionFlags.None;
     },
     itemAction: async (args: {
       denops: Denops;
@@ -319,7 +319,7 @@ export class Ui extends BaseUi<Params> {
       const params = args.actionParams as DoActionParams;
       const items = params.items ?? await this.getItems(args.denops);
       if (items.length == 0) {
-        return Promise.resolve(ActionFlags.None);
+        return ActionFlags.None;
       }
 
       await args.denops.call(
@@ -330,7 +330,7 @@ export class Ui extends BaseUi<Params> {
         params.params ?? {},
       );
 
-      return Promise.resolve(ActionFlags.None);
+      return ActionFlags.None;
     },
     preview: async (args: {
       denops: Denops;
@@ -338,7 +338,7 @@ export class Ui extends BaseUi<Params> {
       options: DduOptions;
       uiParams: Params;
     }) => {
-      return Promise.resolve(ActionFlags.Persist);
+      return ActionFlags.Persist;
     },
     quit: async (args: {
       denops: Denops;
@@ -353,13 +353,13 @@ export class Ui extends BaseUi<Params> {
         uiParams: args.uiParams,
       });
       await args.denops.call("ddu#pop", args.options.name);
-      return Promise.resolve(ActionFlags.None);
+      return ActionFlags.None;
     },
     // deno-lint-ignore require-await
     refreshItems: async (_: {
       denops: Denops;
     }) => {
-      return Promise.resolve(ActionFlags.RefreshItems);
+      return ActionFlags.RefreshItems;
     },
     toggleSelectItem: async (args: {
       denops: Denops;
@@ -367,7 +367,7 @@ export class Ui extends BaseUi<Params> {
       uiParams: Params;
     }) => {
       if (this.items.length == 0) {
-        return Promise.resolve(ActionFlags.None);
+        return ActionFlags.None;
       }
 
       const idx = await this.getIndex(args.denops);
@@ -377,7 +377,7 @@ export class Ui extends BaseUi<Params> {
         this.selectedItems.add(idx);
       }
 
-      return Promise.resolve(ActionFlags.Redraw);
+      return ActionFlags.Redraw;
     },
   };
 
@@ -401,8 +401,7 @@ export class Ui extends BaseUi<Params> {
   ): Promise<number> {
     const bufnr = await fn.bufadd(denops, bufferName);
     await fn.bufload(denops, bufnr);
-
-    return Promise.resolve(bufnr);
+    return bufnr;
   }
 
   private async initOptions(
