@@ -424,7 +424,6 @@ export class Ui extends BaseUi<Params> {
       await fn.setwinvar(denops, winid, "&signcolumn", "no");
       await fn.setwinvar(denops, winid, "&spell", 0);
       await fn.setwinvar(denops, winid, "&wrap", 0);
-      await fn.setwinvar(denops, winid, "&signcolumn", "no");
 
       await fn.setbufvar(denops, bufnr, "&bufhidden", "unload");
       await fn.setbufvar(denops, bufnr, "&buftype", "nofile");
