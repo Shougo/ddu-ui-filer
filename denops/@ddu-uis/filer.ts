@@ -361,6 +361,16 @@ export class Ui extends BaseUi<Params> {
     }) => {
       return ActionFlags.RefreshItems;
     },
+    updateOptions: async (args: {
+      denops: Denops;
+      options: DduOptions;
+      actionParams: unknown;
+    }) => {
+      await args.denops.call("ddu#redraw", args.options.name, {
+        updateOptions: args.actionParams,
+      });
+      return ActionFlags.None;
+    },
     toggleSelectItem: async (args: {
       denops: Denops;
       options: DduOptions;

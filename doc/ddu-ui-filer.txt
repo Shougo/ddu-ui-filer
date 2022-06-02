@@ -89,6 +89,14 @@ itemAction
 toggleSelectItem
 		Toggle selected item.
 
+					*ddu-ui-filer-action-updateOptions*
+updateOptions
+		params:
+			{option-name}: option name and value
+
+		Update current options and redraw the UI.
+		Refer to |ddu-options| about options.
+
 
 ==============================================================================
 PARAMS						*ddu-ui-filer-params*
