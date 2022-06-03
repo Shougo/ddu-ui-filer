@@ -5,6 +5,9 @@ function! ddu#ui#filer#do_action(name, ...) abort
     return
   endif
 
+  let b:ddu_ui_filer_cursor_pos = getcurpos()
+  let b:ddu_ui_filer_cursor_text = getline('.')
+
   call ddu#ui_action(b:ddu_ui_name, a:name, get(a:000, 0, {}))
 endfunction
 

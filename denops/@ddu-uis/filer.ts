@@ -12,6 +12,7 @@ import {
   Denops,
   fn,
   op,
+  vars,
 } from "https://deno.land/x/ddu_vim@v1.5.0/deps.ts";
 
 type DoActionParams = {
@@ -46,13 +47,10 @@ export class Ui extends BaseUi<Params> {
   private items: DduItem[] = [];
   private selectedItems: Set<number> = new Set();
   private saveTitle = "";
-  private saveCursor: number[] = [];
-  private prevPath = "";
 
   refreshItems(args: {
     items: DduItem[];
   }): void {
-    this.prevPath = this.items.length == 0 ? "" : this.items[0].word;
     this.items = this.getSortedItems(args.items);
     this.selectedItems.clear();
   }
@@ -197,14 +195,33 @@ export class Ui extends BaseUi<Params> {
       0,
     );
 
-    const path = this.items.length == 0 ? "" : this.items[0].word;
-    if (path == this.prevPath && this.saveCursor.length != 0) {
-      await fn.cursor(args.denops, this.saveCursor[1], this.saveCursor[2]);
-      this.saveCursor = [];
+    const saveCursor = await fn.getbufvar(
+      args.denops,
+      bufnr,
+      "ddu_ui_filer_cursor_pos",
+      [],
+    ) as number[];
+    const saveText = await fn.getbufvar(
+      args.denops,
+      bufnr,
+      "ddu_ui_filer_cursor_text",
+      "",
+    ) as string;
+    let currentText = "";
+    if (saveCursor.length != 0) {
+      const buflines = await fn.getbufline(args.denops, bufnr, saveCursor[1]);
+      if (buflines.length != 0) {
+        currentText = buflines[0];
+      }
     }
-
-    this.saveCursor = await fn.getcurpos(args.denops) as number[];
-    this.prevPath = path;
+    if (
+      saveCursor.length != 0 && this.items.length != 0 &&
+      currentText == saveText
+    ) {
+      await fn.cursor(args.denops, saveCursor[1], saveCursor[2]);
+    } else {
+      await fn.cursor(args.denops, 1, 1);
+    }
   }
 
   async quit(args: {
@@ -213,7 +230,16 @@ export class Ui extends BaseUi<Params> {
     options: DduOptions;
     uiParams: Params;
   }): Promise<void> {
-    this.saveCursor = await fn.getcurpos(args.denops) as number[];
+    await vars.b.set(
+      args.denops,
+      "ddu_ui_filer_cursor_pos",
+      await fn.getcurpos(args.denops),
+    );
+    await vars.b.set(
+      args.denops,
+      "ddu_ui_filer_cursor_text",
+      await fn.getline(args.denops, "."),
+    );
 
     if (
       args.uiParams.split == "no" || (await fn.winnr(args.denops, "$")) == 1
@@ -332,7 +358,8 @@ export class Ui extends BaseUi<Params> {
 
       return ActionFlags.None;
     },
-    preview: async (args: {
+    // deno-lint-ignore require-await
+    preview: async (_: {
       denops: Denops;
       context: Context;
       options: DduOptions;
