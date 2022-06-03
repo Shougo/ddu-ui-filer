@@ -5,8 +5,7 @@ function! ddu#ui#filer#do_action(name, ...) abort
     return
   endif
 
-  let b:ddu_ui_filer_cursor_pos = getcurpos()
-  let b:ddu_ui_filer_cursor_text = getline('.')
+  call ddu#ui#filer#_save_pos(b:ddu_ui_filer_path)
 
   call ddu#ui_action(b:ddu_ui_name, a:name, get(a:000, 0, {}))
 endfunction
@@ -98,5 +97,39 @@ function! ddu#ui#filer#_highlight(
           \ 'bufnr': a:bufnr,
           \ 'id': a:id,
           \ })
+  endif
+endfunction
+
+function! ddu#ui#filer#_save_pos(path) abort
+  let b:ddu_ui_filer_cursor_pos = getcurpos()
+  let b:ddu_ui_filer_cursor_text = getline('.')
+
+  if a:path ==# ''
+    return
+  endif
+
+  if !exists('b:ddu_ui_filer_save_pos')
+    let b:ddu_ui_filer_save_pos = {}
+  endif
+  let b:ddu_ui_filer_save_pos[a:path] = {
+        \ 'pos': b:ddu_ui_filer_cursor_pos,
+        \ 'text': b:ddu_ui_filer_cursor_text,
+        \ }
+endfunction
+function! ddu#ui#filer#_restore_pos(path) abort
+  let save_pos = get(b:, 'ddu_ui_filer_save_pos', {})
+  if has_key(save_pos, a:path)
+    let save_cursor_pos = save_pos[a:path].pos
+    let save_cursor_text = save_pos[a:path].text
+  else
+    let save_cursor_pos = get(b:, 'ddu_ui_filer_cursor_pos', [])
+    let save_cursor_text = get(b:, 'ddu_ui_filer_cursor_text', '')
+  endif
+
+  if !empty(save_cursor_pos)
+        \ && getline(save_cursor_pos[1]) ==# save_cursor_text
+    call cursor(save_cursor_pos[1], save_cursor_pos[2])
+  else
+    call cursor(1, 1)
   endif
 endfunction

@@ -195,33 +195,18 @@ export class Ui extends BaseUi<Params> {
       0,
     );
 
-    const saveCursor = await fn.getbufvar(
+    const path = this.items.length == 0
+      ? ""
+      : (this.items[0].action as ActionData).path;
+    await args.denops.call(
+      "ddu#ui#filer#_restore_pos",
+      path,
+    );
+    await vars.b.set(
       args.denops,
-      bufnr,
-      "ddu_ui_filer_cursor_pos",
-      [],
-    ) as number[];
-    const saveText = await fn.getbufvar(
-      args.denops,
-      bufnr,
-      "ddu_ui_filer_cursor_text",
-      "",
-    ) as string;
-    let currentText = "";
-    if (saveCursor.length != 0) {
-      const buflines = await fn.getbufline(args.denops, bufnr, saveCursor[1]);
-      if (buflines.length != 0) {
-        currentText = buflines[0];
-      }
-    }
-    if (
-      saveCursor.length != 0 && this.items.length != 0 &&
-      currentText == saveText
-    ) {
-      await fn.cursor(args.denops, saveCursor[1], saveCursor[2]);
-    } else {
-      await fn.cursor(args.denops, 1, 1);
-    }
+      "ddu_ui_filer_path",
+      path,
+    );
   }
 
   async quit(args: {
@@ -230,15 +215,12 @@ export class Ui extends BaseUi<Params> {
     options: DduOptions;
     uiParams: Params;
   }): Promise<void> {
-    await vars.b.set(
-      args.denops,
-      "ddu_ui_filer_cursor_pos",
-      await fn.getcurpos(args.denops),
-    );
-    await vars.b.set(
-      args.denops,
-      "ddu_ui_filer_cursor_text",
-      await fn.getline(args.denops, "."),
+    const path = this.items.length == 0
+      ? ""
+      : (this.items[0].action as ActionData).path;
+    await args.denops.call(
+      "ddu#ui#filer#_save_pos",
+      path,
     );
 
     if (
