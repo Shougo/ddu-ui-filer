@@ -55,7 +55,7 @@ function! ddu#ui#filer#_highlight_items(
       call ddu#ui#filer#_highlight(
             \ hl.hl_group, hl.name, 1,
             \ s:namespace, a:bufnr,
-            \ a:params.reversed ? a:max_lines - item.row + 1 : item.row,
+            \ item.row,
             \ hl.col + strwidth(item.prefix), hl.width)
     endfor
   endfor

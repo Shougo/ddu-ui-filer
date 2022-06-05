@@ -183,7 +183,7 @@ export class Ui extends BaseUi<Params> {
     );
 
     await args.denops.call(
-      "ddu#ui#ff#_highlight_items",
+      "ddu#ui#filer#_highlight_items",
       args.uiParams,
       bufnr,
       this.items.length,
