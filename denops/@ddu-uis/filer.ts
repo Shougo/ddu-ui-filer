@@ -47,7 +47,6 @@ export class Ui extends BaseUi<Params> {
   private buffers: Record<string, number> = {};
   private items: DduItem[] = [];
   private selectedItems: Set<number> = new Set();
-  private saveTitle = "";
 
   refreshItems(args: {
     items: DduItem[];
@@ -84,7 +83,7 @@ export class Ui extends BaseUi<Params> {
     uiOptions: UiOptions;
     uiParams: Params;
   }): Promise<void> {
-    const bufferName = `ddu-ff-${args.options.name}`;
+    const bufferName = `ddu-filer-${args.options.name}`;
     const initialized = this.buffers[args.options.name];
     const bufnr = initialized
       ? this.buffers[args.options.name]
@@ -149,17 +148,39 @@ export class Ui extends BaseUi<Params> {
     const async = `${args.context.done ? "" : "[async]"}`;
     const laststatus = await op.laststatus.get(args.denops);
     if (hasNvim && (floating || laststatus == 0)) {
-      if (this.saveTitle == "") {
-        this.saveTitle = await args.denops.call(
+      if (
+        (await vars.g.get(args.denops, "ddu#ui#filer#_save_title", "")) == ""
+      ) {
+        const saveTitle = await args.denops.call(
           "nvim_get_option",
           "titlestring",
         ) as string;
+        await vars.g.set(args.denops, "ddu#ui#filer#_save_title", saveTitle);
       }
 
-      args.denops.call(
+      const augroupName = `${await op.filetype.getLocal(
+        args.denops,
+      )}-${args.options.name}`;
+      await args.denops.cmd(`augroup ${augroupName}`);
+      await args.denops.cmd(`autocmd! ${augroupName}`);
+      if (await fn.exists(args.denops, "##WinClosed")) {
+        await args.denops.cmd(
+          `autocmd ${augroupName} WinClosed,BufLeave <buffer>` +
+            " let &titlestring=g:ddu#ui#filer#_save_title",
+        );
+      }
+
+      const titleString = header + " %{" + linenr + "}%*" + async;
+      await vars.b.set(args.denops, "ddu_ui_filer_title", titleString);
+
+      await args.denops.call(
         "nvim_set_option",
         "titlestring",
-        header + " %{" + linenr + "}%*" + async,
+        titleString,
+      );
+      await args.denops.cmd(
+        `autocmd ${augroupName} WinEnter,BufEnter <buffer>` +
+          " let &titlestring=b:ddu_ui_filer_title",
       );
     } else {
       await fn.setwinvar(
@@ -175,9 +196,7 @@ export class Ui extends BaseUi<Params> {
       "ddu#ui#filer#_update_buffer",
       args.uiParams,
       bufnr,
-      this.items.map((c) =>
-        (c.display ?? c.word)
-      ),
+      this.items.map((c) => (c.display ?? c.word)),
       false,
       0,
     );
@@ -235,14 +254,17 @@ export class Ui extends BaseUi<Params> {
     }
 
     // Restore options
-    if (this.saveTitle != "") {
+    const saveTitle = await vars.g.get(
+      args.denops,
+      "ddu#ui#filer#_save_title",
+      "",
+    );
+    if (saveTitle != "") {
       args.denops.call(
         "nvim_set_option",
         "titlestring",
-        this.saveTitle,
+        saveTitle,
       );
-
-      this.saveTitle = "";
     }
 
     // Close preview window
