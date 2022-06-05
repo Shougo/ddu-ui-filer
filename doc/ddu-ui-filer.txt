@@ -110,6 +110,10 @@ highlights	(dictionary)
 		Specify floating window background highlight.
 		Default: "NormalFloat"
 
+		selected			(string)
+		Specify selected item highlight.
+		Default: "Statement"
+
 		Default: {}
 
 				    		*ddu-ui-filer-param-split*

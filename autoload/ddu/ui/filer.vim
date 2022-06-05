@@ -24,7 +24,7 @@ function! ddu#ui#filer#is_directory() abort
 endfunction
 
 function! ddu#ui#filer#_update_buffer(
-      \ params, bufnr, selected_items, highlight_items, lines, refreshed, pos) abort
+      \ params, bufnr, lines, refreshed, pos) abort
   call setbufvar(a:bufnr, '&modifiable', 1)
 
   call setbufline(a:bufnr, 1, a:lines)
@@ -38,12 +38,15 @@ function! ddu#ui#filer#_update_buffer(
     call win_execute(bufwinid(a:bufnr),
           \ printf('call cursor(%d, 0) | redraw', a:pos + 1))
   endif
+endfunction
 
+function! ddu#ui#filer#_highlight_items(
+      \ params, bufnr, max_lines, highlight_items, selected_items) abort
   " Clear all highlights
   if has('nvim')
     call nvim_buf_clear_namespace(0, s:namespace, 0, -1)
   else
-    call prop_clear(1, len(a:lines) + 1, { 'bufnr': a:bufnr })
+    call prop_clear(1, a:max_lines + 1, { 'bufnr': a:bufnr })
   endif
 
   " Highlights items
@@ -52,14 +55,16 @@ function! ddu#ui#filer#_update_buffer(
       call ddu#ui#filer#_highlight(
             \ hl.hl_group, hl.name, 1,
             \ s:namespace, a:bufnr,
-            \ item.row, hl.col + strwidth(item.prefix), hl.width)
+            \ a:params.reversed ? a:max_lines - item.row + 1 : item.row,
+            \ hl.col + strwidth(item.prefix), hl.width)
     endfor
   endfor
 
   " Selected items highlights
+  let selected_highlight = get(a:params.highlights, 'selected', 'Statement')
   for item_nr in a:selected_items
     call ddu#ui#filer#_highlight(
-          \ 'Statement', 'ddu-ui-selected', 10000,
+          \ selected_highlight, 'ddu-ui-selected', 10000,
           \ s:namespace, a:bufnr, item_nr + 1, 1, 1000)
   endfor
 
@@ -68,7 +73,6 @@ function! ddu#ui#filer#_update_buffer(
     redraw
   endif
 endfunction
-
 function! ddu#ui#filer#_highlight(
       \ highlight, prop_type, priority, id, bufnr, row, col, length) abort
   if !has('nvim')

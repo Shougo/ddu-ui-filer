@@ -23,6 +23,7 @@ type DoActionParams = {
 
 type HighlightGroup = {
   floating?: string;
+  selected?: string;
 };
 
 type Params = {
@@ -174,7 +175,18 @@ export class Ui extends BaseUi<Params> {
       "ddu#ui#filer#_update_buffer",
       args.uiParams,
       bufnr,
-      [...this.selectedItems],
+      this.items.map((c) =>
+        (c.display ?? c.word)
+      ),
+      false,
+      0,
+    );
+
+    await args.denops.call(
+      "ddu#ui#ff#_highlight_items",
+      args.uiParams,
+      bufnr,
+      this.items.length,
       this.items.map((c, i) => {
         return {
           highlights: c.highlights ?? [],
@@ -182,17 +194,7 @@ export class Ui extends BaseUi<Params> {
           prefix: "",
         };
       }).filter((c) => c.highlights),
-      this.items.map((c) =>
-        " ".repeat(c.__level) +
-        (!(c.action as ActionData).isDirectory
-          ? " "
-          : c.__expanded
-          ? args.uiParams.expandedIcon
-          : args.uiParams.collapsedIcon) +
-        " " + (c.display ?? c.word)
-      ),
-      false,
-      0,
+      [...this.selectedItems],
     );
 
     const path = this.items.length == 0
