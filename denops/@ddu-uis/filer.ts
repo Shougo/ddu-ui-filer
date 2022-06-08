@@ -6,14 +6,15 @@ import {
   DduOptions,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v1.5.0/types.ts";
+} from "https://deno.land/x/ddu_vim@v1.8.1/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v1.5.0/deps.ts";
+} from "https://deno.land/x/ddu_vim@v1.8.1/deps.ts";
+import { basename } from "https://deno.land/std@0.142.0/path/mod.ts";
 
 type DoActionParams = {
   name?: string;
@@ -344,14 +345,29 @@ export class Ui extends BaseUi<Params> {
     },
     itemAction: async (args: {
       denops: Denops;
+      context: Context;
       options: DduOptions;
       uiParams: Params;
       actionParams: unknown;
     }) => {
       const params = args.actionParams as DoActionParams;
-      const items = params.items ?? await this.getItems(args.denops);
+      let items = params.items ?? await this.getItems(args.denops);
       if (items.length == 0) {
-        return ActionFlags.None;
+        // Create dummy data from current directory
+        const path = args.context.path;
+        items = [{
+          word: path,
+          display: basename(path),
+          action: {
+            isDirectory: true,
+            path: path,
+          },
+          matcherKey: "word",
+          __sourceIndex: 0,
+          __sourceName: args.options.sources[0].name,
+          __level: 0,
+          __expanded: false,
+        }];
       }
 
       await args.denops.call(
