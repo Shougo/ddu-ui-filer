@@ -63,13 +63,15 @@ export class Ui extends BaseUi<Params> {
     // Search parent.
     const index = this.items.findIndex(
       (item: DduItem) =>
-        item.word == args.parent.word &&
+        (item.action as ActionData).path ==
+          (args.parent.action as ActionData).path &&
         item.__sourceIndex == args.parent.__sourceIndex,
     );
     if (index >= 0) {
       this.items = this.items.slice(0, index + 1).concat(args.children).concat(
         this.items.slice(index + 1),
       );
+      this.items[index] = args.parent;
     } else {
       this.items = this.items.concat(args.children);
     }
@@ -322,13 +324,13 @@ export class Ui extends BaseUi<Params> {
         return ActionFlags.None;
       }
 
+      item.__expanded = true;
+
       await args.denops.call(
         "ddu#expand_item",
         args.options.name,
         item,
       );
-
-      item.__expanded = true;
 
       return ActionFlags.None;
     },
