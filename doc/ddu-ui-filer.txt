@@ -72,6 +72,12 @@ collapseItem
 					*ddu-ui-filer-action-expandItem*
 expandItem
 		Expand the item tree.
+		params:
+			{option}: The supported values are:
+
+			"toggle":
+				Close the item tree if the directory is
+				opened.
 
 					*ddu-ui-filer-action-itemAction*
 itemAction

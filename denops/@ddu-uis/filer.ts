@@ -288,39 +288,50 @@ export class Ui extends BaseUi<Params> {
     return items.filter((item) => item);
   }
 
+  private async collapseItem(denops: Denops) {
+    const startIndex = await this.getIndex(denops);
+    const closeItem = this.items[startIndex];
+
+    if (!(closeItem.action as ActionData).isDirectory) {
+      return ActionFlags.None;
+    }
+
+    closeItem.__expanded = false;
+
+    const endIndex = startIndex + this.items.slice(startIndex + 1).findIndex(
+      (item: DduItem) => item.__level <= closeItem.__level,
+    );
+
+    this.items = this.items.slice(0, startIndex + 1).concat(
+      this.items.slice(endIndex + 1),
+    );
+    this.selectedItems.clear();
+
+    return ActionFlags.Redraw;
+  }
+
   actions: UiActions<Params> = {
     collapseItem: async (args: {
       denops: Denops;
       options: DduOptions;
     }) => {
-      const startIndex = await this.getIndex(args.denops);
-      const closeItem = this.items[startIndex];
-
-      if (!(closeItem.action as ActionData).isDirectory) {
-        return ActionFlags.None;
-      }
-
-      closeItem.__expanded = false;
-
-      const endIndex = startIndex + this.items.slice(startIndex + 1).findIndex(
-        (item: DduItem) => item.__level <= closeItem.__level,
-      );
-
-      this.items = this.items.slice(0, startIndex + 1).concat(
-        this.items.slice(endIndex + 1),
-      );
-      this.selectedItems.clear();
-
-      return ActionFlags.Redraw;
+      return await this.collapseItem(args.denops);
     },
     expandItem: async (args: {
       denops: Denops;
       options: DduOptions;
+      actionParams: unknown;
     }) => {
       const idx = await this.getIndex(args.denops);
       const item = this.items[idx];
+      const params = args.actionParams as {
+        option?: "toggle";
+      };
 
       if (item.__expanded) {
+        if (params.option == "toggle") {
+          return await this.collapseItem(args.denops);
+        }
         return ActionFlags.None;
       }
 
