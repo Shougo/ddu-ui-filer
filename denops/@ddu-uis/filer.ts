@@ -14,7 +14,11 @@ import {
   op,
   vars,
 } from "https://deno.land/x/ddu_vim@v1.8.1/deps.ts";
-import { basename } from "https://deno.land/std@0.142.0/path/mod.ts";
+import {
+  basename,
+  isAbsolute,
+  join,
+} from "https://deno.land/std@0.142.0/path/mod.ts";
 
 type DoActionParams = {
   name?: string;
@@ -35,6 +39,7 @@ type Params = {
   collapsedIcon: string;
   expandedIcon: string;
   highlights: HighlightGroup;
+  search: string;
   split: "horizontal" | "vertical" | "floating" | "no";
   splitDirection: "botright" | "topleft";
   winCol: number;
@@ -235,6 +240,18 @@ export class Ui extends BaseUi<Params> {
       "ddu_ui_filer_path",
       path,
     );
+
+    if (args.uiParams.search != "") {
+      const search = isAbsolute(args.uiParams.search)
+        ? args.uiParams.search
+        : join(args.context.path, args.uiParams.search);
+      const pos = this.items.findIndex(
+        (item) => search == (item?.action as ActionData).path ?? item.word,
+      );
+      if (pos >= 0) {
+        await fn.cursor(args.denops, pos + 1, 0);
+      }
+    }
   }
 
   async quit(args: {
@@ -460,6 +477,7 @@ export class Ui extends BaseUi<Params> {
       collapsedIcon: "+",
       expandedIcon: "-",
       highlights: {},
+      search: "",
       split: "horizontal",
       splitDirection: "botright",
       winCol: 0,

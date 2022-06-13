@@ -122,6 +122,14 @@ highlights	(dictionary)
 
 		Default: {}
 
+				    		*ddu-ui-filer-param-search*
+search		(string)
+		Search the path.
+		Note: If the path is not absolute path, current directory
+		relative path is used instead.
+
+		Default: ""
+
 				    		*ddu-ui-filer-param-split*
 split		(string)
 		Specify split mode. Following values are available:
