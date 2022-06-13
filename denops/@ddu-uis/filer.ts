@@ -22,6 +22,10 @@ type DoActionParams = {
   params?: unknown;
 };
 
+type ExpandItemParams = {
+  mode?: "toggle";
+};
+
 type HighlightGroup = {
   floating?: string;
   selected?: string;
@@ -324,12 +328,10 @@ export class Ui extends BaseUi<Params> {
     }) => {
       const idx = await this.getIndex(args.denops);
       const item = this.items[idx];
-      const params = args.actionParams as {
-        option?: "toggle";
-      };
+      const params = args.actionParams as ExpandItemParams;
 
       if (item.__expanded) {
-        if (params.option == "toggle") {
+        if (params.mode == "toggle") {
           return await this.collapseItem(args.denops);
         }
         return ActionFlags.None;
