@@ -4,21 +4,22 @@ import {
   Context,
   DduItem,
   DduOptions,
+  SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v1.8.1/types.ts";
+} from "https://deno.land/x/ddu_vim@v1.8.2/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v1.8.1/deps.ts";
+} from "https://deno.land/x/ddu_vim@v1.8.2/deps.ts";
 import {
   basename,
   isAbsolute,
   join,
-} from "https://deno.land/std@0.142.0/path/mod.ts";
+} from "https://deno.land/std@0.144.0/path/mod.ts";
 
 type DoActionParams = {
   name?: string;
@@ -59,9 +60,10 @@ export class Ui extends BaseUi<Params> {
   private selectedItems: Set<number> = new Set();
 
   refreshItems(args: {
+    sources: SourceInfo[];
     items: DduItem[];
   }): void {
-    this.items = this.getSortedItems(args.items);
+    this.items = this.getSortedItems(args.sources, args.items);
     this.selectedItems.clear();
   }
 
@@ -384,31 +386,16 @@ export class Ui extends BaseUi<Params> {
     }) => {
       const params = args.actionParams as DoActionParams;
       let items = params.items ?? await this.getItems(args.denops);
-      if (items.length == 0) {
-        // Create dummy data from current directory
-        const path = args.context.path;
-        items = [{
-          word: path,
-          display: basename(path),
-          action: {
-            isDirectory: true,
-            path: path,
-          },
-          matcherKey: "word",
-          __sourceIndex: 0,
-          __sourceName: args.options.sources[0].name,
-          __level: 0,
-          __expanded: false,
-        }];
-      }
 
-      await args.denops.call(
-        "ddu#item_action",
-        args.options.name,
-        params.name ?? "default",
-        items,
-        params.params ?? {},
-      );
+      if (items.length != 0) {
+        await args.denops.call(
+          "ddu#item_action",
+          args.options.name,
+          params.name ?? "default",
+          items,
+          params.params ?? {},
+        );
+      }
 
       return ActionFlags.None;
     },
@@ -554,24 +541,39 @@ export class Ui extends BaseUi<Params> {
   }
 
   private getSortedItems(
+    sources: SourceInfo[],
     items: DduItem[],
   ): DduItem[] {
     const sourceItems: Record<number, DduItem[]> = {};
-    let sourceIndexes: number[] = [];
     for (const item of items) {
       if (!sourceItems[item.__sourceIndex]) {
         sourceItems[item.__sourceIndex] = [];
       }
       sourceItems[item.__sourceIndex].push(item);
-      sourceIndexes.push(item.__sourceIndex);
     }
 
-    // Uniq
-    sourceIndexes = [...new Set(sourceIndexes)];
-
     let ret: DduItem[] = [];
-    for (const index of sourceIndexes) {
-      const sortedSourceItems = sourceItems[index].sort((a, b) => {
+    for (const source of sources) {
+      // Create root item from source directory
+      ret.push({
+        word: source.path,
+        display: `${source.name}:${source.path}`,
+        action: {
+          isDirectory: true,
+          path: source.path,
+        },
+        matcherKey: "word",
+        __sourceIndex: source.index,
+        __sourceName: source.name,
+        __level: 0,
+        __expanded: false,
+      });
+
+      if (!sourceItems[source.index]) {
+        continue;
+      }
+
+      const sortedSourceItems = sourceItems[source.index].sort((a, b) => {
         const nameA = (a.action as ActionData).path ?? a.word;
         const nameB = (b.action as ActionData).path ?? b.word;
         return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
