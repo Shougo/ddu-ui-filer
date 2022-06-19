@@ -362,8 +362,9 @@ export class Ui extends BaseUi<Params> {
       item.__expanded = true;
 
       await args.denops.call(
-        "ddu#expand_item",
+        "ddu#redraw_tree",
         args.options.name,
+        "expand",
         item,
       );
 
