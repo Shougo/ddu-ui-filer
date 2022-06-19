@@ -7,16 +7,15 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v1.8.2/types.ts";
+} from "https://deno.land/x/ddu_vim@v1.8.3/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v1.8.2/deps.ts";
+} from "https://deno.land/x/ddu_vim@v1.8.3/deps.ts";
 import {
-  basename,
   isAbsolute,
   join,
 } from "https://deno.land/std@0.144.0/path/mod.ts";
@@ -74,7 +73,7 @@ export class Ui extends BaseUi<Params> {
     parent: DduItem;
     children: DduItem[];
   }): void {
-    // Search parent.
+    // Search index.
     const index = this.items.findIndex(
       (item: DduItem) =>
         (item.action as ActionData).path ==
@@ -89,6 +88,33 @@ export class Ui extends BaseUi<Params> {
     } else {
       this.items = this.items.concat(args.children);
     }
+
+    this.selectedItems.clear();
+  }
+
+  collapseItem(args: {
+    parent: DduItem;
+    item: DduItem;
+  }) {
+    // Search index.
+    const startIndex = this.items.findIndex(
+      (item: DduItem) =>
+        (item.action as ActionData).path ==
+          (args.item.action as ActionData).path &&
+        item.__sourceIndex == args.item.__sourceIndex,
+    );
+    if (startIndex < 0) {
+      return;
+    }
+
+    const endIndex = startIndex + this.items.slice(startIndex + 1).findIndex(
+      (item: DduItem) => item.__level <= args.item.__level,
+    );
+
+    this.items = this.items.slice(0, startIndex + 1).concat(
+      this.items.slice(endIndex + 1),
+    );
+    this.items[startIndex] = args.item;
 
     this.selectedItems.clear();
   }
@@ -209,6 +235,7 @@ export class Ui extends BaseUi<Params> {
     }
 
     // Update main buffer
+    console.log(this.items.map((c) => (c.display ?? c.word)));
     await args.denops.call(
       "ddu#ui#filer#_update_buffer",
       args.uiParams,
@@ -314,26 +341,22 @@ export class Ui extends BaseUi<Params> {
     return items.filter((item) => item);
   }
 
-  private async collapseItem(denops: Denops) {
-    const startIndex = await this.getIndex(denops);
-    const closeItem = this.items[startIndex];
+  private async collapseItemAction(denops: Denops, options: DduOptions) {
+    const index = await this.getIndex(denops);
+    const closeItem = this.items[index];
 
     if (!(closeItem.action as ActionData).isDirectory) {
       return ActionFlags.None;
     }
 
-    closeItem.__expanded = false;
-
-    const endIndex = startIndex + this.items.slice(startIndex + 1).findIndex(
-      (item: DduItem) => item.__level <= closeItem.__level,
+    await denops.call(
+      "ddu#redraw_tree",
+      options.name,
+      "collapse",
+      closeItem,
     );
 
-    this.items = this.items.slice(0, startIndex + 1).concat(
-      this.items.slice(endIndex + 1),
-    );
-    this.selectedItems.clear();
-
-    return ActionFlags.Redraw;
+    return ActionFlags.None;
   }
 
   actions: UiActions<Params> = {
@@ -341,7 +364,7 @@ export class Ui extends BaseUi<Params> {
       denops: Denops;
       options: DduOptions;
     }) => {
-      return await this.collapseItem(args.denops);
+      return await this.collapseItemAction(args.denops, args.options);
     },
     expandItem: async (args: {
       denops: Denops;
@@ -354,7 +377,7 @@ export class Ui extends BaseUi<Params> {
 
       if (item.__expanded) {
         if (params.mode == "toggle") {
-          return await this.collapseItem(args.denops);
+          return await this.collapseItemAction(args.denops, args.options);
         }
         return ActionFlags.None;
       }
@@ -389,7 +412,7 @@ export class Ui extends BaseUi<Params> {
       actionParams: unknown;
     }) => {
       const params = args.actionParams as DoActionParams;
-      let items = params.items ?? await this.getItems(args.denops);
+      const items = params.items ?? await this.getItems(args.denops);
 
       if (items.length != 0) {
         await args.denops.call(
