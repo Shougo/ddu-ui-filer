@@ -7,14 +7,14 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v1.8.3/types.ts";
+} from "https://deno.land/x/ddu_vim@v1.8.4/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v1.8.3/deps.ts";
+} from "https://deno.land/x/ddu_vim@v1.8.4/deps.ts";
 import {
   isAbsolute,
   join,
@@ -117,6 +117,17 @@ export class Ui extends BaseUi<Params> {
     this.items[startIndex] = args.item;
 
     this.selectedItems.clear();
+  }
+
+  async searchItem(args: {
+    denops: Denops;
+    item: DduItem;
+  }) {
+    const pos = this.items.findIndex((element) => element == args.item);
+
+    if (pos > 0) {
+      await fn.cursor(args.denops, pos + 1, 0);
+    }
   }
 
   async redraw(args: {
@@ -276,11 +287,14 @@ export class Ui extends BaseUi<Params> {
       const search = isAbsolute(args.uiParams.search)
         ? args.uiParams.search
         : join(args.context.path, args.uiParams.search);
-      const pos = this.items.findIndex(
+      const item = this.items.find(
         (item) => search == (item?.action as ActionData).path ?? item.word,
       );
-      if (pos >= 0) {
-        await fn.cursor(args.denops, pos + 1, 0);
+      if (item) {
+        await this.searchItem({
+          denops: args.denops,
+          item,
+        });
       }
     }
   }
