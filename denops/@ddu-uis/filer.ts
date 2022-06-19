@@ -20,6 +20,9 @@ import {
   isAbsolute,
   join,
 } from "https://deno.land/std@0.144.0/path/mod.ts";
+import { Env } from "https://deno.land/x/env@v2.2.0/env.js";
+
+const env = new Env();
 
 type DoActionParams = {
   name?: string;
@@ -555,9 +558,17 @@ export class Ui extends BaseUi<Params> {
     let ret: DduItem[] = [];
     for (const source of sources) {
       // Create root item from source directory
+
+      // Replace the home directory.
+      const home = env.get("HOME", "");
+      let display = source.path;
+      if (home && home != "") {
+        display = display.replace(home, "~");
+      }
+
       ret.push({
         word: source.path,
-        display: `${source.name}:${source.path}`,
+        display: `${source.name}:${display}`,
         action: {
           isDirectory: true,
           path: source.path,
