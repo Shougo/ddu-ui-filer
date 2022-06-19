@@ -235,7 +235,6 @@ export class Ui extends BaseUi<Params> {
     }
 
     // Update main buffer
-    console.log(this.items.map((c) => (c.display ?? c.word)));
     await args.denops.call(
       "ddu#ui#filer#_update_buffer",
       args.uiParams,
