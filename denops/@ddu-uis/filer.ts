@@ -34,6 +34,7 @@ type Params = {
   search: string;
   split: "horizontal" | "vertical" | "floating" | "no";
   splitDirection: "botright" | "topleft";
+  toggle: boolean;
   winCol: number;
   winHeight: number;
   winRow: number;
@@ -61,6 +62,7 @@ export class Ui extends BaseUi<Params> {
   private selectedItems: Set<number> = new Set();
 
   refreshItems(args: {
+    context: Context;
     sources: SourceInfo[];
     items: DduItem[];
   }): void {
@@ -143,6 +145,22 @@ export class Ui extends BaseUi<Params> {
     this.buffers[args.options.name] = bufnr;
 
     await this.setDefaultParams(args.denops, args.uiParams);
+
+    const prevDone = await fn.getbufvar(
+      args.denops, bufnr, "ddu_ui_filer_prev_done", false)
+    if (args.context.done && prevDone && args.uiParams.toggle) {
+      args.context.bufNr = await fn.getbufvar(
+        args.denops, bufnr, "ddu_ui_filer_prev_bufnr", -1)
+      await this.quit({
+        denops: args.denops,
+        context: args.context,
+        options: args.options,
+        uiParams: args.uiParams,
+      });
+      await fn.setbufvar(
+        args.denops, bufnr, "ddu_ui_filer_prev_done", false);
+      return;
+    }
 
     const hasNvim = args.denops.meta.host == "nvim";
     const floating = args.uiParams.split == "floating" && hasNvim;
@@ -294,6 +312,13 @@ export class Ui extends BaseUi<Params> {
           item,
         });
       }
+    }
+
+    if (args.context.done) {
+      await fn.setbufvar(
+        args.denops, bufnr, "ddu_ui_filer_prev_done", true);
+      await fn.setbufvar(
+        args.denops, bufnr, "ddu_ui_filer_prev_bufnr", args.context.bufNr);
     }
 
     if (!args.uiParams.focus) {
@@ -508,6 +533,7 @@ export class Ui extends BaseUi<Params> {
       search: "",
       split: "horizontal",
       splitDirection: "botright",
+      toggle: false,
       winCol: 0,
       winHeight: 20,
       winRow: 0,
