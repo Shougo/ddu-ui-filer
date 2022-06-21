@@ -23,24 +23,13 @@ import { Env } from "https://deno.land/x/env@v2.2.0/env.js";
 
 const env = new Env();
 
-type DoActionParams = {
-  name?: string;
-  items?: DduItem[];
-  params?: unknown;
-};
-
-type ExpandItemParams = {
-  mode?: "toggle";
-};
-
 type HighlightGroup = {
   floating?: string;
   selected?: string;
 };
 
 type Params = {
-  collapsedIcon: string;
-  expandedIcon: string;
+  focus: boolean;
   highlights: HighlightGroup;
   search: string;
   split: "horizontal" | "vertical" | "floating" | "no";
@@ -49,6 +38,16 @@ type Params = {
   winHeight: number;
   winRow: number;
   winWidth: number;
+};
+
+type DoActionParams = {
+  name?: string;
+  items?: DduItem[];
+  params?: unknown;
+};
+
+type ExpandItemParams = {
+  mode?: "toggle";
 };
 
 export type ActionData = {
@@ -93,7 +92,6 @@ export class Ui extends BaseUi<Params> {
   }
 
   collapseItem(args: {
-    parent: DduItem;
     item: DduItem;
   }) {
     // Search index.
@@ -296,6 +294,10 @@ export class Ui extends BaseUi<Params> {
           item,
         });
       }
+    }
+
+    if (!args.uiParams.focus) {
+      await fn.win_gotoid(args.denops, args.context.winId);
     }
   }
 
@@ -501,8 +503,7 @@ export class Ui extends BaseUi<Params> {
 
   params(): Params {
     return {
-      collapsedIcon: "+",
-      expandedIcon: "-",
+      focus: true,
       highlights: {},
       search: "",
       split: "horizontal",

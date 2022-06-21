@@ -107,6 +107,12 @@ updateOptions
 ==============================================================================
 PARAMS						*ddu-ui-filer-params*
 
+				    		*ddu-ui-filer-param-focus*
+focus		(boolean)
+		Focus on the UI window after opening the UI window.
+
+		Default: v:true
+
 				    	*ddu-ui-filer-param-highlights*
 highlights	(dictionary)
 		It specifies ddu-ui-filer buffer highlights.
