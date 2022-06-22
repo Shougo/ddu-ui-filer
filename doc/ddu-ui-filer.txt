@@ -65,6 +65,10 @@ ddu#ui#filer#is_directory()
 ------------------------------------------------------------------------------
 ACTIONS						*ddu-ui-filer-actions*
 
+					*ddu-ui-filer-action-checkItems*
+checkItems
+		Check the items are updated.
+
 					*ddu-ui-filer-action-collapseItem*
 collapseItem
 		Collapse the item tree.

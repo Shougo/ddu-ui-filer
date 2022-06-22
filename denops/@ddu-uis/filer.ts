@@ -7,14 +7,14 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v1.8.4/types.ts";
+} from "https://deno.land/x/ddu_vim@v1.8.5/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v1.8.4/deps.ts";
+} from "https://deno.land/x/ddu_vim@v1.8.5/deps.ts";
 import {
   isAbsolute,
   join,
@@ -400,6 +400,15 @@ export class Ui extends BaseUi<Params> {
   }
 
   actions: UiActions<Params> = {
+    checkItems: async (args: {
+      denops: Denops;
+    }) => {
+      await args.denops.call("ddu#redraw", args.options.name, {
+        check: true,
+        refreshItems: true,
+      });
+      return ActionFlags.None;
+    },
     collapseItem: async (args: {
       denops: Denops;
       options: DduOptions;
