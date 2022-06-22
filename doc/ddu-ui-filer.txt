@@ -68,6 +68,7 @@ ACTIONS						*ddu-ui-filer-actions*
 					*ddu-ui-filer-action-checkItems*
 checkItems
 		Check the items are updated.
+		Note: Source support is needed for the feature.
 
 					*ddu-ui-filer-action-collapseItem*
 collapseItem
@@ -245,6 +246,8 @@ Q: I want to check updated items automatically.
 A: >
 	autocmd TabEnter,CursorHold,FocusGained <buffer>
 	\ call ddu#ui#filer#do_action('checkItems')
+
+Note: Source support is needed for |ddu-ui-filer-action-checkItems|.
 
 
 ==============================================================================
