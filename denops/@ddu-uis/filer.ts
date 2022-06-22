@@ -15,10 +15,7 @@ import {
   op,
   vars,
 } from "https://deno.land/x/ddu_vim@v1.8.5/deps.ts";
-import {
-  isAbsolute,
-  join,
-} from "https://deno.land/std@0.144.0/path/mod.ts";
+import { isAbsolute, join } from "https://deno.land/std@0.144.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.0/env.js";
 
 const env = new Env();
@@ -147,10 +144,18 @@ export class Ui extends BaseUi<Params> {
     await this.setDefaultParams(args.denops, args.uiParams);
 
     const prevDone = await fn.getbufvar(
-      args.denops, bufnr, "ddu_ui_filer_prev_done", false)
+      args.denops,
+      bufnr,
+      "ddu_ui_filer_prev_done",
+      false,
+    );
     if (args.context.done && prevDone && args.uiParams.toggle) {
       args.context.bufNr = await fn.getbufvar(
-        args.denops, bufnr, "ddu_ui_filer_prev_bufnr", -1)
+        args.denops,
+        bufnr,
+        "ddu_ui_filer_prev_bufnr",
+        -1,
+      );
       await this.quit({
         denops: args.denops,
         context: args.context,
@@ -158,7 +163,11 @@ export class Ui extends BaseUi<Params> {
         uiParams: args.uiParams,
       });
       await fn.setbufvar(
-        args.denops, bufnr, "ddu_ui_filer_prev_done", false);
+        args.denops,
+        bufnr,
+        "ddu_ui_filer_prev_done",
+        false,
+      );
       return;
     }
 
@@ -316,9 +325,17 @@ export class Ui extends BaseUi<Params> {
 
     if (args.context.done) {
       await fn.setbufvar(
-        args.denops, bufnr, "ddu_ui_filer_prev_done", true);
+        args.denops,
+        bufnr,
+        "ddu_ui_filer_prev_done",
+        true,
+      );
       await fn.setbufvar(
-        args.denops, bufnr, "ddu_ui_filer_prev_bufnr", args.context.bufNr);
+        args.denops,
+        bufnr,
+        "ddu_ui_filer_prev_bufnr",
+        args.context.bufNr,
+      );
     }
 
     if (!args.uiParams.focus) {
@@ -407,6 +424,7 @@ export class Ui extends BaseUi<Params> {
         check: true,
         refreshItems: true,
       });
+
       return ActionFlags.None;
     },
     collapseItem: async (args: {
@@ -496,7 +514,9 @@ export class Ui extends BaseUi<Params> {
         options: args.options,
         uiParams: args.uiParams,
       });
+
       await args.denops.call("ddu#pop", args.options.name);
+
       return ActionFlags.None;
     },
     // deno-lint-ignore require-await
@@ -513,6 +533,7 @@ export class Ui extends BaseUi<Params> {
       await args.denops.call("ddu#redraw", args.options.name, {
         updateOptions: args.actionParams,
       });
+
       return ActionFlags.None;
     },
     toggleSelectItem: async (args: {
