@@ -419,6 +419,7 @@ export class Ui extends BaseUi<Params> {
   actions: UiActions<Params> = {
     checkItems: async (args: {
       denops: Denops;
+      options: DduOptions;
     }) => {
       await args.denops.call("ddu#redraw", args.options.name, {
         check: true,
