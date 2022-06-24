@@ -486,7 +486,7 @@ export class Ui extends BaseUi<Params> {
       await args.denops.call(
         "ddu#redraw_tree",
         args.options.name,
-        params.mode == "recursive" ? "expand_recursive" : "expand",
+        params.mode == "recursive" ? "recursive" : "expand",
         item,
       );
 
