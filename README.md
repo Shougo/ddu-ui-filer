@@ -1,4 +1,4 @@
-# ddu-ui-filter
+# ddu-ui-filer
 
 File listing UI for ddu.vim
 
