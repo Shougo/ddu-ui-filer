@@ -45,7 +45,7 @@ type DoActionParams = {
 };
 
 type ExpandItemParams = {
-  mode?: "toggle";
+  mode?: "toggle" | "recursive";
 };
 
 export type ActionData = {
@@ -483,12 +483,10 @@ export class Ui extends BaseUi<Params> {
         return ActionFlags.None;
       }
 
-      item.__expanded = true;
-
       await args.denops.call(
         "ddu#redraw_tree",
         args.options.name,
-        "expand",
+        params.mode == "recursive" ? "expand_recursive" : "expand",
         item,
       );
 

@@ -87,6 +87,9 @@ expandItem
 		mode:
 			{mode}: The supported values are:
 
+			"recursive":
+				Expand the item tree recursively.
+
 			"toggle":
 				Close the item tree if the directory is
 				opened.
