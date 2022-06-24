@@ -70,6 +70,13 @@ checkItems
 		Check the items are updated.
 		Note: Source support is needed for the feature.
 
+					*ddu-ui-filer-action-chooseAction*
+chooseAction
+		Choose and fire the action.
+
+		Note: "ddu-source-action" is required.
+		https://github.com/Shougo/ddu-source-action
+
 					*ddu-ui-filer-action-collapseItem*
 collapseItem
 		Collapse the item tree.

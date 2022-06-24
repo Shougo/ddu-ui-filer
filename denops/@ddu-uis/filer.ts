@@ -15,7 +15,7 @@ import {
   op,
   vars,
 } from "https://deno.land/x/ddu_vim@v1.8.5/deps.ts";
-import { isAbsolute, join } from "https://deno.land/std@0.144.0/path/mod.ts";
+import { isAbsolute, join } from "https://deno.land/std@0.145.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.0/env.js";
 
 const env = new Env();
@@ -424,6 +424,39 @@ export class Ui extends BaseUi<Params> {
       await args.denops.call("ddu#redraw", args.options.name, {
         check: true,
         refreshItems: true,
+      });
+
+      return ActionFlags.None;
+    },
+    chooseAction: async (args: {
+      denops: Denops;
+      options: DduOptions;
+    }) => {
+      const items = await this.getItems(args.denops);
+      if (items.length == 0) {
+        return ActionFlags.None;
+      }
+
+      const actions = await args.denops.call(
+        "ddu#get_item_actions",
+        args.options.name,
+        items,
+      );
+
+      await args.denops.call("ddu#start", {
+        name: args.options.name,
+        push: true,
+        sources: [
+          {
+            name: "action",
+            options: {},
+            params: {
+              actions: actions,
+              name: args.options.name,
+              items: items,
+            },
+          },
+        ],
       });
 
       return ActionFlags.None;
