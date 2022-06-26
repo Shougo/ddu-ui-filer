@@ -87,12 +87,13 @@ expandItem
 		mode:
 			{mode}: The supported values are:
 
-			"recursive":
-				Expand the item tree recursively.
-
 			"toggle":
 				Close the item tree if the directory is
 				opened.
+
+		maxLevel:
+			Maximum expand recursive level.
+			If it is less than 0, infinite recursive.
 
 					*ddu-ui-filer-action-itemAction*
 itemAction
@@ -146,8 +147,9 @@ highlights	(dictionary)
 				    		*ddu-ui-filer-param-search*
 search		(string)
 		Search the path.
-		Note: If the path is not absolute path, current directory
-		relative path is used instead.
+		Note: If the path is not found, expand the parent tree
+		automatically.
+		Note: If the path must be absolute path.
 
 		Default: ""
 

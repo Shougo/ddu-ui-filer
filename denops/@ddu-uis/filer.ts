@@ -15,7 +15,7 @@ import {
   op,
   vars,
 } from "https://deno.land/x/ddu_vim@v1.8.5/deps.ts";
-import { isAbsolute, join } from "https://deno.land/std@0.145.0/path/mod.ts";
+import { dirname } from "https://deno.land/std@0.145.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.0/env.js";
 
 const env = new Env();
@@ -45,7 +45,8 @@ type DoActionParams = {
 };
 
 type ExpandItemParams = {
-  mode?: "toggle" | "recursive";
+  mode?: "toggle";
+  maxLevel?: number;
 };
 
 export type ActionData = {
@@ -155,7 +156,7 @@ export class Ui extends BaseUi<Params> {
         bufnr,
         "ddu_ui_filer_prev_bufnr",
         -1,
-      );
+      ) as number;
       await this.quit({
         denops: args.denops,
         context: args.context,
@@ -309,17 +310,39 @@ export class Ui extends BaseUi<Params> {
     );
 
     if (args.uiParams.search != "") {
-      const search = isAbsolute(args.uiParams.search)
-        ? args.uiParams.search
-        : join(args.context.path, args.uiParams.search);
-      const item = this.items.find(
-        (item) => search == (item?.action as ActionData).path ?? item.word,
-      );
+      const search = args.uiParams.search;
+      let searchParent = search;
+      let item = undefined;
+      let maxLevel = 0;
+      while (1) {
+        item = this.items.find(
+          (item) =>
+            searchParent == (item?.action as ActionData).path ?? item.word,
+        );
+
+        if (searchParent == dirname(searchParent) || item) {
+          break;
+        }
+
+        searchParent = dirname(searchParent);
+        maxLevel++;
+      }
       if (item) {
-        await this.searchItem({
-          denops: args.denops,
-          item,
-        });
+        if (searchParent == search) {
+          await this.searchItem({
+            denops: args.denops,
+            item,
+          });
+        } else if (!item.__expanded) {
+          // Need expand redraw
+          await args.denops.call(
+            "ddu#redraw_tree",
+            args.options.name,
+            "expand",
+            item,
+            { search, maxLevel },
+          );
+        }
       }
     }
 
@@ -486,8 +509,9 @@ export class Ui extends BaseUi<Params> {
       await args.denops.call(
         "ddu#redraw_tree",
         args.options.name,
-        params.mode == "recursive" ? "recursive" : "expand",
+        "expand",
         item,
+        { maxLevel: params.maxLevel ?? 0 },
       );
 
       return ActionFlags.None;
