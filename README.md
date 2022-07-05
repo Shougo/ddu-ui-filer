@@ -2,6 +2,9 @@
 
 File listing UI for ddu.vim
 
+Note: I have created
+[Japanese article](https://zenn.dev/shougo/articles/ddu-ui-filer) for ddu-ui-filer.
+
 ## Required
 
 ### denops.vim
