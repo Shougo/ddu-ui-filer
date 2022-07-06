@@ -170,6 +170,9 @@ sort		(string)
 		Sort method.
 		If the method is upper case, the order will be reversed.
 
+		Note: To sort items properly, the source must support
+		|ddu-item-attribute-status|.
+
 		"extension": file extension sort
 		"filename": file name sort
 		"size": file size sort
