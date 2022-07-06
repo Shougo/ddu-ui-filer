@@ -164,6 +164,18 @@ split		(string)
 
 		Default: "horizontal"
 
+				    		*ddu-ui-filer-param-sort*
+sort		(string)
+
+		Sort method.
+
+		"extension": file extension sort
+		"filename": file name sort
+		"size": file size sort
+		"time": file modified time sort
+
+		Default: "filename"
+
 				    	*ddu-ui-filer-param-splitDirection*
 splitDirection	(string)
 		Specify split direction.

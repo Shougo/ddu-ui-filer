@@ -7,15 +7,15 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v1.8.5/types.ts";
+} from "https://deno.land/x/ddu_vim@v1.8.6/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v1.8.5/deps.ts";
-import { dirname } from "https://deno.land/std@0.145.0/path/mod.ts";
+} from "https://deno.land/x/ddu_vim@v1.8.6/deps.ts";
+import { dirname, extname } from "https://deno.land/std@0.147.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.0/env.js";
 
 const env = new Env();
@@ -29,6 +29,7 @@ type Params = {
   focus: boolean;
   highlights: HighlightGroup;
   search: string;
+  sort: "filename" | "extension" | "size" | "time" | "";
   split: "horizontal" | "vertical" | "floating" | "no";
   splitDirection: "botright" | "topleft";
   toggle: boolean;
@@ -61,10 +62,11 @@ export class Ui extends BaseUi<Params> {
 
   refreshItems(args: {
     context: Context;
+    uiParams: Params;
     sources: SourceInfo[];
     items: DduItem[];
   }): void {
-    this.items = this.getSortedItems(args.sources, args.items);
+    this.items = this.getSortedItems(args.sources, args.uiParams, args.items);
     this.selectedItems.clear();
   }
 
@@ -619,6 +621,7 @@ export class Ui extends BaseUi<Params> {
       search: "",
       split: "horizontal",
       splitDirection: "botright",
+      sort: "filename",
       toggle: false,
       winCol: 0,
       winHeight: 20,
@@ -695,6 +698,7 @@ export class Ui extends BaseUi<Params> {
 
   private getSortedItems(
     sources: SourceInfo[],
+    uiParams: Params,
     items: DduItem[],
   ): DduItem[] {
     const sourceItems: Record<number, DduItem[]> = {};
@@ -734,11 +738,16 @@ export class Ui extends BaseUi<Params> {
         continue;
       }
 
-      const sortedSourceItems = sourceItems[source.index].sort((a, b) => {
-        const nameA = (a.action as ActionData).path ?? a.word;
-        const nameB = (b.action as ActionData).path ?? b.word;
-        return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
-      });
+      const sortFunc = uiParams.sort == "extension"
+        ? sortByExtension
+        : uiParams.sort == "size"
+        ? sortBySize
+        : uiParams.sort == "time"
+        ? sortByTime
+        : uiParams.sort == "filename"
+        ? sortByFilename
+        : sortByNone;
+      const sortedSourceItems = sourceItems[source.index].sort(sortFunc);
       const dirs = sortedSourceItems.filter(
         (item) => (item.action as ActionData)?.isDirectory,
       );
@@ -751,3 +760,31 @@ export class Ui extends BaseUi<Params> {
     return ret;
   }
 }
+
+const sortByFilename = (a: DduItem, b: DduItem) => {
+  const nameA = (a.action as ActionData).path ?? a.word;
+  const nameB = (b.action as ActionData).path ?? b.word;
+  return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
+};
+
+const sortByExtension = (a: DduItem, b: DduItem) => {
+  const nameA = extname((a.action as ActionData).path ?? a.word);
+  const nameB = extname((b.action as ActionData).path ?? b.word);
+  return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
+};
+
+const sortBySize = (a: DduItem, b: DduItem) => {
+  const sizeA = a.status?.size ?? -1;
+  const sizeB = b.status?.size ?? -1;
+  return sizeA < sizeB ? -1 : sizeA > sizeB ? 1 : 0;
+};
+
+const sortByTime = (a: DduItem, b: DduItem) => {
+  const timeA = a.status?.time ?? -1;
+  const timeB = b.status?.time ?? -1;
+  return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
+};
+
+const sortByNone = (_a: DduItem, _b: DduItem) => {
+  return 0;
+};
