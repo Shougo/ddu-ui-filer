@@ -29,7 +29,16 @@ type Params = {
   focus: boolean;
   highlights: HighlightGroup;
   search: string;
-  sort: "filename" | "extension" | "size" | "time" | "";
+  sort:
+    | "filename"
+    | "extension"
+    | "size"
+    | "time"
+    | "Filename"
+    | "Extension"
+    | "Size"
+    | "Time"
+    | "";
   split: "horizontal" | "vertical" | "floating" | "no";
   splitDirection: "botright" | "topleft";
   toggle: boolean;
@@ -738,20 +747,26 @@ export class Ui extends BaseUi<Params> {
         continue;
       }
 
-      const sortFunc = uiParams.sort == "extension"
+      const sortMethod = uiParams.sort.toLowerCase();
+      const sortFunc = sortMethod == "extension"
         ? sortByExtension
-        : uiParams.sort == "size"
+        : sortMethod == "size"
         ? sortBySize
-        : uiParams.sort == "time"
+        : sortMethod == "time"
         ? sortByTime
-        : uiParams.sort == "filename"
+        : sortMethod == "filename"
         ? sortByFilename
         : sortByNone;
-      const sortedSourceItems = sourceItems[source.index].sort(sortFunc);
-      const dirs = sortedSourceItems.filter(
+      const reversed = uiParams.sort.toLowerCase() != uiParams.sort;
+
+      const items = sourceItems[source.index];
+      const sortedItems = reversed
+        ? items.sort(sortFunc).reverse()
+        : items.sort(sortFunc);
+      const dirs = sortedItems.filter(
         (item) => (item.action as ActionData)?.isDirectory,
       );
-      const files = sortedSourceItems.filter(
+      const files = sortedItems.filter(
         (item) => !(item.action as ActionData)?.isDirectory,
       );
       ret = ret.concat(dirs);

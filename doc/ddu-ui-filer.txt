@@ -168,6 +168,7 @@ split		(string)
 sort		(string)
 
 		Sort method.
+		If the method is upper case, the order will be reversed.
 
 		"extension": file extension sort
 		"filename": file name sort
