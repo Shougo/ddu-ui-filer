@@ -68,6 +68,13 @@ export class Ui extends BaseUi<Params> {
   private buffers: Record<string, number> = {};
   private items: DduItem[] = [];
   private selectedItems: Set<number> = new Set();
+  private itemSortMethod: {
+    func?: (a: DduItem, b: DduItem) => number;
+    reversed?: boolean;
+  } = {
+    func: sortByFilename,
+    reversed: false,
+  };
 
   refreshItems(args: {
     context: Context;
@@ -90,13 +97,25 @@ export class Ui extends BaseUi<Params> {
           (args.parent.action as ActionData).path &&
         item.__sourceIndex == args.parent.__sourceIndex,
     );
+
+    let insertItems = this.itemSortMethod.reversed
+      ? args.children.sort(this.itemSortMethod.func).reverse()
+      : args.children.sort(this.itemSortMethod.func);
+    const dirs = insertItems.filter((item) =>
+      (item.action as ActionData)?.isDirectory
+    );
+    const files = insertItems.filter((item) =>
+      !(item.action as ActionData)?.isDirectory
+    );
+    insertItems = dirs.concat(files);
+
     if (index >= 0) {
-      this.items = this.items.slice(0, index + 1).concat(args.children).concat(
+      this.items = this.items.slice(0, index + 1).concat(insertItems).concat(
         this.items.slice(index + 1),
       );
       this.items[index] = args.parent;
     } else {
-      this.items = this.items.concat(args.children);
+      this.items = this.items.concat(insertItems);
     }
 
     this.selectedItems.clear();
@@ -758,6 +777,10 @@ export class Ui extends BaseUi<Params> {
         ? sortByFilename
         : sortByNone;
       const reversed = uiParams.sort.toLowerCase() != uiParams.sort;
+      this.itemSortMethod = {
+        func: sortFunc,
+        reversed: reversed,
+      };
 
       const items = sourceItems[source.index];
       const sortedItems = reversed
