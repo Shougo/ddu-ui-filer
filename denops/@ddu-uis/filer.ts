@@ -68,13 +68,6 @@ export class Ui extends BaseUi<Params> {
   private buffers: Record<string, number> = {};
   private items: DduItem[] = [];
   private selectedItems: Set<number> = new Set();
-  private itemSortMethod: {
-    func?: (a: DduItem, b: DduItem) => number;
-    reversed?: boolean;
-  } = {
-    func: sortByFilename,
-    reversed: false,
-  };
 
   refreshItems(args: {
     context: Context;
@@ -87,6 +80,7 @@ export class Ui extends BaseUi<Params> {
   }
 
   expandItem(args: {
+    uiParams: Params;
     parent: DduItem;
     children: DduItem[];
   }): void {
@@ -98,16 +92,7 @@ export class Ui extends BaseUi<Params> {
         item.__sourceIndex == args.parent.__sourceIndex,
     );
 
-    let insertItems = this.itemSortMethod.reversed
-      ? args.children.sort(this.itemSortMethod.func).reverse()
-      : args.children.sort(this.itemSortMethod.func);
-    const dirs = insertItems.filter((item) =>
-      (item.action as ActionData)?.isDirectory
-    );
-    const files = insertItems.filter((item) =>
-      !(item.action as ActionData)?.isDirectory
-    );
-    insertItems = dirs.concat(files);
+    const insertItems = this.sortItems(args.uiParams, args.children);
 
     if (index >= 0) {
       this.items = this.items.slice(0, index + 1).concat(insertItems).concat(
@@ -766,36 +751,37 @@ export class Ui extends BaseUi<Params> {
         continue;
       }
 
-      const sortMethod = uiParams.sort.toLowerCase();
-      const sortFunc = sortMethod == "extension"
-        ? sortByExtension
-        : sortMethod == "size"
-        ? sortBySize
-        : sortMethod == "time"
-        ? sortByTime
-        : sortMethod == "filename"
-        ? sortByFilename
-        : sortByNone;
-      const reversed = uiParams.sort.toLowerCase() != uiParams.sort;
-      this.itemSortMethod = {
-        func: sortFunc,
-        reversed: reversed,
-      };
-
-      const items = sourceItems[source.index];
-      const sortedItems = reversed
-        ? items.sort(sortFunc).reverse()
-        : items.sort(sortFunc);
-      const dirs = sortedItems.filter(
-        (item) => (item.action as ActionData)?.isDirectory,
-      );
-      const files = sortedItems.filter(
-        (item) => !(item.action as ActionData)?.isDirectory,
-      );
-      ret = ret.concat(dirs);
-      ret = ret.concat(files);
+      ret = ret.concat(this.sortItems(uiParams, sourceItems[source.index]));
     }
     return ret;
+  }
+  private sortItems(
+    uiParams: Params,
+    items: DduItem[],
+  ): DduItem[] {
+    const sortMethod = uiParams.sort.toLowerCase();
+    const sortFunc = sortMethod == "extension"
+      ? sortByExtension
+      : sortMethod == "size"
+      ? sortBySize
+      : sortMethod == "time"
+      ? sortByTime
+      : sortMethod == "filename"
+      ? sortByFilename
+      : sortByNone;
+    const reversed = uiParams.sort.toLowerCase() != uiParams.sort;
+
+    const sortedItems = reversed
+      ? items.sort(sortFunc).reverse()
+      : items.sort(sortFunc);
+    const dirs = sortedItems.filter(
+      (item) => (item.action as ActionData)?.isDirectory,
+    );
+    const files = sortedItems.filter(
+      (item) => !(item.action as ActionData)?.isDirectory,
+    );
+
+    return dirs.concat(files);
   }
 }
 
