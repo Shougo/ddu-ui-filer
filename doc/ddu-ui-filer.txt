@@ -186,11 +186,6 @@ splitDirection	(string)
 
 		Default: "botright"
 
-				    		*ddu-ui-filer-param-toggle*
-toggle
-		Close the UI window if the window exists.
-		Default: v:false
-
 						*ddu-ui-filer-param-winCol*
 winCol		(number)
 		Set the column position of the window if

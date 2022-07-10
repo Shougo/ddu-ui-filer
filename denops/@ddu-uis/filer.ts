@@ -41,7 +41,6 @@ type Params = {
     | "";
   split: "horizontal" | "vertical" | "floating" | "no";
   splitDirection: "botright" | "topleft";
-  toggle: boolean;
   winCol: number;
   winHeight: number;
   winRow: number;
@@ -158,34 +157,6 @@ export class Ui extends BaseUi<Params> {
     this.buffers[args.options.name] = bufnr;
 
     await this.setDefaultParams(args.denops, args.uiParams);
-
-    const prevDone = await fn.getbufvar(
-      args.denops,
-      bufnr,
-      "ddu_ui_filer_prev_done",
-      false,
-    );
-    if (args.context.done && prevDone && args.uiParams.toggle) {
-      args.context.bufNr = await fn.getbufvar(
-        args.denops,
-        bufnr,
-        "ddu_ui_filer_prev_bufnr",
-        -1,
-      ) as number;
-      await this.quit({
-        denops: args.denops,
-        context: args.context,
-        options: args.options,
-        uiParams: args.uiParams,
-      });
-      await fn.setbufvar(
-        args.denops,
-        bufnr,
-        "ddu_ui_filer_prev_done",
-        false,
-      );
-      return;
-    }
 
     const hasNvim = args.denops.meta.host == "nvim";
     const floating = args.uiParams.split == "floating" && hasNvim;
@@ -365,12 +336,6 @@ export class Ui extends BaseUi<Params> {
       await fn.setbufvar(
         args.denops,
         bufnr,
-        "ddu_ui_filer_prev_done",
-        true,
-      );
-      await fn.setbufvar(
-        args.denops,
-        bufnr,
         "ddu_ui_filer_prev_bufnr",
         args.context.bufNr,
       );
@@ -398,7 +363,11 @@ export class Ui extends BaseUi<Params> {
     if (
       args.uiParams.split == "no" || (await fn.winnr(args.denops, "$")) == 1
     ) {
-      await args.denops.cmd(`buffer ${args.context.bufNr}`);
+      await args.denops.cmd(
+        args.context.bufNr == this.buffers[args.options.name]
+          ? "enew"
+          : `buffer ${args.context.bufNr}`,
+      );
     } else {
       await args.denops.cmd("close!");
       await fn.win_gotoid(args.denops, args.context.winId);
@@ -635,7 +604,6 @@ export class Ui extends BaseUi<Params> {
       split: "horizontal",
       splitDirection: "botright",
       sort: "filename",
-      toggle: false,
       winCol: 0,
       winHeight: 20,
       winRow: 0,
