@@ -7,15 +7,15 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v1.8.6/types.ts";
+} from "https://deno.land/x/ddu_vim@v1.8.8/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v1.8.6/deps.ts";
-import { dirname, extname } from "https://deno.land/std@0.147.0/path/mod.ts";
+} from "https://deno.land/x/ddu_vim@v1.8.8/deps.ts";
+import { dirname, extname } from "https://deno.land/std@0.149.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.0/env.js";
 
 const env = new Env();
@@ -23,6 +23,8 @@ const env = new Env();
 type HighlightGroup = {
   floating?: string;
   selected?: string;
+  sourceName?: string;
+  sourcePath?: string;
 };
 
 type Params = {
@@ -68,13 +70,19 @@ export class Ui extends BaseUi<Params> {
   private items: DduItem[] = [];
   private selectedItems: Set<number> = new Set();
 
-  refreshItems(args: {
+  async refreshItems(args: {
+    denops: Denops;
     context: Context;
     uiParams: Params;
     sources: SourceInfo[];
     items: DduItem[];
-  }): void {
-    this.items = this.getSortedItems(args.sources, args.uiParams, args.items);
+  }): Promise<void> {
+    this.items = await this.getSortedItems(
+      args.denops,
+      args.sources,
+      args.uiParams,
+      args.items,
+    );
     this.selectedItems.clear();
   }
 
@@ -677,11 +685,12 @@ export class Ui extends BaseUi<Params> {
     return (await fn.line(denops, ".")) - 1;
   }
 
-  private getSortedItems(
+  private async getSortedItems(
+    denops: Denops,
     sources: SourceInfo[],
     uiParams: Params,
     items: DduItem[],
-  ): DduItem[] {
+  ): Promise<DduItem[]> {
     const sourceItems: Record<number, DduItem[]> = {};
     for (const item of items) {
       if (!sourceItems[item.__sourceIndex]) {
@@ -708,6 +717,20 @@ export class Ui extends BaseUi<Params> {
           isDirectory: true,
           path: source.path,
         },
+        highlights: [
+          {
+            name: "root-source-name",
+            "hl_group": uiParams.highlights.sourceName ?? "Type",
+            col: 1,
+            width: await fn.strwidth(denops, source.name) as number,
+          },
+          {
+            name: "root-source-path",
+            "hl_group": uiParams.highlights.sourcePath ?? "String",
+            col: source.name.length + 2,
+            width: await fn.strwidth(denops, display) as number,
+          },
+        ],
         matcherKey: "word",
         __sourceIndex: source.index,
         __sourceName: source.name,
