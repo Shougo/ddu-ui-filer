@@ -107,6 +107,10 @@ itemAction
 
 		Note: You cannot mix multiple kinds/sources.
 
+					*ddu-ui-filer-action-toggleAllItems*
+toggleAllItems
+		Toggle selected state for the all items.
+
 					*ddu-ui-filer-action-toggleSelectItem*
 toggleSelectItem
 		Toggle selected item.

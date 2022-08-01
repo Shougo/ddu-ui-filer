@@ -584,6 +584,29 @@ export class Ui extends BaseUi<Params> {
 
       return ActionFlags.None;
     },
+    // deno-lint-ignore require-await
+    toggleAllItems: async (_: {
+      denops: Denops;
+      options: DduOptions;
+      uiParams: Params;
+    }) => {
+      if (this.items.length == 0) {
+        return ActionFlags.None;
+      }
+
+      this.items.forEach((_, idx) => {
+        // Skip root directory
+        if (this.items[idx].__level >= 0) {
+          if (this.selectedItems.has(idx)) {
+            this.selectedItems.delete(idx);
+          } else {
+            this.selectedItems.add(idx);
+          }
+        }
+      });
+
+      return ActionFlags.Redraw;
+    },
     toggleSelectItem: async (args: {
       denops: Denops;
       options: DduOptions;
@@ -734,7 +757,7 @@ export class Ui extends BaseUi<Params> {
         matcherKey: "word",
         __sourceIndex: source.index,
         __sourceName: source.name,
-        __level: 0,
+        __level: -1,
         __expanded: false,
       });
 
