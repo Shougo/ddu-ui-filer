@@ -44,6 +44,18 @@ ddu#ui#filer#do_action({action-name}[, {params}])
 		actions list in |ddu-ui-filer-actions|.
 		{args} behavior depends on {action-name}.
 
+						*ddu#ui#filer#multi_actions()*
+ddu#ui#filer#multi_actions([{action-name1}[, {params1}], ...])
+		Fire multiple actions.
+
+		Example: >
+
+		nnoremap <buffer> c
+		\ <Cmd>call ddu#ui#filer#multi_actions([
+		\ ['itemAction', {'name': 'copy'}],
+		\ ['clearSelectAllItems'],
+		\ ])<CR>
+<
 						*ddu#ui#filer#get_item()*
 ddu#ui#filer#get_item()
 		Return the current cursor item as |Dictionary|.
@@ -76,6 +88,10 @@ chooseAction
 
 		Note: "ddu-source-action" is required.
 		https://github.com/Shougo/ddu-source-action
+
+				*ddu-ui-filer-action-clearSelectAllItems*
+clearSelectAllItems
+		Clear all selected items.
 
 					*ddu-ui-filer-action-collapseItem*
 collapseItem

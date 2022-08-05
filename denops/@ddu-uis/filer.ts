@@ -476,6 +476,13 @@ export class Ui extends BaseUi<Params> {
 
       return ActionFlags.None;
     },
+    // deno-lint-ignore require-await
+    clearSelectAllItems: async (_: {
+      denops: Denops;
+    }) => {
+      this.selectedItems.clear();
+      return ActionFlags.Redraw;
+    },
     collapseItem: async (args: {
       denops: Denops;
       options: DduOptions;

@@ -10,6 +10,16 @@ function! ddu#ui#filer#do_action(name, ...) abort
   call ddu#ui_action(b:ddu_ui_name, a:name, get(a:000, 0, {}))
 endfunction
 
+function! ddu#ui#filer#multi_actions(actions) abort
+  if !exists('b:ddu_ui_name')
+    return
+  endif
+
+  for action in a:actions
+    call call('ddu#ui#filer#do_action', action)
+  endfor
+endfunction
+
 function! ddu#ui#filer#get_item() abort
   if !exists('b:ddu_ui_name')
     return {}
