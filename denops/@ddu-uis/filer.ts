@@ -86,11 +86,12 @@ export class Ui extends BaseUi<Params> {
     this.selectedItems.clear();
   }
 
-  expandItem(args: {
+  // deno-lint-ignore require-await
+  async expandItem(args: {
     uiParams: Params;
     parent: DduItem;
     children: DduItem[];
-  }): void {
+  }) {
     // Search index.
     const index = this.items.findIndex(
       (item: DduItem) =>
@@ -113,7 +114,8 @@ export class Ui extends BaseUi<Params> {
     this.selectedItems.clear();
   }
 
-  collapseItem(args: {
+  // deno-lint-ignore require-await
+  async collapseItem(args: {
     item: DduItem;
   }) {
     // Search index.
