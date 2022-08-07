@@ -69,6 +69,7 @@ export class Ui extends BaseUi<Params> {
   private buffers: Record<string, number> = {};
   private items: DduItem[] = [];
   private selectedItems: Set<number> = new Set();
+  private expandedPaths: Set<string> = new Set();
 
   async refreshItems(args: {
     denops: Denops;
@@ -103,10 +104,17 @@ export class Ui extends BaseUi<Params> {
     const insertItems = this.sortItems(args.uiParams, args.children);
 
     if (index >= 0) {
+      if (this.items[index].__expanded) {
+        // Skip if already expanded.
+        return;
+      }
+
       this.items = this.items.slice(0, index + 1).concat(insertItems).concat(
         this.items.slice(index + 1),
       );
       this.items[index] = args.parent;
+      const path = (args.parent.action as ActionData).path ?? args.parent.word;
+      this.expandedPaths.add(path);
     } else {
       this.items = this.items.concat(insertItems);
     }
@@ -137,6 +145,8 @@ export class Ui extends BaseUi<Params> {
       this.items.slice(endIndex + 1),
     );
     this.items[startIndex] = args.item;
+    const path = (args.item.action as ActionData).path ?? args.item.word;
+    this.expandedPaths.delete(path);
 
     this.selectedItems.clear();
   }
@@ -292,6 +302,15 @@ export class Ui extends BaseUi<Params> {
       [...this.selectedItems],
     );
 
+    for (const path of this.expandedPaths) {
+      await this.expandPath(
+        args.denops,
+        args.options.name,
+        path,
+        false,
+      );
+    }
+
     const path = this.items.length == 0
       ? ""
       : (this.items[0].action as ActionData).path;
@@ -306,40 +325,12 @@ export class Ui extends BaseUi<Params> {
     );
 
     if (args.uiParams.search != "") {
-      const search = args.uiParams.search;
-      let searchParent = search;
-      let item = undefined;
-      let maxLevel = 0;
-      while (1) {
-        item = this.items.find(
-          (item) =>
-            searchParent == (item?.action as ActionData).path ?? item.word,
-        );
-
-        if (searchParent == dirname(searchParent) || item) {
-          break;
-        }
-
-        searchParent = dirname(searchParent);
-        maxLevel++;
-      }
-      if (item) {
-        if (searchParent == search) {
-          await this.searchItem({
-            denops: args.denops,
-            item,
-          });
-        } else if (!item.__expanded) {
-          // Need expand redraw
-          await args.denops.call(
-            "ddu#redraw_tree",
-            args.options.name,
-            "expand",
-            item,
-            { search, maxLevel },
-          );
-        }
-      }
+      await this.expandPath(
+        args.denops,
+        args.options.name,
+        args.uiParams.search,
+        true,
+      );
     }
 
     if (args.context.done) {
@@ -366,7 +357,7 @@ export class Ui extends BaseUi<Params> {
     const bufnr = this.buffers[args.options.name];
     await fn.win_gotoid(
       args.denops,
-      await fn.bufwinid(args.denops, bufnr)
+      await fn.bufwinid(args.denops, bufnr),
     );
 
     const path = this.items.length == 0
@@ -381,9 +372,7 @@ export class Ui extends BaseUi<Params> {
       args.uiParams.split == "no" || (await fn.winnr(args.denops, "$")) == 1
     ) {
       await args.denops.cmd(
-        args.context.bufNr == bufnr
-          ? "enew"
-          : `buffer ${args.context.bufNr}`,
+        args.context.bufNr == bufnr ? "enew" : `buffer ${args.context.bufNr}`,
       );
     } else {
       await args.denops.cmd("close!");
@@ -812,6 +801,46 @@ export class Ui extends BaseUi<Params> {
     );
 
     return dirs.concat(files);
+  }
+
+  private async expandPath(
+    denops: Denops,
+    name: string,
+    path: string,
+    searchPath: boolean,
+  ) {
+    let parent = path;
+    let item = undefined;
+    let maxLevel = 0;
+    while (1) {
+      item = this.items.find(
+        (item) => parent == (item?.action as ActionData).path ?? item.word,
+      );
+
+      if (parent == dirname(parent) || item) {
+        break;
+      }
+
+      parent = dirname(parent);
+      maxLevel++;
+    }
+    if (item) {
+      if (searchPath && parent == path) {
+        await this.searchItem({
+          denops: denops,
+          item,
+        });
+      } else if (!item.__expanded) {
+        // Need expand redraw
+        await denops.call(
+          "ddu#redraw_tree",
+          name,
+          "expand",
+          item,
+          { path, maxLevel },
+        );
+      }
+    }
   }
 }
 
