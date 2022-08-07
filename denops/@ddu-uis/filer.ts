@@ -360,6 +360,13 @@ export class Ui extends BaseUi<Params> {
     options: DduOptions;
     uiParams: Params;
   }): Promise<void> {
+    // Move to the UI window.
+    const bufnr = this.buffers[args.options.name];
+    await fn.win_gotoid(
+      args.denops,
+      await fn.bufwinid(args.denops, bufnr)
+    );
+
     const path = this.items.length == 0
       ? ""
       : (this.items[0].action as ActionData).path;
@@ -372,7 +379,7 @@ export class Ui extends BaseUi<Params> {
       args.uiParams.split == "no" || (await fn.winnr(args.denops, "$")) == 1
     ) {
       await args.denops.cmd(
-        args.context.bufNr == this.buffers[args.options.name]
+        args.context.bufNr == bufnr
           ? "enew"
           : `buffer ${args.context.bufNr}`,
       );
