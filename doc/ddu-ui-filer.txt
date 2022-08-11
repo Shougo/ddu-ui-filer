@@ -291,7 +291,6 @@ A: >
 	  return empty(matchers) ? ['matcher_hidden'] : []
 	endfunction
 
-
 Q: I want to check updated items automatically.
 
 A: >
@@ -300,6 +299,11 @@ A: >
 
 Note: Source support is needed for |ddu-ui-filer-action-checkItems|.
 
+Q: I want to use icon fonts in ddu columns.
+
+A: You can use "ddu-column-icon_filename".
+
+https://github.com/ryota2357/ddu-column-icon_filename
 
 ==============================================================================
 COMPATIBILITY					*ddu-ui-filer-compatibility*
