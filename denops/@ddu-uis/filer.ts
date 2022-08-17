@@ -141,6 +141,12 @@ export class Ui extends BaseUi<Params> {
       (item: DduItem) => item.__level <= args.item.__level,
     );
 
+    // Remove from expandedPaths
+    for (const item of this.items.slice(startIndex + 1, endIndex)) {
+      const path = (item.action as ActionData).path ?? item.word;
+      this.expandedPaths.delete(path);
+    }
+
     this.items = this.items.slice(0, startIndex + 1).concat(
       this.items.slice(endIndex + 1),
     );
