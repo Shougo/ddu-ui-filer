@@ -208,6 +208,12 @@ sort		(string)
 
 		Default: "filename"
 
+				    *ddu-ui-filer-param-sortDirectoriesFirst*
+sortDirectoriesFirst	(boolean)
+		Sort directories in the first than files.
+
+		Default : v:true
+
 				    	*ddu-ui-filer-param-splitDirection*
 splitDirection	(string)
 		Specify split direction.

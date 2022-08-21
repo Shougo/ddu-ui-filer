@@ -41,6 +41,7 @@ type Params = {
     | "Size"
     | "Time"
     | "";
+  sortDirectoriesFirst: boolean;
   split: "horizontal" | "vertical" | "floating" | "no";
   splitDirection: "botright" | "topleft";
   winCol: number;
@@ -650,6 +651,7 @@ export class Ui extends BaseUi<Params> {
       split: "horizontal",
       splitDirection: "botright",
       sort: "filename",
+      sortDirectoriesFirst: true,
       winCol: 0,
       winHeight: 20,
       winRow: 0,
@@ -808,14 +810,18 @@ export class Ui extends BaseUi<Params> {
     const sortedItems = reversed
       ? items.sort(sortFunc).reverse()
       : items.sort(sortFunc);
-    const dirs = sortedItems.filter(
-      (item) => (item.action as ActionData)?.isDirectory,
-    );
-    const files = sortedItems.filter(
-      (item) => !(item.action as ActionData)?.isDirectory,
-    );
 
-    return dirs.concat(files);
+    if (uiParams.sortDirectoriesFirst) {
+      const dirs = sortedItems.filter(
+        (item) => (item.action as ActionData)?.isDirectory,
+      );
+      const files = sortedItems.filter(
+        (item) => !(item.action as ActionData)?.isDirectory,
+      );
+      return dirs.concat(files);
+    } else {
+      return sortedItems;
+    }
   }
 
   private async expandPath(
