@@ -68,6 +68,7 @@ export type ActionData = {
 export class Ui extends BaseUi<Params> {
   private buffers: Record<string, number> = {};
   private items: DduItem[] = [];
+  private viewItems: DduItem[] = [];
   private selectedItems: Set<number> = new Set();
   private expandedPaths: Set<string> = new Set();
 
@@ -106,6 +107,7 @@ export class Ui extends BaseUi<Params> {
     if (index >= 0) {
       if (this.items[index].__expanded) {
         // Skip if already expanded.
+        // TODO: It does not work for recursive expand tree
         return;
       }
 
@@ -292,6 +294,8 @@ export class Ui extends BaseUi<Params> {
       false,
       0,
     );
+
+    this.viewItems = Array.from(this.items);
 
     await args.denops.call(
       "ddu#ui#filer#_highlight_items",
@@ -716,7 +720,12 @@ export class Ui extends BaseUi<Params> {
   private async getIndex(
     denops: Denops,
   ): Promise<number> {
-    return (await fn.line(denops, ".")) - 1;
+    // Convert viewItems index to items index.
+    const index = (await fn.line(denops, ".")) - 1;
+    const viewItem = this.viewItems[index];
+    return this.items.findIndex(
+      (item: DduItem) => item == viewItem,
+    );
   }
 
   private async getSortedItems(
