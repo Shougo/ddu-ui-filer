@@ -178,6 +178,11 @@ export class Ui extends BaseUi<Params> {
     uiOptions: UiOptions;
     uiParams: Params;
   }): Promise<void> {
+    if (args.options.sync && !args.context.done) {
+      // Skip redraw if all items are not done
+      return;
+    }
+
     const bufferName = `ddu-filer-${args.options.name}`;
     const initialized = this.buffers[args.options.name];
     const bufnr = initialized
