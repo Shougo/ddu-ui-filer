@@ -7,16 +7,16 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v1.8.8/types.ts";
+} from "https://deno.land/x/ddu_vim@v1.9.0/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v1.8.8/deps.ts";
-import { dirname, extname } from "https://deno.land/std@0.149.0/path/mod.ts";
-import { Env } from "https://deno.land/x/env@v2.2.0/env.js";
+} from "https://deno.land/x/ddu_vim@v1.9.0/deps.ts";
+import { dirname, extname } from "https://deno.land/std@0.152.0/path/mod.ts";
+import { Env } from "https://deno.land/x/env@v2.2.1/env.js";
 
 const env = new Env();
 
@@ -419,6 +419,9 @@ export class Ui extends BaseUi<Params> {
     let items: DduItem[];
     if (this.selectedItems.size == 0) {
       const idx = await this.getIndex(denops);
+      if (idx < 0) {
+        return [];
+      }
       items = [this.items[idx]];
     } else {
       items = [...this.selectedItems].map((i) => this.items[i]);
@@ -429,6 +432,10 @@ export class Ui extends BaseUi<Params> {
 
   private async collapseItemAction(denops: Denops, options: DduOptions) {
     const index = await this.getIndex(denops);
+    if (index < 0) {
+      return ActionFlags.None;
+    }
+
     const closeItem = this.items[index];
 
     if (!(closeItem.action as ActionData).isDirectory) {
@@ -509,6 +516,10 @@ export class Ui extends BaseUi<Params> {
       actionParams: unknown;
     }) => {
       const idx = await this.getIndex(args.denops);
+      if (idx < 0) {
+        return ActionFlags.None;
+      }
+
       const item = this.items[idx];
       const params = args.actionParams as ExpandItemParams;
 
@@ -534,6 +545,10 @@ export class Ui extends BaseUi<Params> {
       options: DduOptions;
     }) => {
       const idx = await this.getIndex(args.denops);
+      if (idx < 0) {
+        return ActionFlags.None;
+      }
+
       const item = this.items[idx];
       const bufnr = this.buffers[args.options.name];
       await fn.setbufvar(args.denops, bufnr, "ddu_ui_filer_item", item);
@@ -633,11 +648,11 @@ export class Ui extends BaseUi<Params> {
       options: DduOptions;
       uiParams: Params;
     }) => {
-      if (this.items.length == 0) {
+      const idx = await this.getIndex(args.denops);
+      if (idx < 0) {
         return ActionFlags.None;
       }
 
-      const idx = await this.getIndex(args.denops);
       if (this.selectedItems.has(idx)) {
         this.selectedItems.delete(idx);
       } else {
@@ -781,11 +796,12 @@ export class Ui extends BaseUi<Params> {
             width: await fn.strwidth(denops, display) as number,
           },
         ],
+        kind: source.kind,
         matcherKey: "word",
         __sourceIndex: source.index,
         __sourceName: source.name,
         __level: -1,
-        __expanded: false,
+        __expanded: true,
       });
 
       if (!sourceItems[source.index]) {
