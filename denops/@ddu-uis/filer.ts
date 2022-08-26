@@ -168,6 +168,7 @@ export class Ui extends BaseUi<Params> {
 
     if (pos > 0) {
       await fn.cursor(args.denops, pos + 1, 0);
+      await args.denops.cmd("normal! zz");
     }
   }
 
@@ -318,7 +319,7 @@ export class Ui extends BaseUi<Params> {
       [...this.selectedItems],
     );
 
-    const expandItems: ExpandItem[] = [];
+    let expandItems: ExpandItem[] = [];
 
     for (const path of this.expandedPaths) {
       const expand = await this.expandPath(
@@ -328,6 +329,8 @@ export class Ui extends BaseUi<Params> {
       );
 
       if (expand) {
+        // Remote dup items
+        expandItems = expandItems.filter((item) => item.item != expand.item);
         expandItems.push(expand);
       }
     }
@@ -354,13 +357,13 @@ export class Ui extends BaseUi<Params> {
     }
 
     if (expandItems.length != 0) {
-        // Need expand redraw
-        await args.denops.call(
-          "ddu#redraw_tree",
-          args.options.name,
-          "expand",
-          expandItems,
-        );
+      // Need expand redraw
+      await args.denops.call(
+        "ddu#redraw_tree",
+        args.options.name,
+        "expand",
+        expandItems,
+      );
     }
 
     if (args.context.done) {
