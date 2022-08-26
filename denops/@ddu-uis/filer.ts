@@ -7,24 +7,19 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v1.9.0/types.ts";
+} from "https://deno.land/x/ddu_vim@v1.10.1/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v1.9.0/deps.ts";
-import { dirname, extname } from "https://deno.land/std@0.152.0/path/mod.ts";
+} from "https://deno.land/x/ddu_vim@v1.10.1/deps.ts";
+import { ExpandItem } from "https://deno.land/x/ddu_vim@v1.10.1/types.ts";
+import { dirname, extname } from "https://deno.land/std@0.153.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.1/env.js";
 
 const env = new Env();
-
-type ExpandItem = {
-  item: DduItem;
-  maxLevel?: number;
-  search?: string;
-};
 
 type HighlightGroup = {
   floating?: string;
