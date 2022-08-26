@@ -20,6 +20,12 @@ import { Env } from "https://deno.land/x/env@v2.2.1/env.js";
 
 const env = new Env();
 
+type ExpandItem = {
+  item: DduItem;
+  maxLevel?: number;
+  search?: string;
+};
+
 type HighlightGroup = {
   floating?: string;
   selected?: string;
@@ -106,12 +112,6 @@ export class Ui extends BaseUi<Params> {
     const insertItems = this.sortItems(args.uiParams, args.children);
 
     if (index >= 0) {
-      if (this.items[index].__expanded) {
-        // Skip if already expanded.
-        // TODO: It does not work for recursive expand tree
-        return;
-      }
-
       this.items = this.items.slice(0, index + 1).concat(insertItems).concat(
         this.items.slice(index + 1),
       );
@@ -318,13 +318,18 @@ export class Ui extends BaseUi<Params> {
       [...this.selectedItems],
     );
 
+    const expandItems: ExpandItem[] = [];
+
     for (const path of this.expandedPaths) {
-      await this.expandPath(
+      const expand = await this.expandPath(
         args.denops,
-        args.options.name,
         path,
         false,
       );
+
+      if (expand) {
+        expandItems.push(expand);
+      }
     }
 
     const path = this.items.length == 0
@@ -343,10 +348,19 @@ export class Ui extends BaseUi<Params> {
     if (args.uiParams.search != "") {
       await this.expandPath(
         args.denops,
-        args.options.name,
         args.uiParams.search,
         true,
       );
+    }
+
+    if (expandItems.length != 0) {
+        // Need expand redraw
+        await args.denops.call(
+          "ddu#redraw_tree",
+          args.options.name,
+          "expand",
+          expandItems,
+        );
     }
 
     if (args.context.done) {
@@ -446,7 +460,7 @@ export class Ui extends BaseUi<Params> {
       "ddu#redraw_tree",
       options.name,
       "collapse",
-      closeItem,
+      [{ item: closeItem }],
     );
 
     return ActionFlags.None;
@@ -534,8 +548,7 @@ export class Ui extends BaseUi<Params> {
         "ddu#redraw_tree",
         args.options.name,
         "expand",
-        item,
-        { maxLevel: params.maxLevel ?? 0 },
+        [{ item, maxLevel: params.maxLevel ?? 0 }],
       );
 
       return ActionFlags.None;
@@ -847,10 +860,9 @@ export class Ui extends BaseUi<Params> {
 
   private async expandPath(
     denops: Denops,
-    name: string,
     path: string,
     searchPath: boolean,
-  ) {
+  ): Promise<ExpandItem | undefined> {
     let parent = path;
     let item = undefined;
     let maxLevel = 0;
@@ -873,14 +885,7 @@ export class Ui extends BaseUi<Params> {
           item,
         });
       } else if (!item.__expanded) {
-        // Need expand redraw
-        await denops.call(
-          "ddu#redraw_tree",
-          name,
-          "expand",
-          item,
-          { path, maxLevel },
-        );
+        return { item, search: path, maxLevel };
       }
     }
   }
