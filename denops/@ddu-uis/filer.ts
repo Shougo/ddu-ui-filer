@@ -179,6 +179,49 @@ export class Ui extends BaseUi<Params> {
       return;
     }
 
+    let expandItems: ExpandItem[] = [];
+
+    for (const path of this.expandedPaths) {
+      const expand = this.expandPath(path);
+
+      if (expand) {
+        // Remote dup items
+        expandItems = expandItems.filter((item) => item.item != expand.item);
+        expandItems.push(expand);
+      }
+    }
+
+    let searchItem: DduItem | undefined = undefined;
+    if (args.uiParams.search != "") {
+      searchItem = this.items.find(
+        (item) =>
+          args.uiParams.search == (item?.action as ActionData).path ??
+            item.word,
+      );
+
+      if (!searchItem) {
+        const expand = this.expandPath(args.uiParams.search);
+
+        if (expand) {
+          // Remote dup items
+          expandItems = expandItems.filter((item) => item.item != expand.item);
+          expandItems.push(expand);
+        }
+      }
+    }
+
+    if (expandItems.length != 0) {
+      // Need expand redraw
+      await args.denops.call(
+        "ddu#redraw_tree",
+        args.options.name,
+        "expand",
+        expandItems,
+      );
+
+      return;
+    }
+
     const bufferName = `ddu-filer-${args.options.name}`;
     const initialized = this.buffers[args.options.name];
     const bufnr = initialized
@@ -314,22 +357,6 @@ export class Ui extends BaseUi<Params> {
       [...this.selectedItems],
     );
 
-    let expandItems: ExpandItem[] = [];
-
-    for (const path of this.expandedPaths) {
-      const expand = await this.expandPath(
-        args.denops,
-        path,
-        false,
-      );
-
-      if (expand) {
-        // Remote dup items
-        expandItems = expandItems.filter((item) => item.item != expand.item);
-        expandItems.push(expand);
-      }
-    }
-
     const path = this.items.length == 0
       ? ""
       : (this.items[0].action as ActionData).path;
@@ -343,22 +370,11 @@ export class Ui extends BaseUi<Params> {
       path,
     );
 
-    if (args.uiParams.search != "") {
-      await this.expandPath(
-        args.denops,
-        args.uiParams.search,
-        true,
-      );
-    }
-
-    if (expandItems.length != 0) {
-      // Need expand redraw
-      await args.denops.call(
-        "ddu#redraw_tree",
-        args.options.name,
-        "expand",
-        expandItems,
-      );
+    if (searchItem) {
+      await this.searchItem({
+        denops: args.denops,
+        item: searchItem,
+      });
     }
 
     if (args.context.done) {
@@ -856,11 +872,9 @@ export class Ui extends BaseUi<Params> {
     }
   }
 
-  private async expandPath(
-    denops: Denops,
+  private expandPath(
     path: string,
-    searchPath: boolean,
-  ): Promise<ExpandItem | undefined> {
+  ): ExpandItem | undefined {
     let parent = path;
     let item = undefined;
     let maxLevel = 0;
@@ -876,15 +890,8 @@ export class Ui extends BaseUi<Params> {
       parent = dirname(parent);
       maxLevel++;
     }
-    if (item) {
-      if (searchPath && parent == path) {
-        await this.searchItem({
-          denops: denops,
-          item,
-        });
-      } else if (!item.__expanded) {
-        return { item, search: path, maxLevel };
-      }
+    if (item && !item.__expanded) {
+      return { item, search: path, maxLevel };
     }
   }
 }
