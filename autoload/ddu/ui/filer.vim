@@ -5,8 +5,6 @@ function! ddu#ui#filer#do_action(name, ...) abort
     return
   endif
 
-  call ddu#ui#filer#_save_pos(b:ddu_ui_filer_path)
-
   call ddu#ui_action(b:ddu_ui_name, a:name, get(a:000, 0, {}))
 endfunction
 
@@ -14,8 +12,6 @@ function! ddu#ui#filer#multi_actions(actions) abort
   if !exists('b:ddu_ui_name')
     return
   endif
-
-  call ddu#ui#filer#_save_pos(b:ddu_ui_filer_path)
 
   for action in a:actions
     call call('ddu#ui#filer#do_action', action)

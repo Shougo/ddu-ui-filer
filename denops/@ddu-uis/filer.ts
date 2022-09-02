@@ -281,6 +281,12 @@ export class Ui extends BaseUi<Params> {
       await this.initOptions(args.denops, args.options, args.uiParams, bufnr);
     }
 
+    const augroupName = `${await op.filetype.getLocal(
+      args.denops,
+    )}-${args.options.name}`;
+    await args.denops.cmd(`augroup ${augroupName}`);
+    await args.denops.cmd(`autocmd! ${augroupName}`);
+
     const header =
       `[ddu-${args.options.name}] ${this.items.length}/${args.context.maxItems}`;
     const linenr = "printf('%'.(len(line('$'))+2).'d/%d',line('.'),line('$'))";
@@ -297,11 +303,6 @@ export class Ui extends BaseUi<Params> {
         await vars.g.set(args.denops, "ddu#ui#filer#_save_title", saveTitle);
       }
 
-      const augroupName = `${await op.filetype.getLocal(
-        args.denops,
-      )}-${args.options.name}`;
-      await args.denops.cmd(`augroup ${augroupName}`);
-      await args.denops.cmd(`autocmd! ${augroupName}`);
       if (await fn.exists(args.denops, "##WinClosed")) {
         await args.denops.cmd(
           `autocmd ${augroupName} WinClosed,BufLeave <buffer>` +
@@ -370,6 +371,12 @@ export class Ui extends BaseUi<Params> {
       path,
     );
 
+    // Save cursor when cursor moved
+    await args.denops.cmd(
+      `autocmd ${augroupName} CursorMoved <buffer>` +
+        " call ddu#ui#filer#_save_pos(b:ddu_ui_filer_path)",
+    );
+
     if (searchItem) {
       await this.searchItem({
         denops: args.denops,
@@ -402,14 +409,6 @@ export class Ui extends BaseUi<Params> {
     await fn.win_gotoid(
       args.denops,
       await fn.bufwinid(args.denops, bufnr),
-    );
-
-    const path = this.items.length == 0
-      ? ""
-      : (this.items[0].action as ActionData).path;
-    await args.denops.call(
-      "ddu#ui#filer#_save_pos",
-      path,
     );
 
     if (
