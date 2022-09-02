@@ -15,6 +15,8 @@ function! ddu#ui#filer#multi_actions(actions) abort
     return
   endif
 
+  call ddu#ui#filer#_save_pos(b:ddu_ui_filer_path)
+
   for action in a:actions
     call call('ddu#ui#filer#do_action', action)
   endfor
