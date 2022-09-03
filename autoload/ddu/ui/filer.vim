@@ -112,7 +112,7 @@ function! ddu#ui#filer#_highlight(
   endif
 endfunction
 
-function! ddu#ui#filer#_save_pos(path) abort
+function! ddu#ui#filer#_save_cursor(path) abort
   let b:ddu_ui_filer_cursor_pos = getcurpos()
   let b:ddu_ui_filer_cursor_text = getline('.')
 
@@ -120,16 +120,16 @@ function! ddu#ui#filer#_save_pos(path) abort
     return
   endif
 
-  if !exists('b:ddu_ui_filer_save_pos')
-    let b:ddu_ui_filer_save_pos = {}
+  if !exists('b:ddu_ui_filer_save_cursor')
+    let b:ddu_ui_filer_save_cursor = {}
   endif
-  let b:ddu_ui_filer_save_pos[a:path] = {
+  let b:ddu_ui_filer_save_cursor[a:path] = {
         \ 'pos': b:ddu_ui_filer_cursor_pos,
         \ 'text': b:ddu_ui_filer_cursor_text,
         \ }
 endfunction
-function! ddu#ui#filer#_restore_pos(path) abort
-  let save_pos = get(b:, 'ddu_ui_filer_save_pos', {})
+function! ddu#ui#filer#_restore_cursor(path) abort
+  let save_pos = get(b:, 'ddu_ui_filer_save_cursor', {})
   if has_key(save_pos, a:path)
     let save_cursor_pos = save_pos[a:path].pos
     let save_cursor_text = save_pos[a:path].text

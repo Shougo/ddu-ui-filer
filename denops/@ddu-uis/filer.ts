@@ -16,7 +16,7 @@ import {
   vars,
 } from "https://deno.land/x/ddu_vim@v1.10.1/deps.ts";
 import { ExpandItem } from "https://deno.land/x/ddu_vim@v1.10.1/types.ts";
-import { dirname, extname } from "https://deno.land/std@0.153.0/path/mod.ts";
+import { dirname, extname } from "https://deno.land/std@0.154.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.1/env.js";
 
 const env = new Env();
@@ -362,7 +362,7 @@ export class Ui extends BaseUi<Params> {
       ? ""
       : (this.items[0].action as ActionData).path;
     await args.denops.call(
-      "ddu#ui#filer#_restore_pos",
+      "ddu#ui#filer#_restore_cursor",
       path,
     );
     await vars.b.set(
@@ -374,7 +374,7 @@ export class Ui extends BaseUi<Params> {
     // Save cursor when cursor moved
     await args.denops.cmd(
       `autocmd ${augroupName} CursorMoved <buffer>` +
-        " call ddu#ui#filer#_save_pos(b:ddu_ui_filer_path)",
+        " call ddu#ui#filer#_save_cursor(b:ddu_ui_filer_path)",
     );
 
     if (searchItem) {
