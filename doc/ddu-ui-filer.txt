@@ -30,6 +30,10 @@ Please install both "ddu.vim" and "denops.vim".
 https://github.com/Shougo/ddu.vim
 https://github.com/vim-denops/denops.vim
 
+Because of the use of the "gio" command, `desktop-file-utils` should be
+installed on macOS. >
+
+	$ brew install desktop-file-utils
 
 ==============================================================================
 INTERFACE					*ddu-ui-filer-interface*

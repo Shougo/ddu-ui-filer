@@ -30,7 +30,10 @@ call ddu#custom#patch_global({
 ```
 
 ### For macOS
-Because of the use of the gio command, `desktop-file-utils` must be installed on macOS.
+
+Because of the use of the "gio" command, `desktop-file-utils` should be
+installed on macOS.
+
 ```bash
 $ brew install desktop-file-utils
 ```
