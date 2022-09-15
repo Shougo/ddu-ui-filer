@@ -332,14 +332,23 @@ export class Ui extends BaseUi<Params> {
     }
 
     // Update main buffer
-    await args.denops.call(
-      "ddu#ui#filer#_update_buffer",
-      args.uiParams,
-      bufnr,
-      this.items.map((c) => (c.display ?? c.word)),
-      false,
-      0,
-    );
+    try {
+      await args.denops.call(
+        "ddu#ui#filer#_update_buffer",
+        args.uiParams,
+        bufnr,
+        this.items.map((c) => (c.display ?? c.word)),
+          false,
+        0,
+      );
+    } catch (e) {
+      await errorException(
+        args.denops,
+        e,
+        "[ddu-ui-filer] update buffer failed",
+      );
+      return;
+    }
 
     this.viewItems = Array.from(this.items);
 
@@ -922,3 +931,22 @@ const sortByTime = (a: DduItem, b: DduItem) => {
 const sortByNone = (_a: DduItem, _b: DduItem) => {
   return 0;
 };
+
+async function errorException(denops: Denops, e: unknown, message: string) {
+  await denops.call(
+    "ddu#util#print_error",
+    message,
+  );
+  if (e instanceof Error) {
+    await denops.call(
+      "ddu#util#print_error",
+      e.message,
+    );
+    if (e.stack) {
+      await denops.call(
+        "ddu#util#print_error",
+        e.stack,
+      );
+    }
+  }
+}
