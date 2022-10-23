@@ -1,7 +1,7 @@
 let s:namespace = has('nvim') ? nvim_create_namespace('ddu-ui-filer') : 0
 
 function! ddu#ui#filer#do_action(name, ...) abort
-  if !exists('b:ddu_ui_name')
+  if !exists('b:ddu_ui_name') || &filetype !=# 'ddu-filer'
     return
   endif
 
