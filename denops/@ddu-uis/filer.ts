@@ -145,9 +145,14 @@ export class Ui extends BaseUi<Params> {
       this.expandedPaths.delete(path);
     }
 
-    this.items = this.items.slice(0, startIndex + 1).concat(
-      this.items.slice(endIndex + 1),
-    );
+    if (endIndex < 0) {
+      this.items = this.items.slice(0, startIndex + 1);
+    } else {
+      this.items = this.items.slice(0, startIndex + 1).concat(
+        this.items.slice(endIndex + 1),
+      );
+    }
+
     this.items[startIndex] = args.item;
     const path = (args.item.action as ActionData).path ?? args.item.word;
     this.expandedPaths.delete(path);
