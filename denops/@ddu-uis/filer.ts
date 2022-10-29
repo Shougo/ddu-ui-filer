@@ -4,6 +4,7 @@ import {
   Context,
   DduItem,
   DduOptions,
+  ExpandItem,
   SourceInfo,
   UiActions,
   UiOptions,
@@ -15,7 +16,6 @@ import {
   op,
   vars,
 } from "https://deno.land/x/ddu_vim@v1.12.0/deps.ts";
-import { ExpandItem } from "https://deno.land/x/ddu_vim@v1.12.0/types.ts";
 import { dirname, extname } from "https://deno.land/std@0.160.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.1/env.js";
 
@@ -198,7 +198,7 @@ export class Ui extends BaseUi<Params> {
       const expand = this.expandPath(path);
 
       if (expand) {
-        // Remote dup items
+        // Remove dup items
         expandItems = expandItems.filter((item) => item.item != expand.item);
         expandItems.push(expand);
       }
@@ -216,7 +216,7 @@ export class Ui extends BaseUi<Params> {
         const expand = this.expandPath(args.uiParams.search);
 
         if (expand) {
-          // Remote dup items
+          // Remove dup items
           expandItems = expandItems.filter((item) => item.item != expand.item);
           expandItems.push(expand);
         }
