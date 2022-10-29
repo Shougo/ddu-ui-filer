@@ -209,6 +209,7 @@ sort		(string)
 		"filename": file name sort
 		"size": file size sort
 		"time": file modified time sort
+		"none": disabled
 
 		Default: "filename"
 
