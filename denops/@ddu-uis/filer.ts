@@ -8,15 +8,15 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v1.12.0/types.ts";
+} from "https://deno.land/x/ddu_vim@v.1.13.0/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v1.12.0/deps.ts";
-import { dirname, extname } from "https://deno.land/std@0.160.0/path/mod.ts";
+} from "https://deno.land/x/ddu_vim@v.1.13.0/deps.ts";
+import { dirname, extname } from "https://deno.land/std@0.161.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.1/env.js";
 
 const env = new Env();
@@ -62,11 +62,6 @@ type ExpandItemParams = {
   maxLevel?: number;
 };
 
-export type ActionData = {
-  isDirectory?: boolean;
-  path?: string;
-};
-
 export class Ui extends BaseUi<Params> {
   private buffers: Record<string, number> = {};
   private items: DduItem[] = [];
@@ -99,8 +94,7 @@ export class Ui extends BaseUi<Params> {
     // Search index.
     const index = this.items.findIndex(
       (item: DduItem) =>
-        (item.action as ActionData).path ==
-          (args.parent.action as ActionData).path &&
+        item.treePath == args.parent.treePath &&
         item.__sourceIndex == args.parent.__sourceIndex,
     );
 
@@ -111,11 +105,12 @@ export class Ui extends BaseUi<Params> {
         this.items.slice(index + 1),
       );
       this.items[index] = args.parent;
-      const path = (args.parent.action as ActionData).path ?? args.parent.word;
-      this.expandedPaths.add(path);
     } else {
       this.items = this.items.concat(insertItems);
     }
+
+    const path = args.parent.treePath ?? args.parent.word;
+    this.expandedPaths.add(path);
 
     this.selectedItems.clear();
   }
@@ -127,8 +122,7 @@ export class Ui extends BaseUi<Params> {
     // Search index.
     const startIndex = this.items.findIndex(
       (item: DduItem) =>
-        (item.action as ActionData).path ==
-          (args.item.action as ActionData).path &&
+        item.treePath == args.item.treePath &&
         item.__sourceIndex == args.item.__sourceIndex,
     );
     if (startIndex < 0) {
@@ -141,7 +135,7 @@ export class Ui extends BaseUi<Params> {
 
     // Remove from expandedPaths
     for (const item of this.items.slice(startIndex + 1, endIndex)) {
-      const path = (item.action as ActionData).path ?? item.word;
+      const path = item.treePath ?? item.word;
       this.expandedPaths.delete(path);
     }
 
@@ -154,7 +148,7 @@ export class Ui extends BaseUi<Params> {
     }
 
     this.items[startIndex] = args.item;
-    const path = (args.item.action as ActionData).path ?? args.item.word;
+    const path = args.item.treePath ?? args.item.word;
     this.expandedPaths.delete(path);
 
     this.selectedItems.clear();
@@ -177,7 +171,7 @@ export class Ui extends BaseUi<Params> {
     path: string;
   }) {
     const pos = this.items.findIndex(
-      (item) => args.path == (item?.action as ActionData).path ?? item.word);
+      (item) => args.path == item.treePath ?? item.word);
 
     if (pos > 0) {
       await fn.cursor(args.denops, pos + 1, 0);
@@ -212,9 +206,7 @@ export class Ui extends BaseUi<Params> {
     let searchItem: DduItem | undefined = undefined;
     if (args.uiParams.search != "") {
       searchItem = this.items.find(
-        (item) =>
-          args.uiParams.search == (item?.action as ActionData).path ??
-            item.word,
+        (item) => args.uiParams.search == item.treePath ?? item.word,
       );
 
       if (!searchItem) {
@@ -222,7 +214,9 @@ export class Ui extends BaseUi<Params> {
 
         if (expand) {
           // Remove dup items
-          expandItems = expandItems.filter((item) => item.item != expand.item);
+          expandItems = expandItems.filter(
+            (item) => item.item != expand.item
+          );
           expandItems.push(expand);
         }
       }
@@ -387,7 +381,7 @@ export class Ui extends BaseUi<Params> {
 
     const path = this.items.length == 0
       ? ""
-      : (this.items[0].action as ActionData).path;
+      : this.items[0].treePath ?? "";
     await args.denops.call(
       "ddu#ui#filer#_restore_cursor",
       path,
@@ -492,7 +486,7 @@ export class Ui extends BaseUi<Params> {
 
     const closeItem = this.items[index];
 
-    if (!(closeItem.action as ActionData).isDirectory) {
+    if (!closeItem.isTree) {
       return ActionFlags.None;
     }
 
@@ -886,12 +880,8 @@ export class Ui extends BaseUi<Params> {
       : items.sort(sortFunc);
 
     if (uiParams.sortDirectoriesFirst) {
-      const dirs = sortedItems.filter(
-        (item) => (item.action as ActionData)?.isDirectory,
-      );
-      const files = sortedItems.filter(
-        (item) => !(item.action as ActionData)?.isDirectory,
-      );
+      const dirs = sortedItems.filter((item) => item.isTree);
+      const files = sortedItems.filter((item) => !item.isTree);
       return dirs.concat(files);
     } else {
       return sortedItems;
@@ -905,9 +895,7 @@ export class Ui extends BaseUi<Params> {
     let item = undefined;
     let maxLevel = 0;
     while (1) {
-      item = this.items.find(
-        (item) => parent == (item?.action as ActionData).path ?? item.word,
-      );
+      item = this.items.find((item) => parent == item.treePath ?? item.word);
 
       if (parent == dirname(parent) || item) {
         break;
@@ -923,14 +911,14 @@ export class Ui extends BaseUi<Params> {
 }
 
 const sortByFilename = (a: DduItem, b: DduItem) => {
-  const nameA = (a.action as ActionData).path ?? a.word;
-  const nameB = (b.action as ActionData).path ?? b.word;
+  const nameA = a.treePath ?? a.word;
+  const nameB = b.treePath ?? b.word;
   return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
 };
 
 const sortByExtension = (a: DduItem, b: DduItem) => {
-  const nameA = extname((a.action as ActionData).path ?? a.word);
-  const nameB = extname((b.action as ActionData).path ?? b.word);
+  const nameA = extname(a.treePath ?? a.word);
+  const nameB = extname(b.treePath ?? b.word);
   return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
 };
 
