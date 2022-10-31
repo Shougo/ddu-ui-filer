@@ -35,13 +35,14 @@ type Params = {
   sort:
     | "filename"
     | "extension"
+    | "none"
     | "size"
     | "time"
     | "Filename"
     | "Extension"
     | "Size"
     | "Time"
-    | "";
+    ;
   sortTreesFirst: boolean;
   split: "horizontal" | "vertical" | "floating" | "no";
   splitDirection: "botright" | "topleft";
@@ -718,8 +719,8 @@ export class Ui extends BaseUi<Params> {
       search: "",
       split: "horizontal",
       splitDirection: "botright",
-      sort: "filename",
-      sortTreesFirst: true,
+      sort: "none",
+      sortTreesFirst: false,
       winCol: 0,
       winHeight: 20,
       winRow: 0,
