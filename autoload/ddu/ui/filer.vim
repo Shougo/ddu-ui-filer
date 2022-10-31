@@ -26,9 +26,8 @@ function! ddu#ui#filer#get_item() abort
   call ddu#ui_action(b:ddu_ui_name, 'getItem', {})
   return get(b:, 'ddu_ui_filer_item', {})
 endfunction
-function! ddu#ui#filer#is_directory() abort
-  let action = get(ddu#ui#filer#get_item(), 'action', {})
-  return get(action, 'isDirectory', v:false)
+function! ddu#ui#filer#is_tree() abort
+  return get(ddu#ui#filer#get_item(), 'isTree', v:false)
 endfunction
 
 function! ddu#ui#filer#_update_buffer(

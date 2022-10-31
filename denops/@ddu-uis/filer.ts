@@ -42,7 +42,7 @@ type Params = {
     | "Size"
     | "Time"
     | "";
-  sortDirectoriesFirst: boolean;
+  sortTreesFirst: boolean;
   split: "horizontal" | "vertical" | "floating" | "no";
   splitDirection: "botright" | "topleft";
   winCol: number;
@@ -679,7 +679,7 @@ export class Ui extends BaseUi<Params> {
       }
 
       this.items.forEach((_, idx) => {
-        // Skip root directory
+        // Skip root
         if (this.items[idx].__level >= 0) {
           if (this.selectedItems.has(idx)) {
             this.selectedItems.delete(idx);
@@ -845,6 +845,8 @@ export class Ui extends BaseUi<Params> {
           },
         ],
         kind: source.kind,
+        isTree: true,
+        treePath: source.path,
         matcherKey: "word",
         __sourceIndex: source.index,
         __sourceName: source.name,
