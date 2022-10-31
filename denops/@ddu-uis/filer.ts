@@ -719,7 +719,7 @@ export class Ui extends BaseUi<Params> {
       split: "horizontal",
       splitDirection: "botright",
       sort: "filename",
-      sortDirectoriesFirst: true,
+      sortTreesFirst: true,
       winCol: 0,
       winHeight: 20,
       winRow: 0,
@@ -882,7 +882,7 @@ export class Ui extends BaseUi<Params> {
       ? items.sort(sortFunc).reverse()
       : items.sort(sortFunc);
 
-    if (uiParams.sortDirectoriesFirst) {
+    if (uiParams.sortTreesFirst) {
       const dirs = sortedItems.filter((item) => item.isTree);
       const files = sortedItems.filter((item) => !item.isTree);
       return dirs.concat(files);
