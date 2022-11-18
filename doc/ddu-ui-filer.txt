@@ -318,6 +318,9 @@ https://github.com/ryota2357/ddu-column-icon_filename
 ==============================================================================
 COMPATIBILITY					*ddu-ui-filer-compatibility*
 
+2022.11.18
+* Require neovim 0.8.
+
 2022.10.31
 * Rename "directory" to "tree".
 * Change "ddu-ui-filer-param-sort" and "ddu-ui-filer-param-sortTreesFirst"

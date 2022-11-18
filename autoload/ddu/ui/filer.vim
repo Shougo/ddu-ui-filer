@@ -85,9 +85,9 @@ function! ddu#ui#filer#_highlight(
   if !has('nvim')
     " Add prop_type
     if empty(prop_type_get(a:prop_type))
-      call prop_type_add(a:prop_type, {
-            \ 'highlight': a:highlight,
-            \ 'priority': a:priority,
+      call prop_type_add(a:prop_type, #{
+            \   highlight: a:highlight,
+            \   priority: a:priority,
             \ })
     endif
   endif
@@ -102,11 +102,11 @@ function! ddu#ui#filer#_highlight(
           \ a:col - 1 + a:length
           \ )
   else
-    call prop_add(a:row, a:col, {
-          \ 'length': a:length,
-          \ 'type': a:prop_type,
-          \ 'bufnr': a:bufnr,
-          \ 'id': a:id,
+    call prop_add(a:row, a:col, #{
+          \   length: a:length,
+          \   type: a:prop_type,
+          \   bufnr: a:bufnr,
+          \   id: a:id,
           \ })
   endif
 endfunction
@@ -122,9 +122,9 @@ function! ddu#ui#filer#_save_cursor(path) abort
   if !exists('b:ddu_ui_filer_save_cursor')
     let b:ddu_ui_filer_save_cursor = {}
   endif
-  let b:ddu_ui_filer_save_cursor[a:path] = {
-        \ 'pos': b:ddu_ui_filer_cursor_pos,
-        \ 'text': b:ddu_ui_filer_cursor_text,
+  let b:ddu_ui_filer_save_cursor[a:path] = #{
+        \   pos: b:ddu_ui_filer_cursor_pos,
+        \   text: b:ddu_ui_filer_cursor_text,
         \ }
 endfunction
 function! ddu#ui#filer#_restore_cursor(path) abort

@@ -8,15 +8,15 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v1.13.0/types.ts";
+} from "https://deno.land/x/ddu_vim@v2.0.0/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v1.13.0/deps.ts";
-import { dirname, extname } from "https://deno.land/std@0.161.0/path/mod.ts";
+} from "https://deno.land/x/ddu_vim@v2.0.0/deps.ts";
+import { dirname, extname } from "https://deno.land/std@0.165.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.1/env.js";
 
 const env = new Env();
