@@ -139,8 +139,10 @@ export class Ui extends BaseUi<Params> {
       removedItems = this.items.slice(startIndex + 1);
       this.items = this.items.slice(0, startIndex + 1);
     } else {
-      removedItems = this.items.slice(startIndex + 1,
-                                      startIndex + endIndex + 1);
+      removedItems = this.items.slice(
+        startIndex + 1,
+        startIndex + endIndex + 1,
+      );
       this.items = this.items.slice(0, startIndex + 1).concat(
         this.items.slice(startIndex + endIndex + 1),
       );
@@ -196,14 +198,11 @@ export class Ui extends BaseUi<Params> {
       return;
     }
 
-    let expandItems: ExpandItem[] = [];
+    const expandItems: ExpandItem[] = [];
 
     for (const path of this.expandedPaths) {
       const expand = this.expandPath(path);
-
       if (expand) {
-        // Remove dup items
-        expandItems = expandItems.filter((item) => item.item != expand.item);
         expandItems.push(expand);
       }
     }
@@ -216,12 +215,7 @@ export class Ui extends BaseUi<Params> {
 
       if (!searchItem) {
         const expand = this.expandPath(args.uiParams.search);
-
         if (expand) {
-          // Remove dup items
-          expandItems = expandItems.filter(
-            (item) => item.item != expand.item
-          );
           expandItems.push(expand);
         }
       }
@@ -229,11 +223,15 @@ export class Ui extends BaseUi<Params> {
 
     if (expandItems.length != 0) {
       // Need expand redraw
+
+      // NOTE: Clear expandedPaths to prevent call "ddu#redraw_tree()" twice
+      this.expandedPaths = new Set();
+
       await args.denops.call(
         "ddu#redraw_tree",
         args.options.name,
         "expand",
-        expandItems,
+        [...new Set(expandItems)],
       );
 
       return;
