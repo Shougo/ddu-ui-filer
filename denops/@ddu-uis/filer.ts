@@ -70,7 +70,7 @@ export class Ui extends BaseUi<Params> {
   private selectedItems: Set<number> = new Set();
   private expandedPaths: Set<string> = new Set();
 
-  async refreshItems(args: {
+  override async refreshItems(args: {
     denops: Denops;
     context: Context;
     uiParams: Params;
@@ -87,7 +87,7 @@ export class Ui extends BaseUi<Params> {
   }
 
   // deno-lint-ignore require-await
-  async expandItem(args: {
+  override async expandItem(args: {
     uiParams: Params;
     parent: DduItem;
     children: DduItem[];
@@ -117,7 +117,7 @@ export class Ui extends BaseUi<Params> {
   }
 
   // deno-lint-ignore require-await
-  async collapseItem(args: {
+  override async collapseItem(args: {
     item: DduItem;
   }) {
     // Search index.
@@ -161,7 +161,7 @@ export class Ui extends BaseUi<Params> {
     this.selectedItems.clear();
   }
 
-  async searchItem(args: {
+  override async searchItem(args: {
     denops: Denops;
     item: DduItem;
   }) {
@@ -173,7 +173,7 @@ export class Ui extends BaseUi<Params> {
     }
   }
 
-  async searchPath(args: {
+  override async searchPath(args: {
     denops: Denops;
     path: string;
   }) {
@@ -186,7 +186,7 @@ export class Ui extends BaseUi<Params> {
     }
   }
 
-  async redraw(args: {
+  override async redraw(args: {
     denops: Denops;
     context: Context;
     options: DduOptions;
@@ -422,7 +422,7 @@ export class Ui extends BaseUi<Params> {
     }
   }
 
-  async quit(args: {
+  override async quit(args: {
     denops: Denops;
     context: Context;
     options: DduOptions;
@@ -466,44 +466,7 @@ export class Ui extends BaseUi<Params> {
     await args.denops.call("ddu#event", args.options.name, "close");
   }
 
-  private async getItems(denops: Denops): Promise<DduItem[]> {
-    let items: DduItem[];
-    if (this.selectedItems.size == 0) {
-      const idx = await this.getIndex(denops);
-      if (idx < 0) {
-        return [];
-      }
-      items = [this.items[idx]];
-    } else {
-      items = [...this.selectedItems].map((i) => this.items[i]);
-    }
-
-    return items.filter((item) => item);
-  }
-
-  private async collapseItemAction(denops: Denops, options: DduOptions) {
-    const index = await this.getIndex(denops);
-    if (index < 0) {
-      return ActionFlags.None;
-    }
-
-    const closeItem = this.items[index];
-
-    if (!closeItem.isTree) {
-      return ActionFlags.None;
-    }
-
-    await denops.call(
-      "ddu#redraw_tree",
-      options.name,
-      "collapse",
-      [{ item: closeItem }],
-    );
-
-    return ActionFlags.None;
-  }
-
-  actions: UiActions<Params> = {
+  override actions: UiActions<Params> = {
     checkItems: async (args: {
       denops: Denops;
       options: DduOptions;
@@ -713,7 +676,7 @@ export class Ui extends BaseUi<Params> {
     },
   };
 
-  params(): Params {
+  override params(): Params {
     return {
       focus: true,
       highlights: {},
@@ -727,6 +690,43 @@ export class Ui extends BaseUi<Params> {
       winRow: 0,
       winWidth: 0,
     };
+  }
+
+  private async getItems(denops: Denops): Promise<DduItem[]> {
+    let items: DduItem[];
+    if (this.selectedItems.size == 0) {
+      const idx = await this.getIndex(denops);
+      if (idx < 0) {
+        return [];
+      }
+      items = [this.items[idx]];
+    } else {
+      items = [...this.selectedItems].map((i) => this.items[i]);
+    }
+
+    return items.filter((item) => item);
+  }
+
+  private async collapseItemAction(denops: Denops, options: DduOptions) {
+    const index = await this.getIndex(denops);
+    if (index < 0) {
+      return ActionFlags.None;
+    }
+
+    const closeItem = this.items[index];
+
+    if (!closeItem.isTree) {
+      return ActionFlags.None;
+    }
+
+    await denops.call(
+      "ddu#redraw_tree",
+      options.name,
+      "collapse",
+      [{ item: closeItem }],
+    );
+
+    return ActionFlags.None;
   }
 
   private async initBuffer(
