@@ -50,7 +50,9 @@ endfunction
 function! ddu#ui#filer#_highlight_items(
       \ params, bufnr, max_lines, highlight_items, selected_items) abort
   " Buffer must be loaded
-  call bufload(a:bufnr)
+  if !bufloaded(a:bufnr)
+    return
+  endif
 
   " Clear all highlights
   if has('nvim')
