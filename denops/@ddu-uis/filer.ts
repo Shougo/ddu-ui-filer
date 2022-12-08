@@ -348,14 +348,32 @@ export class Ui extends BaseUi<Params> {
 
     // Update main buffer
     try {
-      await args.denops.call(
-        "ddu#ui#filer#_update_buffer",
-        args.uiParams,
-        bufnr,
-        this.items.map((c) => (c.display ?? c.word)),
-          false,
-        0,
-      );
+      // Note: Use batch for screen flicker when highlight items.
+      await batch(args.denops, async (denops: Denops) => {
+        await denops.call(
+          "ddu#ui#filer#_update_buffer",
+          args.uiParams,
+          bufnr,
+          this.items.map((c) => (c.display ?? c.word)),
+            false,
+          0,
+        );
+
+        await denops.call(
+          "ddu#ui#filer#_highlight_items",
+          args.uiParams,
+          bufnr,
+          this.items.length,
+          this.items.map((c, i) => {
+            return {
+              highlights: c.highlights ?? [],
+              row: i + 1,
+              prefix: "",
+            };
+          }).filter((c) => c.highlights),
+            [...this.selectedItems],
+        );
+      });
     } catch (e) {
       await errorException(
         args.denops,
@@ -366,21 +384,6 @@ export class Ui extends BaseUi<Params> {
     }
 
     this.viewItems = Array.from(this.items);
-
-    await args.denops.call(
-      "ddu#ui#filer#_highlight_items",
-      args.uiParams,
-      bufnr,
-      this.items.length,
-      this.items.map((c, i) => {
-        return {
-          highlights: c.highlights ?? [],
-          row: i + 1,
-          prefix: "",
-        };
-      }).filter((c) => c.highlights),
-      [...this.selectedItems],
-    );
 
     const path = this.items.length == 0
       ? ""
