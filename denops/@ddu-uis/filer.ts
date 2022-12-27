@@ -272,14 +272,12 @@ export class Ui extends BaseUi<Params> {
           "height": winHeight,
         });
 
-        if (args.uiParams.highlights?.floating) {
-          await fn.setwinvar(
-            args.denops,
-            await fn.bufwinnr(args.denops, bufnr),
-            "&winhighlight",
-            args.uiParams.highlights.floating,
-          );
-        }
+        await fn.setwinvar(
+          args.denops,
+          await fn.bufwinnr(args.denops, bufnr),
+          "&winhighlight",
+          `Normal:${args.uiParams.highlights?.floating ?? "NormalFloat"}`,
+        );
       } else if (args.uiParams.split == "no") {
         await args.denops.cmd(`silent keepalt buffer ${bufnr}`);
       } else {
