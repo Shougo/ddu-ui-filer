@@ -41,8 +41,7 @@ type Params = {
     | "Filename"
     | "Extension"
     | "Size"
-    | "Time"
-    ;
+    | "Time";
   sortTreesFirst: boolean;
   split: "horizontal" | "vertical" | "floating" | "no";
   splitDirection: "botright" | "topleft";
@@ -178,7 +177,8 @@ export class Ui extends BaseUi<Params> {
     path: string;
   }) {
     const pos = this.items.findIndex(
-      (item) => args.path == item.treePath ?? item.word);
+      (item) => args.path == item.treePath ?? item.word,
+    );
 
     if (pos > 0) {
       await fn.cursor(args.denops, pos + 1, 0);
@@ -195,45 +195,6 @@ export class Ui extends BaseUi<Params> {
   }): Promise<void> {
     if (args.options.sync && !args.context.done) {
       // Skip redraw if all items are not done
-      return;
-    }
-
-    const expandItems: ExpandItem[] = [];
-
-    for (const path of this.expandedPaths) {
-      const expand = this.expandPath(path);
-      if (expand) {
-        expandItems.push(expand);
-      }
-    }
-
-    let searchItem: DduItem | undefined = undefined;
-    if (args.uiParams.search != "") {
-      searchItem = this.items.find(
-        (item) => args.uiParams.search == item.treePath ?? item.word,
-      );
-
-      if (!searchItem) {
-        const expand = this.expandPath(args.uiParams.search);
-        if (expand) {
-          expandItems.push(expand);
-        }
-      }
-    }
-
-    if (expandItems.length != 0) {
-      // Need expand redraw
-
-      // NOTE: Clear expandedPaths to prevent call "ddu#redraw_tree()" twice
-      this.expandedPaths = new Set();
-
-      await args.denops.call(
-        "ddu#redraw_tree",
-        args.options.name,
-        "expand",
-        [...new Set(expandItems)],
-      );
-
       return;
     }
 
@@ -351,7 +312,7 @@ export class Ui extends BaseUi<Params> {
           args.uiParams,
           bufnr,
           this.items.map((c) => (c.display ?? c.word)),
-            false,
+          false,
           0,
         );
 
@@ -367,7 +328,7 @@ export class Ui extends BaseUi<Params> {
               prefix: "",
             };
           }).filter((c) => c.highlights),
-            [...this.selectedItems],
+          [...this.selectedItems],
         );
       });
     } catch (e) {
@@ -381,9 +342,7 @@ export class Ui extends BaseUi<Params> {
 
     this.viewItems = Array.from(this.items);
 
-    const path = this.items.length == 0
-      ? ""
-      : this.items[0].treePath ?? "";
+    const path = this.items.length == 0 ? "" : this.items[0].treePath ?? "";
     await args.denops.call(
       "ddu#ui#filer#_restore_cursor",
       path,
@@ -400,11 +359,17 @@ export class Ui extends BaseUi<Params> {
         " call ddu#ui#filer#_save_cursor(b:ddu_ui_filer_path)",
     );
 
-    if (searchItem) {
-      await this.searchItem({
-        denops: args.denops,
-        item: searchItem,
-      });
+    if (args.uiParams.search != "") {
+      const searchItem = this.items.find(
+        (item) => args.uiParams.search == item.treePath ?? item.word,
+      );
+
+      if (searchItem) {
+        await this.searchItem({
+          denops: args.denops,
+          item: searchItem,
+        });
+      }
     }
 
     if (args.context.done) {
