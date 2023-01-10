@@ -198,6 +198,25 @@ export class Ui extends BaseUi<Params> {
       return;
     }
 
+    // Restore expanded items
+    const notExpandedItems = this.items.filter((item) => {
+      if (item.__expanded || !item.treePath) {
+        return false;
+      }
+      return this.expandedPaths.has(item.treePath);
+    });
+    if (notExpandedItems.length) {
+      await args.denops.call(
+        "ddu#redraw_tree",
+        args.options.name,
+        "expand",
+        notExpandedItems.map((item) => ({
+          item,
+        })),
+      );
+      return;
+    }
+
     const bufferName = `ddu-filer-${args.options.name}`;
     const initialized = this.buffers[args.options.name];
     const bufnr = initialized
@@ -841,27 +860,6 @@ export class Ui extends BaseUi<Params> {
       return dirs.concat(files);
     } else {
       return sortedItems;
-    }
-  }
-
-  private expandPath(
-    path: string,
-  ): ExpandItem | undefined {
-    let parent = path;
-    let item = undefined;
-    let maxLevel = 0;
-    while (1) {
-      item = this.items.find((item) => parent == item.treePath ?? item.word);
-
-      if (parent == dirname(parent) || item) {
-        break;
-      }
-
-      parent = dirname(parent);
-      maxLevel++;
-    }
-    if (item && !item.__expanded) {
-      return { item, search: path, maxLevel };
     }
   }
 }
