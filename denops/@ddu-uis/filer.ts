@@ -68,6 +68,7 @@ export class Ui extends BaseUi<Params> {
   private viewItems: DduItem[] = [];
   private selectedItems: Set<number> = new Set();
   private expandedPaths: Set<string> = new Set();
+  private toSearchPath: string = "";
 
   override async refreshItems(args: {
     denops: Denops;
@@ -174,6 +175,7 @@ export class Ui extends BaseUi<Params> {
 
   override async searchPath(args: {
     denops: Denops;
+    options: DduOptions;
     path: string;
   }) {
     const pos = this.items.findIndex(
@@ -183,7 +185,41 @@ export class Ui extends BaseUi<Params> {
     if (pos > 0) {
       await fn.cursor(args.denops, pos + 1, 0);
       await args.denops.cmd("normal! zz");
+      this.toSearchPath = "";
+      return;
     }
+
+    // Try expand parents
+    const parent = this.items.find(
+      (item) =>
+        !item.__expanded && item.treePath &&
+        args.path.startsWith(item.treePath),
+    );
+    if (parent) {
+      this.toSearchPath = args.path;
+
+      let maxLevel = 0;
+      for (
+        let path = dirname(args.path);
+        path !== parent.treePath && path.startsWith(parent.treePath!);
+        path = dirname(path)
+      ) {
+        maxLevel += 1;
+      }
+      await args.denops.call(
+        "ddu#redraw_tree",
+        args.options.name,
+        "expand",
+        [{
+          item: parent,
+          search: args.path,
+          maxLevel: maxLevel,
+        }],
+      );
+      return;
+    }
+    // give up
+    this.toSearchPath = "";
   }
 
   override async redraw(args: {
@@ -358,6 +394,14 @@ export class Ui extends BaseUi<Params> {
       `autocmd ${augroupName} CursorMoved <buffer>` +
         " call ddu#ui#filer#_save_cursor(b:ddu_ui_filer_path)",
     );
+
+    if (this.toSearchPath) {
+      await this.searchPath({
+        denops: args.denops,
+        options: args.options,
+        path: this.toSearchPath,
+      });
+    }
 
     if (args.context.done) {
       await fn.setbufvar(
