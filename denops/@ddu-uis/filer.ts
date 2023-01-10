@@ -359,19 +359,6 @@ export class Ui extends BaseUi<Params> {
         " call ddu#ui#filer#_save_cursor(b:ddu_ui_filer_path)",
     );
 
-    if (args.uiParams.search != "") {
-      const searchItem = this.items.find(
-        (item) => args.uiParams.search == item.treePath ?? item.word,
-      );
-
-      if (searchItem) {
-        await this.searchItem({
-          denops: args.denops,
-          item: searchItem,
-        });
-      }
-    }
-
     if (args.context.done) {
       await fn.setbufvar(
         args.denops,
@@ -394,20 +381,20 @@ export class Ui extends BaseUi<Params> {
   }): Promise<void> {
     // Move to the UI window.
     const bufnr = this.buffers[args.options.name];
-    await fn.win_gotoid(
-      args.denops,
-      await fn.bufwinid(args.denops, bufnr),
-    );
+    const winid = await fn.bufwinid(args.denops, bufnr);
+    if (winid > 0) {
+      await fn.win_gotoid(args.denops, winid);
 
-    if (
-      args.uiParams.split == "no" || (await fn.winnr(args.denops, "$")) == 1
-    ) {
-      await args.denops.cmd(
-        args.context.bufNr == bufnr ? "enew" : `buffer ${args.context.bufNr}`,
-      );
-    } else {
-      await args.denops.cmd("close!");
-      await fn.win_gotoid(args.denops, args.context.winId);
+      if (
+        args.uiParams.split == "no" || (await fn.winnr(args.denops, "$")) == 1
+      ) {
+        await args.denops.cmd(
+          args.context.bufNr == bufnr ? "enew" : `buffer ${args.context.bufNr}`,
+        );
+      } else {
+        await args.denops.cmd("close!");
+        await fn.win_gotoid(args.denops, args.context.winId);
+      }
     }
 
     // Restore options

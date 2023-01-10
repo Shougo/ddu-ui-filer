@@ -175,15 +175,6 @@ highlights	(dictionary)
 
 		Default: {}
 
-				    		*ddu-ui-filer-param-search*
-search		(string)
-		Search the path.
-		Note: If the path is not found, expand the parent tree
-		automatically.
-		Note: If the path must be absolute path.
-
-		Default: ""
-
 				    		*ddu-ui-filer-param-split*
 split		(string)
 		Specify split mode. Following values are available:
@@ -330,6 +321,10 @@ A: You need to set |ddu-action-option-quit| for narrow action. >
 <
 ==============================================================================
 COMPATIBILITY					*ddu-ui-filer-compatibility*
+
+2023.01.10
+* "ddu-ui-filer-param-search" is removed.  Please use "ddu-option-searchPath"
+  instead.
 
 2022.11.18
 * Require neovim 0.8.
