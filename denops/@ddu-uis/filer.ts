@@ -4,7 +4,6 @@ import {
   Context,
   DduItem,
   DduOptions,
-  ExpandItem,
   SourceInfo,
   UiActions,
   UiOptions,
@@ -16,7 +15,7 @@ import {
   op,
   vars,
 } from "https://deno.land/x/ddu_vim@v2.1.0/deps.ts";
-import { dirname, extname } from "https://deno.land/std@0.171.0/path/mod.ts";
+import { extname } from "https://deno.land/std@0.171.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.1/env.js";
 
 const env = new Env();
