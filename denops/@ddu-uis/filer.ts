@@ -8,15 +8,15 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v2.0.0/types.ts";
+} from "https://deno.land/x/ddu_vim@v2.1.0/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v2.0.0/deps.ts";
-import { dirname, extname } from "https://deno.land/std@0.165.0/path/mod.ts";
+} from "https://deno.land/x/ddu_vim@v2.1.0/deps.ts";
+import { dirname, extname } from "https://deno.land/std@0.171.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.1/env.js";
 
 const env = new Env();
@@ -200,12 +200,11 @@ export class Ui extends BaseUi<Params> {
 
     // Restore expanded items
     const notExpandedItems = this.items.filter((item) => {
-      if (item.__expanded || !item.treePath) {
-        return false;
-      }
-      return this.expandedPaths.has(item.treePath);
+      return (item.__expanded || !item.treePath)
+        ? false
+        : this.expandedPaths.has(item.treePath);
     });
-    if (notExpandedItems.length) {
+    if (notExpandedItems.length > 0) {
       await args.denops.call(
         "ddu#redraw_tree",
         args.options.name,
@@ -301,7 +300,7 @@ export class Ui extends BaseUi<Params> {
         );
       }
 
-      const titleString = header + " %{" + linenr + "}%*" + async;
+      const titleString = `${header} %{${linenr}}%*${async}`;
       await vars.b.set(args.denops, "ddu_ui_filer_title", titleString);
 
       await args.denops.call(
@@ -834,6 +833,7 @@ export class Ui extends BaseUi<Params> {
     }
     return ret;
   }
+
   private sortItems(
     uiParams: Params,
     items: DduItem[],
