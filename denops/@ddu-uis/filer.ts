@@ -66,7 +66,6 @@ export class Ui extends BaseUi<Params> {
   private items: DduItem[] = [];
   private viewItems: DduItem[] = [];
   private selectedItems: Set<number> = new Set();
-  private expandedPaths: Set<string> = new Set();
 
   override async refreshItems(args: {
     denops: Denops;
@@ -108,9 +107,6 @@ export class Ui extends BaseUi<Params> {
       this.items = this.items.concat(insertItems);
     }
 
-    const path = args.parent.treePath ?? args.parent.word;
-    this.expandedPaths.add(path);
-
     this.selectedItems.clear();
   }
 
@@ -132,29 +128,15 @@ export class Ui extends BaseUi<Params> {
       (item: DduItem) => item.__level <= args.item.__level,
     );
 
-    let removedItems: DduItem[] = [];
     if (endIndex < 0) {
-      removedItems = this.items.slice(startIndex + 1);
       this.items = this.items.slice(0, startIndex + 1);
     } else {
-      removedItems = this.items.slice(
-        startIndex + 1,
-        startIndex + endIndex + 1,
-      );
       this.items = this.items.slice(0, startIndex + 1).concat(
         this.items.slice(startIndex + endIndex + 1),
       );
     }
 
     this.items[startIndex] = args.item;
-    const path = args.item.treePath ?? args.item.word;
-
-    // Remove from expandedPaths
-    this.expandedPaths.delete(path);
-    for (const item of removedItems) {
-      const path = item.treePath ?? item.word;
-      this.expandedPaths.delete(path);
-    }
 
     this.selectedItems.clear();
   }
@@ -180,24 +162,6 @@ export class Ui extends BaseUi<Params> {
   }): Promise<void> {
     if (args.options.sync && !args.context.done) {
       // Skip redraw if all items are not done
-      return;
-    }
-
-    // Restore expanded items
-    const notExpandedItems = this.items.filter((item) => {
-      return (item.__expanded || !item.treePath)
-        ? false
-        : this.expandedPaths.has(item.treePath);
-    });
-    if (notExpandedItems.length > 0) {
-      await args.denops.call(
-        "ddu#redraw_tree",
-        args.options.name,
-        "expand",
-        notExpandedItems.map((item) => ({
-          item,
-        })),
-      );
       return;
     }
 
