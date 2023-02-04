@@ -348,6 +348,10 @@ export class Ui extends BaseUi<Params> {
   }): Promise<void> {
     // Move to the UI window.
     const bufnr = this.buffers[args.options.name];
+    if (!bufnr) {
+      return;
+    }
+
     const winid = await fn.bufwinid(args.denops, bufnr);
     if (winid > 0) {
       await fn.win_gotoid(args.denops, winid);
