@@ -15,8 +15,9 @@ import {
   op,
   vars,
 } from "https://deno.land/x/ddu_vim@v2.2.0/deps.ts";
-import { extname } from "https://deno.land/std@0.171.0/path/mod.ts";
-import { Env } from "https://deno.land/x/env@v2.2.1/env.js";
+import { extname } from "https://deno.land/std@0.177.0/path/mod.ts";
+import { Env } from "https://deno.land/x/env@v2.2.3/env.js";
+import { PreviewUi } from "../@ddu-ui-filer/preview.ts";
 
 const env = new Env();
 
@@ -27,9 +28,26 @@ type HighlightGroup = {
   sourcePath?: string;
 };
 
-type Params = {
+type FloatingBorder =
+  | "none"
+  | "single"
+  | "double"
+  | "rounded"
+  | "solid"
+  | "shadow"
+  | string[];
+
+export type Params = {
   focus: boolean;
   highlights: HighlightGroup;
+  previewCol: number;
+  previewFloating: boolean;
+  previewFloatingBorder: FloatingBorder;
+  previewFloatingZindex: number;
+  previewHeight: number;
+  previewRow: number;
+  previewVertical: boolean;
+  previewWidth: number;
   search: string;
   sort:
     | "filename"
@@ -66,6 +84,7 @@ export class Ui extends BaseUi<Params> {
   private items: DduItem[] = [];
   private viewItems: DduItem[] = [];
   private selectedItems: Set<number> = new Set();
+  private previewUi = new PreviewUi();
 
   override async refreshItems(args: {
     denops: Denops;
@@ -506,14 +525,32 @@ export class Ui extends BaseUi<Params> {
 
       return ActionFlags.None;
     },
-    // deno-lint-ignore require-await
-    preview: async (_: {
+    preview: async (args: {
       denops: Denops;
       context: Context;
       options: DduOptions;
       uiParams: Params;
+      actionParams: unknown;
     }) => {
-      return ActionFlags.Persist;
+      const idx = await this.getIndex(args.denops);
+      if (idx < 0) {
+        return ActionFlags.None;
+      }
+
+      const item = this.items[idx];
+      if (!item) {
+        return ActionFlags.None;
+      }
+
+      return this.previewUi.previewContents(
+        args.denops,
+        args.context,
+        args.options,
+        args.uiParams,
+        args.actionParams,
+        this.buffers[args.options.name],
+        item,
+      );
     },
     quit: async (args: {
       denops: Denops;
@@ -596,6 +633,14 @@ export class Ui extends BaseUi<Params> {
     return {
       focus: true,
       highlights: {},
+      previewCol: 0,
+      previewFloating: false,
+      previewFloatingBorder: "none",
+      previewFloatingZindex: 50,
+      previewHeight: 10,
+      previewRow: 0,
+      previewVertical: false,
+      previewWidth: 40,
       search: "",
       split: "horizontal",
       splitDirection: "botright",

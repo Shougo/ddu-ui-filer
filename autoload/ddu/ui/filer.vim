@@ -149,3 +149,79 @@ function! ddu#ui#filer#_restore_cursor(path) abort
     call cursor(1, 1)
   endif
 endfunction
+
+function! ddu#ui#filer#_open_preview_window(params, bufnr) abort
+  let preview_width = a:params.previewWidth
+  let preview_height = a:params.previewHeight
+  let pos = win_screenpos(bufwinid(a:bufnr))
+  let win_width = winwidth(0)
+  let win_height = winheight(0)
+
+  if a:params.previewVertical
+    if a:params.previewFloating && exists('*nvim_win_set_config')
+      let buf = nvim_create_buf(v:true, v:false)
+
+      if a:params.split ==# 'floating'
+        let win_row = a:params.previewRow > 0 ?
+              \ a:params.previewRow : pos[0] - 1
+        let win_col = a:params.previewCol > 0 ?
+              \ a:params.previewCol : pos[1] - 1
+        let preview_height = win_height
+      else
+        let win_row = pos[0] - 1
+        let win_col = pos[1] - 1
+      endif
+      let win_col += win_width
+      if (win_col + preview_width) > &columns
+        let win_col -= preview_width
+      endif
+
+      call nvim_open_win(buf, v:true, #{
+            \   relative: 'editor',
+            \   row: win_row,
+            \   col: win_col,
+            \   width: preview_width,
+            \   height: preview_height,
+            \   border: a:params.previewFloatingBorder,
+            \   zindex: a:params.previewFloatingZindex,
+            \ })
+    else
+      silent rightbelow vnew
+      execute 'vert resize ' . preview_width
+    endif
+  else
+    if a:params.previewFloating && exists('*nvim_win_set_config')
+      let buf = nvim_create_buf(v:true, v:false)
+
+      if a:params.split ==# 'floating'
+        let preview_width = win_width
+      endif
+
+      let win_row = a:params.previewRow > 0 ?
+              \ a:params.previewRow : pos[0] - 1
+      let win_col = a:params.previewCol > 0 ?
+              \ a:params.previewCol : pos[1] - 1
+      if a:params.previewRow <= 0 && win_row <= preview_height
+        let win_row += win_height + 1
+        let anchor = 'NW'
+      else
+        let anchor = 'SW'
+      endif
+
+      call nvim_open_win(buf, v:true, #{
+            \   relative: 'editor',
+            \   anchor: anchor,
+            \   row: win_row,
+            \   col: win_col,
+            \   width: preview_width,
+            \   height: preview_height,
+            \   border: a:params.previewFloatingBorder,
+            \   zindex: a:params.previewFloatingZindex,
+            \ })
+    else
+      silent aboveleft new
+      execute 'resize ' . preview_height
+    endif
+  endif
+endfunction
+

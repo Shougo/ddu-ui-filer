@@ -126,6 +126,19 @@ itemAction
 
 		Note: You cannot mix multiple kinds/sources.
 
+					*ddu-ui-filer-action-preview*
+preview
+		params:
+			{syntaxLimitChars}: 	Max number of chars to apply
+						syntax to previewed contents.
+						(Default: 200000)
+
+			The remaining params are passed to |ddu-kinds|.
+			See also |ddu-kind-attribute-getPreviewer| and kinds
+			documentation.
+
+		Preview the item in preview window.
+
 					*ddu-ui-filer-action-toggleAllItems*
 toggleAllItems
 		Toggle selected state for the all items.
@@ -174,6 +187,69 @@ highlights	(dictionary)
 		Default: "String"
 
 		Default: {}
+
+					*ddu-ui-filer-param-previewCol*
+previewCol	(number)
+		Set the column position of the preview window if
+		|ddu-ui-filer-param-previewFloating| is v:true.
+
+		Default: 0
+
+					*ddu-ui-filer-param-previewFloating*
+previewFloating	(boolean)
+		Use floating window in |ddu-ui-filer-action-preview|.
+
+		Default: v:false
+
+			    	*ddu-ui-filer-param-previewFloatingBorder*
+previewFloatingBorder		(string | list)
+		Specify the style of the preview window border if
+		|ddu-ui-filer-param-previewFloating| is v:true.
+		See |nvim_open_win()| for the detail.
+		NOTE: It is neovim only.
+
+		Default: "none"
+
+			    	*ddu-ui-filer-param-previewFloatingZindex*
+previewFloatingZindex		(number)
+		Specify the style of the preview window zindex if
+		|ddu-ui-filer-param-split| is "floating".
+		See |nvim_open_win()| for the detail.
+		NOTE: It is neovim only.
+
+		Default: 50
+
+					*ddu-ui-filer-param-previewHeight*
+previewHeight	(number)
+		Set the height of the |preview-window| in
+		|ddu-ui-filer-action-preview|.
+		If |ddu-ui-filer-param-previewFloating|, set the height of the
+		floating window.
+
+		Default: 10
+
+					*ddu-ui-filer-param-previewRow*
+previewRow	(number)
+		Set the row position of the preview window if
+		|ddu-ui-filer-param-previewFloating| is v:true.
+
+		Default: 0
+
+					*ddu-ui-filer-param-previewVertical*
+previewVertical	(boolean)
+		Use vertical preview instead of horizontal preview in
+		|ddu-ui-filer-action-preview|.
+
+		Default: v:false
+
+					*ddu-ui-filer-param-previewWidth*
+previewWidth	(number)
+		Set the width of the |preview-window| in
+		|ddu-ui-filer-action-preview|.
+		If |ddu-ui-filer-param-previewFloating|, set the width of the
+		floating window.
+
+		Default: 40
 
 				    		*ddu-ui-filer-param-split*
 split		(string)
