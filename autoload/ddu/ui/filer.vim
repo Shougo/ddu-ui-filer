@@ -124,7 +124,7 @@ function! ddu#ui#filer#_save_cursor(path) abort
   let b:ddu_ui_filer_cursor_pos = getcurpos()
   let b:ddu_ui_filer_cursor_text = getline('.')
 
-  " Prevent from saving in quitted
+  " NOTE: Prevent saving after quitted
   if b:ddu_ui_filer_cursor_text ==# ''
     return
   endif
