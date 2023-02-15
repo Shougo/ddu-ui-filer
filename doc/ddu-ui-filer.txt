@@ -402,6 +402,11 @@ A: You need to set |ddu-action-option-quit| for narrow action. >
 	    \   },
 	    \ })
 <
+
+Q: I want to use existing buffer to show preview.
+
+A: Please use "no" in |ddu-ui-filer-param-previewSplit|.
+
 ==============================================================================
 COMPATIBILITY					*ddu-ui-filer-compatibility*
 
