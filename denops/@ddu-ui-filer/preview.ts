@@ -281,10 +281,6 @@ export class PreviewUi {
     previewer: BufferPreviewer | NoFilePreviewer,
   ): Promise<string[]> {
     if (previewer.kind == "buffer") {
-      if (previewer.expr) {
-        // NOTE: buffer may be hidden
-        await fn.bufload(denops, previewer.expr);
-      }
       if (previewer.expr && await fn.buflisted(denops, previewer.expr)) {
         return await fn.getbufline(
           denops,
