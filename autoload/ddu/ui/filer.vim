@@ -150,14 +150,14 @@ function! ddu#ui#filer#_restore_cursor(path) abort
   endif
 endfunction
 
-function! ddu#ui#filer#_open_preview_window(params, bufnr) abort
+function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
   let preview_width = a:params.previewWidth
   let preview_height = a:params.previewHeight
   let pos = win_screenpos(bufwinid(a:bufnr))
   let win_width = winwidth(0)
   let win_height = winheight(0)
 
-  if a:params.previewVertical
+  if a:params.previewSplit ==# 'vertical'
     if a:params.previewFloating && exists('*nvim_win_set_config')
       let buf = nvim_create_buf(v:true, v:false)
 
@@ -189,7 +189,7 @@ function! ddu#ui#filer#_open_preview_window(params, bufnr) abort
       silent rightbelow vnew
       execute 'vert resize ' . preview_width
     endif
-  else
+  elseif a:params.previewSplit ==# 'horizontal'
     if a:params.previewFloating && exists('*nvim_win_set_config')
       let buf = nvim_create_buf(v:true, v:false)
 
@@ -222,6 +222,8 @@ function! ddu#ui#filer#_open_preview_window(params, bufnr) abort
       silent aboveleft new
       execute 'resize ' . preview_height
     endif
+  elseif a:params.previewSplit ==# 'no'
+    call win_gotoid(a:prev_winid)
   endif
 endfunction
 

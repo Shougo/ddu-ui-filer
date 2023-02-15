@@ -7,14 +7,14 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v2.2.0/types.ts";
+} from "https://deno.land/x/ddu_vim@v2.3.0/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v2.2.0/deps.ts";
+} from "https://deno.land/x/ddu_vim@v2.3.0/deps.ts";
 import { extname } from "https://deno.land/std@0.177.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.3/env.js";
 import { PreviewUi } from "../@ddu-ui-filer/preview.ts";
@@ -46,7 +46,7 @@ export type Params = {
   previewFloatingZindex: number;
   previewHeight: number;
   previewRow: number;
-  previewVertical: boolean;
+  previewSplit: "horizontal" | "vertical" | "no";
   previewWidth: number;
   search: string;
   sort:
@@ -359,6 +359,8 @@ export class Ui extends BaseUi<Params> {
     options: DduOptions;
     uiParams: Params;
   }): Promise<void> {
+    await this.previewUi.close(args.denops, args.context);
+
     // Move to the UI window.
     const bufnr = this.buffers[args.options.name];
     if (!bufnr) {
@@ -373,7 +375,7 @@ export class Ui extends BaseUi<Params> {
         args.uiParams.split == "no" || (await fn.winnr(args.denops, "$")) == 1
       ) {
         await args.denops.cmd(
-          args.context.bufNr == bufnr ? "enew" : `buffer ${args.context.bufNr}`,
+          args.context.bufName == "" ? "enew" : `buffer ${args.context.bufNr}`,
         );
       } else {
         await args.denops.cmd("close!");
@@ -394,9 +396,6 @@ export class Ui extends BaseUi<Params> {
         saveTitle,
       );
     }
-
-    // Close preview window
-    await args.denops.cmd("pclose!");
 
     await args.denops.call("ddu#event", args.options.name, "close");
   }
@@ -639,7 +638,7 @@ export class Ui extends BaseUi<Params> {
       previewFloatingZindex: 50,
       previewHeight: 10,
       previewRow: 0,
-      previewVertical: false,
+      previewSplit: "horizontal",
       previewWidth: 40,
       search: "",
       split: "horizontal",
