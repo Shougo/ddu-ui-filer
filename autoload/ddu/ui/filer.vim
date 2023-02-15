@@ -117,10 +117,15 @@ function! ddu#ui#filer#_highlight(
 endfunction
 
 function! ddu#ui#filer#_save_cursor(path) abort
+  if a:path ==# ''
+    return
+  endif
+
   let b:ddu_ui_filer_cursor_pos = getcurpos()
   let b:ddu_ui_filer_cursor_text = getline('.')
 
-  if a:path ==# ''
+  " Prevent from saving in quitted
+  if b:ddu_ui_filer_cursor_text ==# ''
     return
   endif
 
