@@ -62,6 +62,7 @@ export type Params = {
   sortTreesFirst: boolean;
   split: "horizontal" | "vertical" | "floating" | "no";
   splitDirection: "botright" | "topleft";
+  statusline: boolean;
   winCol: number;
   winHeight: number;
   winRow: number;
@@ -280,7 +281,7 @@ export class Ui extends BaseUi<Params> {
         `autocmd ${augroupName} WinEnter,BufEnter <buffer>` +
           " let &titlestring=b:ddu_ui_filer_title",
       );
-    } else {
+    } else if (args.uiParams.statusline) {
       await fn.setwinvar(
         args.denops,
         await fn.bufwinnr(args.denops, bufnr),
@@ -645,6 +646,7 @@ export class Ui extends BaseUi<Params> {
       splitDirection: "botright",
       sort: "none",
       sortTreesFirst: false,
+      statusline: true,
       winCol: 0,
       winHeight: 20,
       winRow: 0,
