@@ -298,6 +298,13 @@ splitDirection	(string)
 
 		Default: "botright"
 
+				    		*ddu-ui-filer-param-statusline*
+statusline	(boolean)
+		If it is true, the original 'statusline' value is set on the
+		buffer.
+
+		Default: v:true
+
 						*ddu-ui-filer-param-winCol*
 winCol		(number)
 		Set the column position of the window if
