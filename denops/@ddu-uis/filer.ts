@@ -513,15 +513,13 @@ export class Ui extends BaseUi<Params> {
       const params = args.actionParams as DoActionParams;
       const items = params.items ?? await this.getItems(args.denops);
 
-      if (items.length != 0) {
-        await args.denops.call(
-          "ddu#item_action",
-          args.options.name,
-          params.name ?? "default",
-          items,
-          params.params ?? {},
-        );
-      }
+      await args.denops.call(
+        "ddu#item_action",
+        args.options.name,
+        params.name ?? "default",
+        items,
+        params.params ?? {},
+      );
 
       return ActionFlags.None;
     },
