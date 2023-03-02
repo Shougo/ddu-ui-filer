@@ -1,7 +1,7 @@
 let s:namespace = has('nvim') ? nvim_create_namespace('ddu-ui-filer') : 0
 
 function! ddu#ui#filer#do_action(name, options = {}) abort
-  if !exists('b:ddu_ui_name') || &filetype !=# 'ddu-filer'
+  if !('b:ddu_ui_name'->exists()) || &filetype !=# 'ddu-filer'
     return
   endif
 
@@ -9,7 +9,7 @@ function! ddu#ui#filer#do_action(name, options = {}) abort
 endfunction
 
 function! ddu#ui#filer#multi_actions(actions) abort
-  if !exists('b:ddu_ui_name')
+  if !('b:ddu_ui_name'->exists())
     return
   endif
 
@@ -19,15 +19,15 @@ function! ddu#ui#filer#multi_actions(actions) abort
 endfunction
 
 function! ddu#ui#filer#get_item() abort
-  if !exists('b:ddu_ui_name')
+  if !('b:ddu_ui_name'->exists())
     return {}
   endif
 
   call ddu#ui_action(b:ddu_ui_name, 'getItem', {})
-  return get(b:, 'ddu_ui_filer_item', {})
+  return b:->get('ddu_ui_filer_item', {})
 endfunction
 function! ddu#ui#filer#is_tree() abort
-  return get(ddu#ui#filer#get_item(), 'isTree', v:false)
+  return ddu#ui#filer#get_item()->get('isTree', v:false)
 endfunction
 
 function! ddu#ui#filer#_update_buffer(
@@ -50,7 +50,7 @@ endfunction
 function! ddu#ui#filer#_highlight_items(
       \ params, bufnr, max_lines, highlight_items, selected_items) abort
   " Buffer must be loaded
-  if !bufloaded(a:bufnr)
+  if !(a:bufnr->bufloaded())
     return
   endif
 
@@ -89,7 +89,7 @@ function! ddu#ui#filer#_highlight(
       \ highlight, prop_type, priority, id, bufnr, row, col, length) abort
   if !has('nvim')
     " Add prop_type
-    if empty(prop_type_get(a:prop_type))
+    if a:prop_type->prop_type_get()->empty()
       call prop_type_add(a:prop_type, #{
             \   highlight: a:highlight,
             \   priority: a:priority,
@@ -122,7 +122,7 @@ function! ddu#ui#filer#_save_cursor(path) abort
   endif
 
   let b:ddu_ui_filer_cursor_pos = getcurpos()
-  let b:ddu_ui_filer_cursor_text = getline('.')
+  let b:ddu_ui_filer_cursor_text = '.'->getline()
 
   " NOTE: Prevent saving after quitted
   if b:ddu_ui_filer_cursor_text ==# ''
@@ -138,17 +138,17 @@ function! ddu#ui#filer#_save_cursor(path) abort
         \ }
 endfunction
 function! ddu#ui#filer#_restore_cursor(path) abort
-  let save_pos = get(b:, 'ddu_ui_filer_save_cursor', {})
-  if has_key(save_pos, a:path)
+  let save_pos = b:->get('ddu_ui_filer_save_cursor', {})
+  if save_pos->has_key(a:path)
     let save_cursor_pos = save_pos[a:path].pos
     let save_cursor_text = save_pos[a:path].text
   else
-    let save_cursor_pos = get(b:, 'ddu_ui_filer_cursor_pos', [])
-    let save_cursor_text = get(b:, 'ddu_ui_filer_cursor_text', '')
+    let save_cursor_pos = b:->get('ddu_ui_filer_cursor_pos', [])
+    let save_cursor_text = b:->get('ddu_ui_filer_cursor_text', '')
   endif
 
-  if !empty(save_cursor_pos)
-        \ && getline(save_cursor_pos[1]) ==# save_cursor_text
+  if !(save_cursor_pos->empty())
+        \ && save_cursor_pos[1]->getline() ==# save_cursor_text
     call cursor(save_cursor_pos[1], save_cursor_pos[2])
   else
     call cursor(1, 1)
@@ -158,13 +158,13 @@ endfunction
 function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
   let preview_width = a:params.previewWidth
   let preview_height = a:params.previewHeight
-  let winnr = bufwinid(a:bufnr)
-  let pos = win_screenpos(winnr)
-  let win_width = winwidth(winnr)
-  let win_height = winheight(winnr)
+  let winnr = a:bufnr->bufwinid()
+  let pos = winnr->win_screenpos()
+  let win_width = winnr->winwidth()
+  let win_height = winnr->winheight()
 
   if a:params.previewSplit ==# 'vertical'
-    if a:params.previewFloating && exists('*nvim_win_set_config')
+    if a:params.previewFloating && '*nvim_win_set_config'->exists()
       let buf = nvim_create_buf(v:true, v:false)
 
       if a:params.split ==# 'floating'
@@ -196,7 +196,7 @@ function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
       execute 'vert resize ' . preview_width
     endif
   elseif a:params.previewSplit ==# 'horizontal'
-    if a:params.previewFloating && exists('*nvim_win_set_config')
+    if a:params.previewFloating && '*nvim_win_set_config'->exists()
       let buf = nvim_create_buf(v:true, v:false)
 
       if a:params.split ==# 'floating'
@@ -232,4 +232,3 @@ function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
     call win_gotoid(a:prev_winid)
   endif
 endfunction
-
