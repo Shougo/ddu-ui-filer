@@ -779,18 +779,22 @@ export class Ui extends BaseUi<Params> {
       // Create root item from source directory
 
       // Replace the home directory.
+      let root = source.path;
+      if (root == "") {
+        root = await fn.getcwd(denops) as string;
+      }
+      let display = root;
       const home = env.get("HOME", "");
-      let display = source.path;
       if (home && home != "") {
         display = display.replace(home, "~");
       }
 
       ret.push({
-        word: source.path,
+        word: root,
         display: `${source.name}:${display}`,
         action: {
           isDirectory: true,
-          path: source.path,
+          path: root,
         },
         highlights: [
           {
@@ -808,7 +812,7 @@ export class Ui extends BaseUi<Params> {
         ],
         kind: source.kind,
         isTree: true,
-        treePath: source.path,
+        treePath: root,
         matcherKey: "word",
         __sourceIndex: source.index,
         __sourceName: source.name,
