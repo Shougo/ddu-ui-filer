@@ -193,7 +193,7 @@ function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
             \ })
     else
       silent rightbelow vnew
-      execute 'vert resize ' . preview_width
+      execute 'vert resize ' .. preview_width
     endif
   elseif a:params.previewSplit ==# 'horizontal'
     if a:params.previewFloating && '*nvim_win_set_config'->exists()
@@ -226,7 +226,7 @@ function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
             \ })
     else
       silent aboveleft new
-      execute 'resize ' . preview_height
+      execute 'resize ' .. preview_height
     endif
   elseif a:params.previewSplit ==# 'no'
     call win_gotoid(a:prev_winid)
