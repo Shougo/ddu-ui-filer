@@ -8,14 +8,14 @@ import {
   PreviewContext,
   Previewer,
   TerminalPreviewer,
-} from "https://deno.land/x/ddu_vim@v2.3.0/types.ts";
+} from "https://deno.land/x/ddu_vim@v2.3.1/types.ts";
 import {
   batch,
   Denops,
   ensureObject,
   fn,
   op,
-} from "https://deno.land/x/ddu_vim@v2.3.0/deps.ts";
+} from "https://deno.land/x/ddu_vim@v2.3.1/deps.ts";
 import { replace } from "https://deno.land/x/denops_std@v4.0.0/buffer/mod.ts";
 import { Params } from "../@ddu-uis/filer.ts";
 
@@ -85,7 +85,7 @@ export class PreviewUi {
       width: uiParams.previewWidth,
       height: uiParams.previewHeight,
       isFloating: uiParams.previewFloating,
-      split: uiParams.split,
+      split: uiParams.previewSplit,
     };
     const previewer = await denops.call(
       "ddu#get_previewer",
@@ -246,6 +246,13 @@ export class PreviewUi {
     } else {
       await denops.cmd(`buffer ${bufname}`);
     }
+
+    // Set options
+    await batch(denops, async (denops: Denops) => {
+      await fn.setwinvar(denops, this.previewWinId, "&signcolumn", "no");
+      await fn.setwinvar(denops, this.previewWinId, "&foldcolumn", 0);
+      await fn.setwinvar(denops, this.previewWinId, "&foldenable", 0);
+    });
 
     if (uiParams.previewSplit != "no") {
       // Set previewwindow option.
