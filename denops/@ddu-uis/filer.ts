@@ -329,10 +329,9 @@ export class Ui extends BaseUi<Params> {
 
     this.viewItems = Array.from(this.items);
 
-    const path = this.items.length == 0 ? "" : this.items[0].treePath ?? "";
-    await args.denops.call("ddu#ui#filer#_restore_cursor", path);
-    await vars.b.set(args.denops, "ddu_ui_filer_path", path);
-    await vars.t.set(args.denops, "ddu_ui_filer_path", path);
+    await args.denops.call("ddu#ui#filer#_restore_cursor", args.context.path);
+    await vars.b.set(args.denops, "ddu_ui_filer_path", args.context.path);
+    await vars.t.set(args.denops, "ddu_ui_filer_path", args.context.path);
 
     // Save cursor when cursor moved
     await args.denops.cmd(
