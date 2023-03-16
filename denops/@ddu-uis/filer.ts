@@ -7,14 +7,14 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v2.3.1/types.ts";
+} from "https://deno.land/x/ddu_vim@v2.4.0/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v2.3.1/deps.ts";
+} from "https://deno.land/x/ddu_vim@v2.4.0/deps.ts";
 import { extname } from "https://deno.land/std@0.179.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.3/env.js";
 import { PreviewUi } from "../@ddu-ui-filer/preview.ts";
@@ -367,8 +367,13 @@ export class Ui extends BaseUi<Params> {
       return;
     }
 
-    const winid = await fn.bufwinid(args.denops, bufnr);
-    if (winid > 0) {
+    for (
+      const winid of (await fn.win_findbuf(args.denops, bufnr) as number[])
+    ) {
+      if (winid <= 0) {
+        continue;
+      }
+
       await fn.win_gotoid(args.denops, winid);
 
       if (
