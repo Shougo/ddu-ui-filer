@@ -18,19 +18,6 @@ function! ddu#ui#filer#multi_actions(actions) abort
   endfor
 endfunction
 
-function! ddu#ui#filer#get_item() abort
-  if !('b:ddu_ui_name'->exists())
-    return {}
-  endif
-
-  call ddu#ui_action(b:ddu_ui_name, 'getItem', {})
-
-  return b:->get('ddu_ui_item', {})
-endfunction
-function! ddu#ui#filer#is_tree() abort
-  return ddu#ui#filer#get_item()->get('isTree', v:false)
-endfunction
-
 function! ddu#ui#filer#_update_buffer(
       \ params, bufnr, lines, refreshed, pos) abort
   call setbufvar(a:bufnr, '&modifiable', 1)
