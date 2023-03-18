@@ -503,7 +503,7 @@ export class Ui extends BaseUi<Params> {
 
       const item = this.items[idx];
       const bufnr = this.buffers[args.options.name];
-      await fn.setbufvar(args.denops, bufnr, "ddu_ui_filer_item", item);
+      await fn.setbufvar(args.denops, bufnr, "ddu_ui_item", item);
 
       return ActionFlags.None;
     },

@@ -24,7 +24,8 @@ function! ddu#ui#filer#get_item() abort
   endif
 
   call ddu#ui_action(b:ddu_ui_name, 'getItem', {})
-  return b:->get('ddu_ui_filer_item', {})
+
+  return b:->get('ddu_ui_item', {})
 endfunction
 function! ddu#ui#filer#is_tree() abort
   return ddu#ui#filer#get_item()->get('isTree', v:false)
