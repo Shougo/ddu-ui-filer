@@ -1,21 +1,11 @@
 let s:namespace = has('nvim') ? nvim_create_namespace('ddu-ui-filer') : 0
 
 function! ddu#ui#filer#do_action(name, options = {}) abort
-  if !('b:ddu_ui_name'->exists()) || &filetype !=# 'ddu-filer'
-    return
-  endif
-
-  call ddu#ui_action(b:ddu_ui_name, a:name, a:options)
+  return ddu#ui#do_action(a:name, a:options)
 endfunction
 
 function! ddu#ui#filer#multi_actions(actions) abort
-  if !('b:ddu_ui_name'->exists())
-    return
-  endif
-
-  for action in a:actions
-    call call('ddu#ui#filer#do_action', action)
-  endfor
+  return ddu#ui#multi_actions(a:actions)
 endfunction
 
 function! ddu#ui#filer#_update_buffer(
