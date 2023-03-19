@@ -397,7 +397,7 @@ Q: I want to check the current item is tree.
 
 A: >
 		nnoremap <buffer><expr> <CR>
-		\ ddu#ui#filer#get_item()->get('isTree', v:false) ?
+		\ ddu#ui#get_item()->get('isTree', v:false) ?
 		\ "<Cmd>call ddu#ui#do_action('itemAction',
 		\  {'name': 'narrow'})<CR>" :
 		\ "<Cmd>call ddu#ui#do_action('itemAction',
