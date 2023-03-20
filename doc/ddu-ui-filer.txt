@@ -354,10 +354,10 @@ A: >
 	\ })<CR>
 	
 	function! ToggleHidden()
-	  let current = ddu#custom#get_current(b:ddu_ui_name)
-	  let source_options = get(current, 'sourceOptions', {})
-	  let source_options_all = get(source_options, '_', {})
-	  let matchers = get(source_options_all, 'matchers', [])
+	  const current = ddu#custom#get_current(b:ddu_ui_name)
+	  const source_options = get(current, 'sourceOptions', {})
+	  const source_options_all = get(source_options, '_', {})
+	  const matchers = get(source_options_all, 'matchers', [])
 	  return empty(matchers) ? ['matcher_hidden'] : []
 	endfunction
 

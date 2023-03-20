@@ -51,7 +51,7 @@ function! ddu#ui#filer#_highlight_items(
   endfor
 
   " Selected items highlights
-  let selected_highlight = get(a:params.highlights, 'selected', 'Statement')
+  const selected_highlight = get(a:params.highlights, 'selected', 'Statement')
   for item_nr in a:selected_items
     call ddu#ui#filer#_highlight(
           \ selected_highlight, 'ddu-ui-selected', 10000,
@@ -116,13 +116,13 @@ function! ddu#ui#filer#_save_cursor(path) abort
         \ }
 endfunction
 function! ddu#ui#filer#_restore_cursor(path) abort
-  let save_pos = b:->get('ddu_ui_filer_save_cursor', {})
+  const save_pos = b:->get('ddu_ui_filer_save_cursor', {})
   if save_pos->has_key(a:path)
-    let save_cursor_pos = save_pos[a:path].pos
-    let save_cursor_text = save_pos[a:path].text
+    const save_cursor_pos = save_pos[a:path].pos
+    const save_cursor_text = save_pos[a:path].text
   else
-    let save_cursor_pos = b:->get('ddu_ui_filer_cursor_pos', [])
-    let save_cursor_text = b:->get('ddu_ui_filer_cursor_text', '')
+    const save_cursor_pos = b:->get('ddu_ui_filer_cursor_pos', [])
+    const save_cursor_text = b:->get('ddu_ui_filer_cursor_text', '')
   endif
 
   if !(save_cursor_pos->empty())
@@ -136,14 +136,14 @@ endfunction
 function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
   let preview_width = a:params.previewWidth
   let preview_height = a:params.previewHeight
-  let winnr = a:bufnr->bufwinid()
-  let pos = winnr->win_screenpos()
-  let win_width = winnr->winwidth()
-  let win_height = winnr->winheight()
+  const winnr = a:bufnr->bufwinid()
+  const pos = winnr->win_screenpos()
+  const win_width = winnr->winwidth()
+  const win_height = winnr->winheight()
 
   if a:params.previewSplit ==# 'vertical'
     if a:params.previewFloating && '*nvim_win_set_config'->exists()
-      let buf = nvim_create_buf(v:true, v:false)
+      const buf = nvim_create_buf(v:true, v:false)
 
       if a:params.split ==# 'floating'
         let win_row = a:params.previewRow > 0 ?
@@ -175,7 +175,7 @@ function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
     endif
   elseif a:params.previewSplit ==# 'horizontal'
     if a:params.previewFloating && '*nvim_win_set_config'->exists()
-      let buf = nvim_create_buf(v:true, v:false)
+      const buf = nvim_create_buf(v:true, v:false)
 
       if a:params.split ==# 'floating'
         let preview_width = win_width
@@ -187,9 +187,9 @@ function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
               \ a:params.previewCol : pos[1] - 1
       if a:params.previewRow <= 0 && win_row <= preview_height
         let win_row += win_height + 1
-        let anchor = 'NW'
+        const anchor = 'NW'
       else
-        let anchor = 'SW'
+        const anchor = 'SW'
       endif
 
       call nvim_open_win(buf, v:true, #{
