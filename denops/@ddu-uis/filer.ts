@@ -7,15 +7,15 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v2.5.0/types.ts";
+} from "https://deno.land/x/ddu_vim@v2.7.0/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v2.5.0/deps.ts";
-import { extname } from "https://deno.land/std@0.180.0/path/mod.ts";
+} from "https://deno.land/x/ddu_vim@v2.7.0/deps.ts";
+import { extname } from "https://deno.land/std@0.181.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.3/env.js";
 import { PreviewUi } from "../@ddu-ui-filer/preview.ts";
 
@@ -351,6 +351,36 @@ export class Ui extends BaseUi<Params> {
     if (!args.uiParams.focus) {
       await fn.win_gotoid(args.denops, args.context.winId);
     }
+  }
+
+  override async visible(args: {
+    denops: Denops;
+    context: Context;
+    options: DduOptions;
+    uiParams: Params;
+    tabNr: number;
+  }): Promise<boolean> {
+    const bufferName = `ddu-filer-${args.options.name}`;
+    const bufnr = await fn.bufnr(args.denops, bufferName);
+    if (args.tabNr > 0) {
+      return (await fn.tabpagebuflist(args.denops, args.tabNr) as number[])
+        .includes(bufnr);
+    } else {
+      // Search from all tabpages.
+      return (await fn.win_findbuf(args.denops, bufnr) as number[]).length > 0;
+    }
+  }
+
+  override async winId(args: {
+    denops: Denops;
+    context: Context;
+    options: DduOptions;
+    uiParams: Params;
+  }): Promise<number> {
+    const bufferName = `ddu-filer-${args.options.name}`;
+    const bufnr = await fn.bufnr(args.denops, bufferName);
+    const winIds = await fn.win_findbuf(args.denops, bufnr) as number[];
+    return winIds.length > 0 ? winIds[0] : -1;
   }
 
   override async quit(args: {
