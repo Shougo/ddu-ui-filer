@@ -787,8 +787,14 @@ export class Ui extends BaseUi<Params> {
     denops: Denops,
   ): Promise<number> {
     // Convert viewItems index to items index.
-    const index = (await fn.line(denops, ".")) - 1;
-    const viewItem = this.viewItems[index];
+    const bufnr = await this.getBufnr(denops);
+    const cursorPos = await fn.getbufvar(
+      denops, bufnr, "ddu_ui_filer_cursor_pos", []) as number[];
+    if (cursorPos.length == 0) {
+      return -1;
+    }
+
+    const viewItem = this.viewItems[cursorPos[1] - 1];
     return this.items.findIndex(
       (item: DduItem) => item == viewItem,
     );
