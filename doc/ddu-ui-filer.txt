@@ -76,6 +76,14 @@ clearSelectAllItems
 collapseItem
 		Collapse the item tree.
 
+					*ddu-ui-filer-action-cursorNext*
+cursorNext
+		Move the cursor to the next.
+
+					*ddu-ui-filer-action-cursorPrevious*
+cursorPrevious
+		Move the cursor to the previous.
+
 					*ddu-ui-filer-action-expandItem*
 expandItem
 		Expand the item tree.
