@@ -107,7 +107,8 @@ itemAction
 			{name}: action name
 			{params}: action params dictionary
 
-		Close the UI window and fire {name} action for items.
+		Close the UI window and fire {name} action for selected or
+		current cursor items.
 		You can find the actions list in item's kind documentation.
 		If {name} is empty, "default" will be used.
 
