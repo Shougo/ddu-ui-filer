@@ -571,6 +571,43 @@ export class Ui extends BaseUi<Params> {
 
       return ActionFlags.None;
     },
+    getSelectedItems: async (args: {
+      denops: Denops;
+      options: DduOptions;
+    }) => {
+      const items = await this.getItems(args.denops);
+      const bufnr = await this.getBufnr(args.denops);
+      await fn.setbufvar(args.denops, bufnr, "ddu_ui_selected_items", items);
+
+      return ActionFlags.None;
+    },
+    inputAction: async (args: {
+      denops: Denops;
+      options: DduOptions;
+      uiParams: Params;
+    }) => {
+      const items = await this.getItems(args.denops);
+
+      const actions = await args.denops.call(
+        "ddu#get_item_actions",
+        args.options.name,
+        items,
+      );
+
+      const actionName = await args.denops.call(
+        "ddu#util#input_list", "Input action name: ", actions);
+      if (actionName != "") {
+        await args.denops.call(
+          "ddu#item_action",
+          args.options.name,
+          actionName,
+          items,
+          {},
+        );
+      }
+
+      return ActionFlags.None;
+    },
     itemAction: async (args: {
       denops: Denops;
       context: Context;

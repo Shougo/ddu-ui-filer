@@ -101,6 +101,14 @@ expandItem
 getItem
 		Set current item to "b:ddu_ui_item" variable.
 
+					*ddu-ui-filer-action-getSelectedItems*
+getSelectedItems
+		Set selected items to "b:ddu_ui_selected_items" variable.
+
+					*ddu-ui-filer-action-inputAction*
+inputAction
+		Choose and fire the action by |input()|.
+
 					*ddu-ui-filer-action-itemAction*
 itemAction
 		params:
