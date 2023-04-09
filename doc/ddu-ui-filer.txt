@@ -170,6 +170,10 @@ highlights	(dictionary)
 		Specify floating window background highlight.
 		Default: "NormalFloat"
 
+		floatingBorder			(string)
+		Specify border highlight of flowing window
+		Default: "FloatBorder"
+
 		selected			(string)
 		Specify selected item highlight.
 		Default: "Statement"

@@ -23,6 +23,7 @@ const env = new Env();
 
 type HighlightGroup = {
   floating?: string;
+  floatingBorder?: string;
   selected?: string;
   sourceName?: string;
   sourcePath?: string;
@@ -219,11 +220,15 @@ export class Ui extends BaseUi<Params> {
           "height": winHeight,
         });
 
+        const highlight = args.uiParams.highlights?.floating ?? "NormalFloat";
+        const floatingHighlight = args.uiParams.highlights?.floatingBorder ??
+          "FloatBorder";
+
         await fn.setwinvar(
           args.denops,
           await fn.bufwinnr(args.denops, bufnr),
           "&winhighlight",
-          `Normal:${args.uiParams.highlights?.floating ?? "NormalFloat"}`,
+          `Normal:${highlight},FloatBorder:${floatingHighlight}`,
         );
       } else if (args.uiParams.split == "no") {
         await args.denops.cmd(`silent keepalt buffer ${bufnr}`);
