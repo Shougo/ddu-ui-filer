@@ -39,6 +39,7 @@ type FloatingBorder =
   | string[];
 
 export type Params = {
+  floatingBorder: FloatingBorder;
   focus: boolean;
   highlights: HighlightGroup;
   previewCol: number;
@@ -63,7 +64,6 @@ export type Params = {
   sortTreesFirst: boolean;
   split: "horizontal" | "vertical" | "floating" | "no";
   splitDirection: "botright" | "topleft";
-  floatingBorder: FloatingBorder;
   statusline: boolean;
   winCol: number;
   winHeight: number;
@@ -741,6 +741,7 @@ export class Ui extends BaseUi<Params> {
 
   override params(): Params {
     return {
+      floatingBorder: "none",
       focus: true,
       highlights: {},
       previewCol: 0,
