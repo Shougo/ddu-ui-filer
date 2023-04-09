@@ -63,6 +63,7 @@ export type Params = {
   sortTreesFirst: boolean;
   split: "horizontal" | "vertical" | "floating" | "no";
   splitDirection: "botright" | "topleft";
+  floatingBorder: FloatingBorder;
   statusline: boolean;
   winCol: number;
   winHeight: number;
@@ -218,6 +219,7 @@ export class Ui extends BaseUi<Params> {
           "col": Number(args.uiParams.winCol),
           "width": Number(args.uiParams.winWidth),
           "height": winHeight,
+          "border": args.uiParams.floatingBorder,
         });
 
         const highlight = args.uiParams.highlights?.floating ?? "NormalFloat";
