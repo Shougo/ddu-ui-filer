@@ -10,10 +10,15 @@ endfunction
 
 function! ddu#ui#filer#_update_buffer(
       \ params, bufnr, lines, refreshed, pos) abort
+  const max_lines = a:lines->len()
+  const current_lines = '$'->line(a:bufnr->bufwinid())
+
   call setbufvar(a:bufnr, '&modifiable', 1)
 
   call setbufline(a:bufnr, 1, a:lines)
-  silent call deletebufline(a:bufnr, len(a:lines) + 1, '$')
+  if current_lines > max_lines
+    call deletebufline(a:bufnr, max_lines + 1, '$')
+  endif
 
   call setbufvar(a:bufnr, '&modifiable', 0)
   call setbufvar(a:bufnr, '&modified', 0)
