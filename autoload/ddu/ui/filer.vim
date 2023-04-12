@@ -17,7 +17,7 @@ function! ddu#ui#filer#_update_buffer(
 
   call setbufline(a:bufnr, 1, a:lines)
   if current_lines > max_lines
-    call deletebufline(a:bufnr, max_lines + 1, '$')
+    silent call deletebufline(a:bufnr, max_lines + 1, '$')
   endif
 
   call setbufvar(a:bufnr, '&modifiable', 0)

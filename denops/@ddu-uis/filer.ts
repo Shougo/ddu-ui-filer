@@ -15,7 +15,7 @@ import {
   op,
   vars,
 } from "https://deno.land/x/ddu_vim@v2.7.0/deps.ts";
-import { extname } from "https://deno.land/std@0.181.0/path/mod.ts";
+import { extname } from "https://deno.land/std@0.182.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.3/env.js";
 import { PreviewUi } from "../@ddu-ui-filer/preview.ts";
 
