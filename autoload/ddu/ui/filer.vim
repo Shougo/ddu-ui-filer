@@ -124,14 +124,11 @@ function! ddu#ui#filer#_restore_cursor(path) abort
   const save_pos = b:->get('ddu_ui_filer_save_cursor', {})
   if save_pos->has_key(a:path)
     const save_cursor_pos = save_pos[a:path].pos
-    const save_cursor_text = save_pos[a:path].text
   else
     const save_cursor_pos = b:->get('ddu_ui_filer_cursor_pos', [])
-    const save_cursor_text = b:->get('ddu_ui_filer_cursor_text', '')
   endif
 
   if !(save_cursor_pos->empty())
-        \ && save_cursor_pos[1]->getline() ==# save_cursor_text
     call cursor(save_cursor_pos[1], save_cursor_pos[2])
   else
     call cursor(1, 1)
