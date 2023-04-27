@@ -213,7 +213,7 @@ export class PreviewUi {
     if (this.previewWinId < 0) {
       try {
         await denops.call(
-          "ddu#ui#ff#_open_preview_window",
+          "ddu#ui#filer#_open_preview_window",
           uiParams,
           bufnr,
           previousWinId,
