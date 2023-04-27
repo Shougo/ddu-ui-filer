@@ -187,7 +187,7 @@ export class Ui extends BaseUi<Params> {
       return;
     }
 
-    this.bufferName = `ddu-ff-${args.options.name}`;
+    this.bufferName = `ddu-filer-${args.options.name}`;
     const initialized = await fn.bufexists(args.denops, this.bufferName) &&
       await fn.bufnr(args.denops, this.bufferName);
     const bufnr = initialized ||
