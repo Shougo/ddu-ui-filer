@@ -415,7 +415,7 @@ export class Ui extends BaseUi<Params> {
       ) {
         const prevName = await fn.bufname(args.denops, args.context.bufNr);
         await args.denops.cmd(
-            prevName != args.context.bufName
+          prevName != args.context.bufName
             ? "enew"
             : `buffer ${args.context.bufNr}`,
         );
@@ -950,13 +950,13 @@ export class Ui extends BaseUi<Params> {
         highlights: [
           {
             name: "root-source-name",
-            "hl_group": uiParams.highlights.sourceName ?? "Type",
+            hl_group: uiParams.highlights.sourceName ?? "Type",
             col: 1,
             width: await fn.strwidth(denops, source.name) as number,
           },
           {
             name: "root-source-path",
-            "hl_group": uiParams.highlights.sourcePath ?? "String",
+            hl_group: uiParams.highlights.sourcePath ?? "String",
             col: source.name.length + 2,
             width: await fn.strwidth(denops, display) as number,
           },
