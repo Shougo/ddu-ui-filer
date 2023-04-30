@@ -320,7 +320,7 @@ export class Ui extends BaseUi<Params> {
               row: i + 1,
               prefix: "",
             };
-          }).filter((c) => c.highlights),
+          }).filter((c) => c.highlights.length > 0),
           [...this.selectedItems],
         );
       });
