@@ -44,8 +44,7 @@ FUNCTIONS					*ddu-ui-filer-functions*
 
 						*ddu#ui#filer#do_action()*
 ddu#ui#filer#do_action({action-name}[, {params}])
-		It is deprecated.  Please use |ddu#ui#do_actions()|
-		instead.
+		It is deprecated.  Please use |ddu#ui#do_action()| instead.
 
 						*ddu#ui#filer#multi_actions()*
 ddu#ui#filer#multi_actions([{action-name1}[, {params1}], ...])
@@ -155,7 +154,7 @@ updateOptions
 ==============================================================================
 PARAMS						*ddu-ui-filer-params*
 
-  				    	*ddu-ui-filer-param-floatingBorder*
+					*ddu-ui-filer-param-floatingBorder*
 floatingBorder	(string | list)
 		Specify the style of the window border if
 		|ddu-ui-filer-param-split| is "floating".
@@ -164,13 +163,13 @@ floatingBorder	(string | list)
 
 		Default: "none"
 
-				    		*ddu-ui-filer-param-focus*
+						*ddu-ui-filer-param-focus*
 focus		(boolean)
 		Focus on the UI window after opening the UI window.
 
 		Default: v:true
 
-				    	*ddu-ui-filer-param-highlights*
+					*ddu-ui-filer-param-highlights*
 highlights	(dictionary)
 		It specifies ddu-ui-filer buffer highlights.
 		It can contain following keys
@@ -210,7 +209,7 @@ previewFloating	(boolean)
 
 		Default: v:false
 
-			    	*ddu-ui-filer-param-previewFloatingBorder*
+				*ddu-ui-filer-param-previewFloatingBorder*
 previewFloatingBorder		(string | list)
 		Specify the style of the preview window border if
 		|ddu-ui-filer-param-previewFloating| is v:true.
@@ -219,7 +218,7 @@ previewFloatingBorder		(string | list)
 
 		Default: "none"
 
-			    	*ddu-ui-filer-param-previewFloatingZindex*
+				*ddu-ui-filer-param-previewFloatingZindex*
 previewFloatingZindex		(number)
 		Specify the style of the preview window zindex if
 		|ddu-ui-filer-param-split| is "floating".
@@ -265,7 +264,7 @@ previewWidth	(number)
 
 		Default: 40
 
-				    		*ddu-ui-filer-param-split*
+						*ddu-ui-filer-param-split*
 split		(string)
 		Specify split mode.
 
@@ -278,7 +277,7 @@ split		(string)
 
 		Default: "horizontal"
 
-				    		*ddu-ui-filer-param-sort*
+						*ddu-ui-filer-param-sort*
 sort		(string)
 
 		Sort method.
