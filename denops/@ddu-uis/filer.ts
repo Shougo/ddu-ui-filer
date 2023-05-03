@@ -114,8 +114,8 @@ export class Ui extends BaseUi<Params> {
     // Search index.
     const index = this.items.findIndex(
       (item: DduItem) =>
-        item.treePath == args.parent.treePath &&
-        item.__sourceIndex == args.parent.__sourceIndex,
+        item.treePath === args.parent.treePath &&
+        item.__sourceIndex === args.parent.__sourceIndex,
     );
 
     const insertItems = this.sortItems(args.uiParams, args.children);
@@ -139,8 +139,8 @@ export class Ui extends BaseUi<Params> {
     // Search index.
     const startIndex = this.items.findIndex(
       (item: DduItem) =>
-        item.treePath == args.item.treePath &&
-        item.__sourceIndex == args.item.__sourceIndex,
+        item.treePath === args.item.treePath &&
+        item.__sourceIndex === args.item.__sourceIndex,
     );
     if (startIndex < 0) {
       return;
@@ -167,7 +167,7 @@ export class Ui extends BaseUi<Params> {
     denops: Denops;
     item: DduItem;
   }) {
-    const pos = this.items.findIndex((item) => item == args.item);
+    const pos = this.items.findIndex((item) => item === args.item);
 
     if (pos > 0) {
       await fn.cursor(args.denops, pos + 1, 0);
@@ -195,18 +195,18 @@ export class Ui extends BaseUi<Params> {
 
     await this.setDefaultParams(args.denops, args.uiParams);
 
-    const hasNvim = args.denops.meta.host == "nvim";
-    const floating = args.uiParams.split == "floating" && hasNvim;
+    const hasNvim = args.denops.meta.host === "nvim";
+    const floating = args.uiParams.split === "floating" && hasNvim;
     const winHeight = Number(args.uiParams.winHeight);
     const winid = await fn.bufwinid(args.denops, bufnr);
     if (winid < 0) {
       const direction = args.uiParams.splitDirection;
-      if (args.uiParams.split == "horizontal") {
+      if (args.uiParams.split === "horizontal") {
         const header = `silent keepalt ${direction} `;
         await args.denops.cmd(
           header + `sbuffer +resize\\ ${winHeight} ${bufnr}`,
         );
-      } else if (args.uiParams.split == "vertical") {
+      } else if (args.uiParams.split === "vertical") {
         const header = `silent keepalt vertical ${direction} `;
         await args.denops.cmd(
           header +
@@ -232,7 +232,7 @@ export class Ui extends BaseUi<Params> {
           "&winhighlight",
           `Normal:${highlight},FloatBorder:${floatingHighlight}`,
         );
-      } else if (args.uiParams.split == "no") {
+      } else if (args.uiParams.split === "no") {
         await args.denops.cmd(`silent keepalt buffer ${bufnr}`);
       } else {
         await args.denops.call(
@@ -257,9 +257,9 @@ export class Ui extends BaseUi<Params> {
     const linenr = "printf('%'.(len(line('$'))+2).'d/%d',line('.'),line('$'))";
     const async = `${args.context.done ? "" : "[async]"}`;
     const laststatus = await op.laststatus.get(args.denops);
-    if (hasNvim && (floating || laststatus == 0)) {
+    if (hasNvim && (floating || laststatus === 0)) {
       if (
-        (await vars.g.get(args.denops, "ddu#ui#filer#_save_title", "")) == ""
+        (await vars.g.get(args.denops, "ddu#ui#filer#_save_title", "")) === ""
       ) {
         const saveTitle = await args.denops.call(
           "nvim_get_option",
@@ -411,11 +411,11 @@ export class Ui extends BaseUi<Params> {
       await fn.win_gotoid(args.denops, winid);
 
       if (
-        args.uiParams.split == "no" || (await fn.winnr(args.denops, "$")) == 1
+        args.uiParams.split === "no" || (await fn.winnr(args.denops, "$")) === 1
       ) {
         const prevName = await fn.bufname(args.denops, args.context.bufNr);
         await args.denops.cmd(
-          prevName != args.context.bufName
+          prevName !== args.context.bufName
             ? "enew"
             : `buffer ${args.context.bufNr}`,
         );
@@ -431,7 +431,7 @@ export class Ui extends BaseUi<Params> {
       "ddu#ui#filer#_save_title",
       "",
     );
-    if (saveTitle != "") {
+    if (saveTitle !== "") {
       args.denops.call(
         "nvim_set_option",
         "titlestring",
@@ -508,7 +508,7 @@ export class Ui extends BaseUi<Params> {
         "ddu_ui_ff_cursor_pos",
         [],
       ) as number[];
-      if (cursorPos.length == 0) {
+      if (cursorPos.length === 0) {
         return ActionFlags.Persist;
       }
 
@@ -536,7 +536,7 @@ export class Ui extends BaseUi<Params> {
         "ddu_ui_filer_cursor_pos",
         [],
       ) as number[];
-      if (cursorPos.length == 0) {
+      if (cursorPos.length === 0) {
         return ActionFlags.Persist;
       }
 
@@ -567,7 +567,7 @@ export class Ui extends BaseUi<Params> {
       const params = args.actionParams as ExpandItemParams;
 
       if (item.__expanded) {
-        if (params.mode == "toggle") {
+        if (params.mode === "toggle") {
           return await this.collapseItemAction(args.denops, args.options);
         }
         return ActionFlags.None;
@@ -625,7 +625,7 @@ export class Ui extends BaseUi<Params> {
         "Input action name: ",
         actions,
       );
-      if (actionName != "") {
+      if (actionName !== "") {
         await args.denops.call(
           "ddu#item_action",
           args.options.name,
@@ -724,7 +724,7 @@ export class Ui extends BaseUi<Params> {
       options: DduOptions;
       uiParams: Params;
     }) => {
-      if (this.items.length == 0) {
+      if (this.items.length === 0) {
         return ActionFlags.None;
       }
 
@@ -789,7 +789,7 @@ export class Ui extends BaseUi<Params> {
 
   private async getItems(denops: Denops): Promise<DduItem[]> {
     let items: DduItem[];
-    if (this.selectedItems.size == 0) {
+    if (this.selectedItems.size === 0) {
       const idx = await this.getIndex(denops);
       if (idx < 0) {
         return [];
@@ -860,26 +860,26 @@ export class Ui extends BaseUi<Params> {
       await fn.setbufvar(denops, bufnr, "&filetype", "ddu-filer");
       await fn.setbufvar(denops, bufnr, "&swapfile", 0);
 
-      if (uiParams.split == "horizontal") {
+      if (uiParams.split === "horizontal") {
         await fn.setbufvar(denops, bufnr, "&winfixheight", 1);
-      } else if (uiParams.split == "vertical") {
+      } else if (uiParams.split === "vertical") {
         await fn.setbufvar(denops, bufnr, "&winfixwidth", 1);
       }
     });
   }
 
   private async setDefaultParams(denops: Denops, uiParams: Params) {
-    if (uiParams.winRow == 0) {
+    if (uiParams.winRow === 0) {
       uiParams.winRow = Math.trunc(
         (await denops.call("eval", "&lines") as number) / 2 - 10,
       );
     }
-    if (uiParams.winCol == 0) {
+    if (uiParams.winCol === 0) {
       uiParams.winCol = Math.trunc(
         (await op.columns.getGlobal(denops)) / 4,
       );
     }
-    if (uiParams.winWidth == 0) {
+    if (uiParams.winWidth === 0) {
       uiParams.winWidth = Math.trunc((await op.columns.getGlobal(denops)) / 2);
     }
   }
@@ -901,13 +901,13 @@ export class Ui extends BaseUi<Params> {
       "ddu_ui_filer_cursor_pos",
       [],
     ) as number[];
-    if (cursorPos.length == 0) {
+    if (cursorPos.length === 0) {
       return -1;
     }
 
     const viewItem = this.viewItems[cursorPos[1] - 1];
     return this.items.findIndex(
-      (item: DduItem) => item == viewItem,
+      (item: DduItem) => item === viewItem,
     );
   }
 
@@ -931,12 +931,12 @@ export class Ui extends BaseUi<Params> {
 
       // Replace the home directory.
       let root = source.path;
-      if (root == "") {
+      if (root === "") {
         root = await fn.getcwd(denops) as string;
       }
       let display = root;
       const home = env.get("HOME", "");
-      if (home && home != "") {
+      if (home && home !== "") {
         display = display.replace(home, "~");
       }
 
@@ -985,16 +985,16 @@ export class Ui extends BaseUi<Params> {
     items: DduItem[],
   ): DduItem[] {
     const sortMethod = uiParams.sort.toLowerCase();
-    const sortFunc = sortMethod == "extension"
+    const sortFunc = sortMethod === "extension"
       ? sortByExtension
-      : sortMethod == "size"
+      : sortMethod === "size"
       ? sortBySize
-      : sortMethod == "time"
+      : sortMethod === "time"
       ? sortByTime
-      : sortMethod == "filename"
+      : sortMethod === "filename"
       ? sortByFilename
       : sortByNone;
-    const reversed = uiParams.sort.toLowerCase() != uiParams.sort;
+    const reversed = uiParams.sort.toLowerCase() !== uiParams.sort;
 
     const sortedItems = reversed
       ? items.sort(sortFunc).reverse()
