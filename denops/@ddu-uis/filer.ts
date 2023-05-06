@@ -38,6 +38,8 @@ type FloatingBorder =
   | "shadow"
   | string[];
 
+type WindowOption = [string, number | string];
+
 export type Params = {
   floatingBorder: FloatingBorder;
   focus: boolean;
@@ -50,6 +52,7 @@ export type Params = {
   previewRow: number;
   previewSplit: "horizontal" | "vertical" | "no";
   previewWidth: number;
+  previewWindowOptions: WindowOption[];
   search: string;
   sort:
     | "filename"
@@ -774,6 +777,13 @@ export class Ui extends BaseUi<Params> {
       previewRow: 0,
       previewSplit: "horizontal",
       previewWidth: 40,
+      previewWindowOptions: [
+        ["&signcolumn", "no"],
+        ["&foldcolumn", 0],
+        ["&foldenable", 0],
+        ["&number", 0],
+        ["&wrap", 0],
+      ],
       search: "",
       split: "horizontal",
       splitDirection: "botright",

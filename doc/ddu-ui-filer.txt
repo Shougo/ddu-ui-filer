@@ -264,6 +264,25 @@ previewWidth	(number)
 
 		Default: 40
 
+				*ddu-ui-filer-param-previewWindowOptions*
+previewWindowOptions	(list)
+		Set the window options of the |preview-window| in
+		|ddu-ui-filer-action-preview|.
+		If |ddu-ui-filer-param-previewFloating| is set, set the
+		options of the floating window.
+		See |options| for the detail.
+		NOTE: The options are applied in the array order.
+
+		Default:
+
+		[
+			["&signcolumn", "no"],
+			["&foldcolumn", 0],
+			["&foldenable", 0],
+			["&number", 0],
+			["&wrap", 0],
+		]
+
 						*ddu-ui-filer-param-split*
 split		(string)
 		Specify split mode.
