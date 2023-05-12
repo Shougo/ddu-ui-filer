@@ -7,15 +7,15 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v2.8.3/types.ts";
+} from "https://deno.land/x/ddu_vim@v2.8.4/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v2.8.3/deps.ts";
-import { extname } from "https://deno.land/std@0.185.0/path/mod.ts";
+} from "https://deno.land/x/ddu_vim@v2.8.4/deps.ts";
+import { extname } from "https://deno.land/std@0.186.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.3/env.js";
 import { PreviewUi } from "../@ddu-ui-filer/preview.ts";
 

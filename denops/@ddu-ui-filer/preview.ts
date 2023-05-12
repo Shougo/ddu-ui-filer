@@ -8,15 +8,15 @@ import {
   PreviewContext,
   Previewer,
   TerminalPreviewer,
-} from "https://deno.land/x/ddu_vim@v2.8.3/types.ts";
+} from "https://deno.land/x/ddu_vim@v2.8.4/types.ts";
 import {
   batch,
   Denops,
   ensureObject,
   fn,
   op,
-} from "https://deno.land/x/ddu_vim@v2.8.3/deps.ts";
-import { replace } from "https://deno.land/x/denops_std@v4.1.5/buffer/mod.ts";
+} from "https://deno.land/x/ddu_vim@v2.8.4/deps.ts";
+import { replace } from "https://deno.land/x/denops_std@v4.3.0/buffer/mod.ts";
 import { Params } from "../@ddu-uis/filer.ts";
 
 type PreviewParams = {
@@ -231,11 +231,8 @@ export class PreviewUi {
       const text = await this.getContents(denops, previewer);
       await batch(denops, async (denops: Denops) => {
         await fn.setbufvar(denops, bufnr, "&buftype", "nofile");
-        // Disable swapfile
         await fn.setbufvar(denops, bufnr, "&swapfile", 0);
-        // NOTE: Set bufhidden to save contents
-        await fn.setbufvar(denops, bufnr, "&bufhidden", "hide");
-
+        await fn.setbufvar(denops, bufnr, "&bufhidden", "wipe");
 
         await fn.bufload(denops, bufnr);
         await denops.cmd(`buffer ${bufnr}`);
