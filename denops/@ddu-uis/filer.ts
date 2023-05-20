@@ -414,7 +414,8 @@ export class Ui extends BaseUi<Params> {
       await fn.win_gotoid(args.denops, winid);
 
       if (
-        args.uiParams.split === "no" || (await fn.winnr(args.denops, "$")) === 1
+        args.uiParams.split === "no" ||
+        (await fn.winnr(args.denops, "$")) === 1
       ) {
         const prevName = await fn.bufname(args.denops, args.context.bufNr);
         await args.denops.cmd(
