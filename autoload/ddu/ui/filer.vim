@@ -172,6 +172,7 @@ function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
             \   zindex: a:params.previewFloatingZindex,
             \ })
     else
+      call win_gotoid(winnr)
       silent rightbelow vnew
       execute 'vert resize ' .. preview_width
     endif
@@ -205,6 +206,7 @@ function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
             \   zindex: a:params.previewFloatingZindex,
             \ })
     else
+      call win_gotoid(winnr)
       silent aboveleft new
       execute 'resize ' .. preview_height
     endif
