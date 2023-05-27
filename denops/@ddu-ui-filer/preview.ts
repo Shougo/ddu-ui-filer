@@ -295,21 +295,25 @@ export class PreviewUi {
     previewer: BufferPreviewer | NoFilePreviewer,
   ): Promise<string[]> {
     if (previewer.kind === "buffer") {
-      if (previewer.expr && await fn.bufexists(denops, previewer.expr)) {
-        return await fn.getbufline(
-          denops,
-          await fn.bufnr(denops, previewer.expr),
-          1,
-          "$",
-        );
-      } else if (
-        previewer.path && (await exists(previewer.path)) &&
+      const bufferPath = previewer?.expr ?? previewer?.path;
+      if (
+        previewer.path && await exists(previewer.path) &&
         !(await isDirectory(previewer.path))
       ) {
         const data = Deno.readFileSync(previewer.path);
         return new TextDecoder().decode(data).split("\n");
+      } else if (
+        bufferPath && await fn.bufexists(denops, bufferPath)
+      ) {
+        // Use buffer instead.
+        return await fn.getbufline(
+          denops,
+          await fn.bufnr(denops, bufferPath),
+          1,
+          "$",
+        );
       } else {
-        return [];
+        return [`"${previewer.path}" cannot be opened.`];
       }
     } else {
       return previewer.contents;
