@@ -236,6 +236,7 @@ export class PreviewUi {
         await fn.setbufvar(denops, bufnr, "&buftype", "nofile");
         await fn.setbufvar(denops, bufnr, "&swapfile", 0);
         await fn.setbufvar(denops, bufnr, "&bufhidden", "wipe");
+        await fn.setbufvar(denops, bufnr, "&modeline", 1);
 
         await fn.bufload(denops, bufnr);
         await denops.cmd(`buffer ${bufnr}`);
@@ -245,6 +246,7 @@ export class PreviewUi {
           if (previewer.syntax) {
             await fn.setbufvar(denops, bufnr, "&syntax", previewer.syntax);
           } else if (previewer.kind === "buffer") {
+            // Enable modeline to detect filetype
             await denops.cmd("filetype detect");
           }
         }
