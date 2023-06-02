@@ -182,18 +182,6 @@ export class PreviewUi {
       });
     }
 
-    // Delete the previous buffer after opening new one to prevent flicker
-    if (this.terminalBufnr > 0) {
-      try {
-        await denops.cmd(
-          `if bufexists(${this.terminalBufnr}) | silent bwipeout! ${this.terminalBufnr} | endif`,
-        );
-        this.terminalBufnr = -1;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
     return ActionFlags.Persist;
   }
 
