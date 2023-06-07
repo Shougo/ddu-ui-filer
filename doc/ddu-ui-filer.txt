@@ -77,24 +77,32 @@ collapseItem
 
 					*ddu-ui-filer-action-cursorNext*
 cursorNext
+		params:
+			{count}: Move count
+
 		Move the cursor to the next.
 
 					*ddu-ui-filer-action-cursorPrevious*
 cursorPrevious
+		params:
+			{count}: Move count
+
 		Move the cursor to the previous.
 
 					*ddu-ui-filer-action-expandItem*
 expandItem
-		Expand the item tree.
-		mode:
+		params:
 			{mode}: The supported values are:
 
-			"toggle":
-				Close the item tree if the tree is opened.
+				"toggle":
+					Close the item tree if the directory
+					is opened.
 
-		maxLevel:
-			Maximum expand recursive level.
-			If it is less than 0, infinite recursive.
+			{maxLevel}:
+				Maximum expand recursive level.
+				If it is less than 0, infinite recursive.
+
+		Expand the item tree.
 
 						*ddu-ui-filer-action-getItem*
 getItem
@@ -111,8 +119,8 @@ inputAction
 					*ddu-ui-filer-action-itemAction*
 itemAction
 		params:
-			{name}: action name
-			{params}: action params dictionary
+			{name}: Action name
+			{params}: Action params dictionary
 
 		Close the UI window and fire {name} action for selected or
 		current cursor items.
@@ -145,7 +153,7 @@ toggleSelectItem
 					*ddu-ui-filer-action-updateOptions*
 updateOptions
 		params:
-			{option-name}: option name and value
+			{option-name}: Option name and value
 
 		Update current options and redraw the UI.
 		Refer to |ddu-options| about options.
@@ -444,12 +452,12 @@ A: Please use "no" in |ddu-ui-filer-param-previewSplit|.
 Q: I want to check the current item is tree.
 
 A: >
-		nnoremap <buffer><expr> <CR>
-		\ ddu#ui#get_item()->get('isTree', v:false) ?
-		\ "<Cmd>call ddu#ui#do_action('itemAction',
-		\  {'name': 'narrow'})<CR>" :
-		\ "<Cmd>call ddu#ui#do_action('itemAction',
-		\  {'name': 'open'})<CR>"
+	nnoremap <buffer><expr> <CR>
+	\ ddu#ui#get_item()->get('isTree', v:false) ?
+	\ "<Cmd>call ddu#ui#do_action('itemAction',
+	\  {'name': 'narrow'})<CR>" :
+	\ "<Cmd>call ddu#ui#do_action('itemAction',
+	\  {'name': 'open'})<CR>"
 
 
 ==============================================================================
