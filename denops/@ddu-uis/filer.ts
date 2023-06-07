@@ -77,6 +77,10 @@ export type Params = {
   winWidth: number;
 };
 
+type CursorActionParams = {
+  count?: number;
+};
+
 type DoActionParams = {
   name?: string;
   items?: DduItem[];
@@ -508,6 +512,7 @@ export class Ui extends BaseUi<Params> {
     cursorNext: async (args: {
       denops: Denops;
       uiParams: Params;
+      actionParams: unknown;
     }) => {
       const bufnr = await this.getBufnr(args.denops);
       const cursorPos = await fn.getbufvar(
@@ -520,8 +525,11 @@ export class Ui extends BaseUi<Params> {
         return ActionFlags.Persist;
       }
 
+      const params = args.actionParams as CursorActionParams;
+      const count = params.count ?? 1;
+
       // Move to the next
-      cursorPos[1] += 1;
+      cursorPos[1] += count;
       if (0 < cursorPos[1] && cursorPos[1] <= this.viewItems.length) {
         await fn.setbufvar(
           args.denops,
@@ -536,6 +544,7 @@ export class Ui extends BaseUi<Params> {
     cursorPrevious: async (args: {
       denops: Denops;
       uiParams: Params;
+      actionParams: unknown;
     }) => {
       const bufnr = await this.getBufnr(args.denops);
       const cursorPos = await fn.getbufvar(
@@ -548,8 +557,11 @@ export class Ui extends BaseUi<Params> {
         return ActionFlags.Persist;
       }
 
+      const params = args.actionParams as CursorActionParams;
+      const count = params.count ?? 1;
+
       // Move to the previous
-      cursorPos[1] -= 1;
+      cursorPos[1] -= count;
       if (0 < cursorPos[1] && cursorPos[1] <= this.viewItems.length) {
         await fn.setbufvar(
           args.denops,
