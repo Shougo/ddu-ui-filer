@@ -350,6 +350,7 @@ export class Ui extends BaseUi<Params> {
       `autocmd ${augroupName} CursorMoved <buffer>` +
         " call ddu#ui#filer#_save_cursor(b:ddu_ui_filer_path)",
     );
+    await args.denops.call("ddu#ui#filer#_save_cursor", args.context.path);
 
     if (args.context.done) {
       await fn.setbufvar(
