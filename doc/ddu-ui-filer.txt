@@ -58,13 +58,13 @@ ACTIONS						*ddu-ui-filer-actions*
 					*ddu-ui-filer-action-checkItems*
 checkItems
 		Check the items are updated.
-		Note: Source support is needed for the feature.
+		NOTE: Source support is needed for the feature.
 
 					*ddu-ui-filer-action-chooseAction*
 chooseAction
 		Choose and fire the action.
 
-		Note: "ddu-source-action" is required.
+		NOTE: "ddu-source-action" is required.
 		https://github.com/Shougo/ddu-source-action
 
 				*ddu-ui-filer-action-clearSelectAllItems*
@@ -127,7 +127,7 @@ itemAction
 		You can find the actions list in item's kind documentation.
 		If {name} is empty, "default" will be used.
 
-		Note: You cannot mix multiple kinds/sources.
+		NOTE: You cannot mix multiple kinds/sources.
 
 					*ddu-ui-filer-action-preview*
 preview
@@ -203,6 +203,12 @@ highlights	(dictionary)
 		Default: "String"
 
 		Default: {}
+
+						*ddu-ui-filer-param-onPreview*
+onPreview	(function)
+		It is called when |ddu-ui-filer-action-preview| is fired.
+		NOTE: The function must be registered by
+		|denops#callback#register()|.
 
 					*ddu-ui-filer-param-previewCol*
 previewCol	(number)
@@ -310,7 +316,7 @@ sort		(string)
 		Sort method.
 		If the method is upper case, the order will be reversed.
 
-		Note: To sort items properly, the source must support
+		NOTE: To sort items properly, the source must support
 		|ddu-item-attribute-status|.
 
 		"extension": file extension sort
@@ -423,7 +429,7 @@ A: >
 	autocmd TabEnter,WinEnter,CursorHold,FocusGained *
 	\ call ddu#ui#do_action('checkItems')
 
-Note: Source support is needed for |ddu-ui-filer-action-checkItems|.
+NOTE: Source support is needed for |ddu-ui-filer-action-checkItems|.
 
 Q: I want to use icon fonts in ddu columns.
 

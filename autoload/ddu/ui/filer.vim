@@ -64,7 +64,7 @@ function! ddu#ui#filer#_highlight_items(
   endfor
 
   if !has('nvim')
-    " Note: :redraw is needed for Vim
+    " NOTE: :redraw is needed for Vim
     redraw
   endif
 endfunction

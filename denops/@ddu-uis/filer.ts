@@ -43,10 +43,17 @@ type FloatingBorder =
 
 type WindowOption = [string, number | string];
 
+type OnPreviewArguments = {
+  denops: Denops;
+  context: Context;
+  item: DduItem;
+};
+
 export type Params = {
   floatingBorder: FloatingBorder;
   focus: boolean;
   highlights: HighlightGroup;
+  onPreview: string | ((args: OnPreviewArguments) => Promise<void>);
   previewCol: number;
   previewFloating: boolean;
   previewFloatingBorder: FloatingBorder;
@@ -253,7 +260,7 @@ export class Ui extends BaseUi<Params> {
       }
     }
 
-    // Note: buffers may be restored
+    // NOTE: buffers may be restored
     if (!initialized || winid < 0) {
       await this.initOptions(args.denops, args.options, args.uiParams, bufnr);
     }
@@ -308,7 +315,7 @@ export class Ui extends BaseUi<Params> {
 
     // Update main buffer
     try {
-      // Note: Use batch for screen flicker when highlight items.
+      // NOTE: Use batch for screen flicker when highlight items.
       await batch(args.denops, async (denops: Denops) => {
         await denops.call(
           "ddu#ui#filer#_update_buffer",
@@ -796,6 +803,7 @@ export class Ui extends BaseUi<Params> {
       floatingBorder: "none",
       focus: true,
       highlights: {},
+      onPreview: (_) => { return Promise.resolve(); },
       previewCol: 0,
       previewFloating: false,
       previewFloatingBorder: "none",
