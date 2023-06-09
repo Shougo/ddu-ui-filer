@@ -122,8 +122,7 @@ export class Ui extends BaseUi<Params> {
     this.selectedItems.clear();
   }
 
-  // deno-lint-ignore require-await
-  override async expandItem(args: {
+  override expandItem(args: {
     uiParams: Params;
     parent: DduItem;
     children: DduItem[];
@@ -147,10 +146,11 @@ export class Ui extends BaseUi<Params> {
     }
 
     this.selectedItems.clear();
+
+    return Promise.resolve();
   }
 
-  // deno-lint-ignore require-await
-  override async collapseItem(args: {
+  override collapseItem(args: {
     item: DduItem;
   }) {
     // Search index.
@@ -160,7 +160,7 @@ export class Ui extends BaseUi<Params> {
         item.__sourceIndex === args.item.__sourceIndex,
     );
     if (startIndex < 0) {
-      return;
+      return Promise.resolve();
     }
 
     const endIndex = this.items.slice(startIndex + 1).findIndex(
@@ -178,6 +178,8 @@ export class Ui extends BaseUi<Params> {
     this.items[startIndex] = args.item;
 
     this.selectedItems.clear();
+
+    return Promise.resolve();
   }
 
   override async searchItem(args: {
@@ -503,12 +505,9 @@ export class Ui extends BaseUi<Params> {
 
       return ActionFlags.None;
     },
-    // deno-lint-ignore require-await
-    clearSelectAllItems: async (_: {
-      denops: Denops;
-    }) => {
+    clearSelectAllItems: (_) => {
       this.selectedItems.clear();
-      return ActionFlags.Redraw;
+      return Promise.resolve(ActionFlags.Redraw);
     },
     collapseItem: async (args: {
       denops: Denops;
@@ -738,11 +737,8 @@ export class Ui extends BaseUi<Params> {
 
       return ActionFlags.None;
     },
-    // deno-lint-ignore require-await
-    refreshItems: async (_: {
-      denops: Denops;
-    }) => {
-      return ActionFlags.RefreshItems;
+    refreshItems: (_) => {
+      return Promise.resolve(ActionFlags.RefreshItems);
     },
     updateOptions: async (args: {
       denops: Denops;
@@ -755,14 +751,9 @@ export class Ui extends BaseUi<Params> {
 
       return ActionFlags.None;
     },
-    // deno-lint-ignore require-await
-    toggleAllItems: async (_: {
-      denops: Denops;
-      options: DduOptions;
-      uiParams: Params;
-    }) => {
+    toggleAllItems: (_) => {
       if (this.items.length === 0) {
-        return ActionFlags.None;
+        return Promise.resolve(ActionFlags.None);
       }
 
       this.items.forEach((_, idx) => {
@@ -776,7 +767,7 @@ export class Ui extends BaseUi<Params> {
         }
       });
 
-      return ActionFlags.Redraw;
+      return Promise.resolve(ActionFlags.Redraw);
     },
     toggleSelectItem: async (args: {
       denops: Denops;
