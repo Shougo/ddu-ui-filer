@@ -19,11 +19,11 @@ https://github.com/Shougo/ddu.vim
 ## Configuration
 
 ```vim
-call ddu#custom#patch_global({
-    \   'ui': 'filer',
-    \   'actionOptions': {
-    \     'narrow': {
-    \       'quit': v:false,
+call ddu#custom#patch_global(#{
+    \   ui: 'filer',
+    \   actionOptions: #{
+    \     narrow: #{
+    \       quit: v:false,
     \     },
     \   },
     \ })
