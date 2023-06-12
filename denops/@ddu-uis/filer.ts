@@ -41,6 +41,12 @@ type FloatingBorder =
   | "shadow"
   | string[];
 
+type FloatingTitleHighlight = string;
+
+type FloatingTitle =
+  | string
+  | [string, FloatingTitleHighlight][];
+
 type WindowOption = [string, number | string];
 
 type OnPreviewArguments = {
@@ -51,6 +57,8 @@ type OnPreviewArguments = {
 
 export type Params = {
   floatingBorder: FloatingBorder;
+  floatingTitle: FloatingTitle;
+  floatingTitlePos: "left" | "center" | "right";
   focus: boolean;
   highlights: HighlightGroup;
   onPreview: string | ((args: OnPreviewArguments) => Promise<void>);
@@ -218,48 +226,79 @@ export class Ui extends BaseUi<Params> {
     const floating = args.uiParams.split === "floating" && hasNvim;
     const winHeight = Number(args.uiParams.winHeight);
     const winid = await fn.bufwinid(args.denops, bufnr);
-    if (winid < 0) {
-      const direction = args.uiParams.splitDirection;
-      if (args.uiParams.split === "horizontal") {
+
+    const direction = args.uiParams.splitDirection;
+    if (args.uiParams.split === "horizontal") {
+      if (winid >= 0) {
+        await fn.win_execute(
+          args.denops,
+          winid,
+          `resize ${winHeight}`,
+        );
+      } else {
         const header = `silent keepalt ${direction} `;
         await args.denops.cmd(
           header + `sbuffer +resize\\ ${winHeight} ${bufnr}`,
         );
-      } else if (args.uiParams.split === "vertical") {
+      }
+    } else if (args.uiParams.split === "vertical") {
+      if (winid >= 0) {
+        await fn.win_execute(
+          args.denops,
+          winid,
+          `vertical resize ${args.uiParams.winWidth}`,
+        );
+      } else {
         const header = `silent keepalt vertical ${direction} `;
         await args.denops.cmd(
           header +
             `sbuffer +vertical\\ resize\\ ${args.uiParams.winWidth} ${bufnr}`,
         );
-      } else if (floating) {
-        await args.denops.call("nvim_open_win", bufnr, true, {
-          "relative": "editor",
-          "row": Number(args.uiParams.winRow),
-          "col": Number(args.uiParams.winCol),
-          "width": Number(args.uiParams.winWidth),
-          "height": winHeight,
-          "border": args.uiParams.floatingBorder,
-        });
-
-        const highlight = args.uiParams.highlights?.floating ?? "NormalFloat";
-        const floatingHighlight = args.uiParams.highlights?.floatingBorder ??
-          "FloatBorder";
-
-        await fn.setwinvar(
-          args.denops,
-          await fn.bufwinnr(args.denops, bufnr),
-          "&winhighlight",
-          `Normal:${highlight},FloatBorder:${floatingHighlight}`,
+      }
+    } else if (floating) {
+      const winOpts = {
+        "relative": "editor",
+        "row": Number(args.uiParams.winRow),
+        "col": Number(args.uiParams.winCol),
+        "width": Number(args.uiParams.winWidth),
+        "height": winHeight,
+        "border": args.uiParams.floatingBorder,
+        "title": args.uiParams.floatingTitle,
+        "title_pos": args.uiParams.floatingTitlePos,
+      };
+      if (winid >= 0) {
+        await args.denops.call(
+          "nvim_win_set_config",
+          winid,
+          winOpts,
         );
-      } else if (args.uiParams.split === "no") {
-        await args.denops.cmd(`silent keepalt buffer ${bufnr}`);
       } else {
         await args.denops.call(
-          "ddu#util#print_error",
-          `Invalid split param: ${args.uiParams.split}`,
+          "nvim_open_win",
+          bufnr,
+          true,
+          winOpts,
         );
-        return;
       }
+
+      const highlight = args.uiParams.highlights?.floating ?? "NormalFloat";
+      const floatingHighlight = args.uiParams.highlights?.floatingBorder ??
+        "FloatBorder";
+
+      await fn.setwinvar(
+        args.denops,
+        await fn.bufwinnr(args.denops, bufnr),
+        "&winhighlight",
+        `Normal:${highlight},FloatBorder:${floatingHighlight}`,
+      );
+    } else if (args.uiParams.split === "no") {
+      await args.denops.cmd(`silent keepalt buffer ${bufnr}`);
+    } else {
+      await args.denops.call(
+        "ddu#util#print_error",
+        `Invalid split param: ${args.uiParams.split}`,
+      );
+      return;
     }
 
     // NOTE: buffers may be restored
@@ -792,9 +831,13 @@ export class Ui extends BaseUi<Params> {
   override params(): Params {
     return {
       floatingBorder: "none",
+      floatingTitle: "",
+      floatingTitlePos: "left",
       focus: true,
       highlights: {},
-      onPreview: (_) => { return Promise.resolve(); },
+      onPreview: (_) => {
+        return Promise.resolve();
+      },
       previewCol: 0,
       previewFloating: false,
       previewFloatingBorder: "none",

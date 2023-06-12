@@ -171,6 +171,23 @@ floatingBorder	(string | list)
 
 		Default: "none"
 
+					*ddu-ui-filer-param-floatingTitle*
+floatingTitle		(string | list)
+		Specify the title of the window border if
+		|ddu-ui-filer-param-floatingBorder| is not "none".
+		NOTE: It is neovim only.
+
+		Default: ""
+
+					*ddu-ui-filer-param-floatingTitlePos*
+floatingTitlePos	(string)
+		Specify the title position of the window border if
+		|ddu-ui-filer-param-floatingBorder| is not "none".
+		See |nvim_open_win()| for the detail.
+		NOTE: It is neovim only.
+
+		Default: "left"
+
 						*ddu-ui-filer-param-focus*
 focus		(boolean)
 		Focus on the UI window after opening the UI window.
