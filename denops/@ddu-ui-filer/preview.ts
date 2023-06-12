@@ -235,25 +235,24 @@ export class PreviewUi {
     } else {
       await fn.win_gotoid(denops, this.previewWinId);
     }
-    if (!exists) {
+    if (!exists || previewer.kind === "nofile") {
       // Create new buffer
       const bufnr = await fn.bufadd(denops, bufname);
       const text = await this.getContents(denops, previewer);
       await batch(denops, async (denops: Denops) => {
         await fn.setbufvar(denops, bufnr, "&buftype", "nofile");
         await fn.setbufvar(denops, bufnr, "&swapfile", 0);
-        await fn.setbufvar(denops, bufnr, "&bufhidden", "wipe");
+        await fn.setbufvar(denops, bufnr, "&bufhidden", "hide");
         await fn.setbufvar(denops, bufnr, "&modeline", 1);
 
         await fn.bufload(denops, bufnr);
         await denops.cmd(`buffer ${bufnr}`);
         await replace(denops, bufnr, text);
-        const limit = actionParams.syntaxLimitChars ?? 200000;
+        const limit = actionParams.syntaxLimitChars ?? 400000;
         if (text.join("\n").length < limit) {
           if (previewer.syntax) {
             await fn.setbufvar(denops, bufnr, "&syntax", previewer.syntax);
           } else if (previewer.kind === "buffer") {
-            // Enable modeline to detect filetype
             await denops.cmd("filetype detect");
           }
         }
@@ -294,6 +293,8 @@ export class PreviewUi {
       } else {
         return `ddu-filer:${previewer.path}`;
       }
+    } else if (previewer.kind === "nofile") {
+      return `ddu-ff:preview`;
     } else {
       return `ddu-filer:${item.word}`;
     }
