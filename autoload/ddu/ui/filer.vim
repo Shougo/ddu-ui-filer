@@ -135,7 +135,14 @@ function! ddu#ui#filer#_restore_cursor(path) abort
   endif
 endfunction
 
-function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
+function! ddu#ui#filer#_open_preview_window(
+      \ params, bufnr, preview_bufnr, prev_winid, preview_winid) abort
+  if a:preview_winid >= 0 && (!a:params.previewFloating || has('nvim'))
+    call win_gotoid(a:preview_winid)
+    execute 'buffer' a:preview_bufnr
+    return a:preview_winid
+  endif
+
   let preview_width = a:params.previewWidth
   let preview_height = a:params.previewHeight
   const winnr = a:bufnr->bufwinid()
@@ -144,9 +151,7 @@ function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
   const win_height = winnr->winheight()
 
   if a:params.previewSplit ==# 'vertical'
-    if a:params.previewFloating && '*nvim_win_set_config'->exists()
-      const buf = nvim_create_buf(v:true, v:false)
-
+    if a:params.previewFloating
       if a:params.split ==# 'floating'
         let win_row = a:params.previewRow > 0 ?
               \ a:params.previewRow : pos[0] - 1
@@ -162,24 +167,54 @@ function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
         let win_col -= preview_width
       endif
 
-      call nvim_open_win(buf, v:true, #{
-            \   relative: 'editor',
-            \   row: win_row,
-            \   col: win_col,
-            \   width: preview_width,
-            \   height: preview_height,
-            \   border: a:params.previewFloatingBorder,
-            \   zindex: a:params.previewFloatingZindex,
-            \ })
+      if a:params.previewFloatingBorder !=# 'none'
+        let preview_width -= 2
+        let preview_height -= 2
+      endif
+
+      if has('nvim')
+        const winid = nvim_open_win(a:preview_bufnr, v:true, #{
+              \   relative: 'editor',
+              \   row: win_row,
+              \   col: win_col,
+              \   width: preview_width,
+              \   height: preview_height,
+              \   border: a:params.previewFloatingBorder,
+              \   title: a:params.previewFloatingTitle,
+              \   title_pos: a:params.previewFloatingTitlePos,
+              \   zindex: a:params.previewFloatingZindex,
+              \ })
+      else
+        let winopts = #{
+              \   pos: 'topleft',
+              \   line: win_row + 1,
+              \   col: win_col + 1,
+              \   border: [],
+              \   borderchars: [],
+              \   borderhighlight: [],
+              \   highlight: 'Normal',
+              \   maxwidth: preview_width,
+              \   minwidth: preview_width,
+              \   maxheight: preview_height,
+              \   minheight: preview_height,
+              \   scrollbar: 0,
+              \   title: a:params.previewFloatingTitle,
+              \   wrap: 0,
+              \   zindex: a:params.previewFloatingZindex,
+              \ }
+        if a:preview_winid >= 0
+          call popup_close(a:preview_winid)
+        endif
+        const winid = a:preview_bufnr->popup_create(winopts)
+      endif
     else
       call win_gotoid(winnr)
-      silent rightbelow vnew
+      execute 'silent rightbelow vertical sbuffer' a:preview_bufnr
       execute 'vert resize ' .. preview_width
+      const winid = win_getid()
     endif
   elseif a:params.previewSplit ==# 'horizontal'
-    if a:params.previewFloating && '*nvim_win_set_config'->exists()
-      const buf = nvim_create_buf(v:true, v:false)
-
+    if a:params.previewFloating
       if a:params.split ==# 'floating'
         let preview_width = win_width
       endif
@@ -188,29 +223,73 @@ function! ddu#ui#filer#_open_preview_window(params, bufnr, prev_winid) abort
               \ a:params.previewRow : pos[0] - 1
       let win_col = a:params.previewCol > 0 ?
               \ a:params.previewCol : pos[1] - 1
-      if a:params.previewRow <= 0 && win_row <= preview_height
-        let win_row += win_height + 1
-        const anchor = 'NW'
-      else
-        const anchor = 'SW'
+
+      if a:params.previewFloatingBorder !=# 'none'
+        let preview_width -= 2
+        let preview_height -= 2
       endif
 
-      call nvim_open_win(buf, v:true, #{
-            \   relative: 'editor',
-            \   anchor: anchor,
-            \   row: win_row,
-            \   col: win_col,
-            \   width: preview_width,
-            \   height: preview_height,
-            \   border: a:params.previewFloatingBorder,
-            \   zindex: a:params.previewFloatingZindex,
-            \ })
+      if has('nvim')
+        if a:params.previewRow <= 0 && win_row <= preview_height
+          let win_row += win_height + 1
+          const anchor = 'NW'
+        else
+          const anchor = 'SW'
+        endif
+
+        const winid = nvim_open_win(a:preview_bufnr, v:true, #{
+              \   relative: 'editor',
+              \   anchor: anchor,
+              \   row: win_row,
+              \   col: win_col,
+              \   width: preview_width,
+              \   height: preview_height,
+              \   border: a:params.previewFloatingBorder,
+              \   title: a:params.previewFloatingTitle,
+              \   title_pos: a:params.previewFloatingTitlePos,
+              \   zindex: a:params.previewFloatingZindex,
+              \ })
+      else
+        if a:params.previewRow <= 0
+          let win_row -= preview_height + 2
+        endif
+        let winopts = #{
+              \   pos: 'topleft',
+              \   line: win_row + 1,
+              \   col: win_col + 1,
+              \   border: [],
+              \   borderchars: [],
+              \   borderhighlight: [],
+              \   highlight: 'Normal',
+              \   maxwidth: preview_width,
+              \   minwidth: preview_width,
+              \   maxheight: preview_height,
+              \   minheight: preview_height,
+              \   scrollbar: 0,
+              \   title: a:params.previewFloatingTitle,
+              \   wrap: 0,
+              \   zindex: a:params.previewFloatingZindex,
+              \ }
+        if a:preview_winid >= 0
+          call popup_close(a:preview_winid)
+        endif
+        const winid = a:preview_bufnr->popup_create(winopts)
+      endif
     else
       call win_gotoid(winnr)
-      silent aboveleft new
+      execute 'silent aboveleft sbuffer' a:preview_bufnr
       execute 'resize ' .. preview_height
+      const winid = win_getid()
     endif
   elseif a:params.previewSplit ==# 'no'
     call win_gotoid(a:prev_winid)
+    execute 'buffer' a:preview_bufnr
+    const winid = win_getid()
   endif
+
+  if a:params.previewSplit !=# 'no'
+    call setwinvar(winid, 'previewwindow', v:true)
+  endif
+
+  return winid
 endfunction

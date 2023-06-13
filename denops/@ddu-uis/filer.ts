@@ -453,7 +453,7 @@ export class Ui extends BaseUi<Params> {
     options: DduOptions;
     uiParams: Params;
   }): Promise<void> {
-    await this.previewUi.close(args.denops, args.context);
+    await this.previewUi.close(args.denops, args.context, args.uiParams);
 
     // Move to the UI window.
     const bufnr = await this.getBufnr(args.denops);
