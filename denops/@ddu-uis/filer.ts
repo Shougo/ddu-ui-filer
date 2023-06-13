@@ -53,6 +53,7 @@ type OnPreviewArguments = {
   denops: Denops;
   context: Context;
   item: DduItem;
+  previewWinId: number;
 };
 
 export type Params = {
@@ -845,7 +846,7 @@ export class Ui extends BaseUi<Params> {
       previewHeight: 10,
       previewRow: 0,
       previewSplit: "horizontal",
-      previewWidth: 40,
+      previewWidth: 80,
       previewWindowOptions: [
         ["&signcolumn", "no"],
         ["&foldcolumn", 0],

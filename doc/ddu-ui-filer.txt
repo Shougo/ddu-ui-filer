@@ -293,7 +293,7 @@ previewWidth	(number)
 		If |ddu-ui-filer-param-previewFloating|, set the width of the
 		floating window.
 
-		Default: 40
+		Default: 80
 
 				*ddu-ui-filer-param-previewWindowOptions*
 previewWindowOptions	(list)

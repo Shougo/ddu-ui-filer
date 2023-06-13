@@ -124,7 +124,7 @@ export class PreviewUi {
       return flag;
     }
 
-    if (uiParams.previewFloating) {
+    if (uiParams.previewFloating && denops.meta.host === "nvim") {
       const highlight = uiParams.highlights?.floating ?? "NormalFloat";
       const borderHighlight = uiParams.highlights?.floatingBorder ??
         "FloatBorder";
@@ -153,6 +153,7 @@ export class PreviewUi {
           denops,
           context,
           item,
+          previewWinId: this.previewWinId,
         });
       }
     }
