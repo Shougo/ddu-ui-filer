@@ -1,14 +1,14 @@
 let s:namespace = has('nvim') ? nvim_create_namespace('ddu-ui-filer') : 0
 
-function! ddu#ui#filer#do_action(name, options = {}) abort
+function ddu#ui#filer#do_action(name, options = {}) abort
   return ddu#ui#do_action(a:name, a:options)
 endfunction
 
-function! ddu#ui#filer#multi_actions(actions) abort
+function ddu#ui#filer#multi_actions(actions) abort
   return ddu#ui#multi_actions(a:actions)
 endfunction
 
-function! ddu#ui#filer#_update_buffer(
+function ddu#ui#filer#_update_buffer(
       \ params, bufnr, lines, refreshed, pos) abort
   const max_lines = a:lines->len()
   const current_lines = '$'->line(a:bufnr->bufwinid())
@@ -30,7 +30,7 @@ function! ddu#ui#filer#_update_buffer(
   endif
 endfunction
 
-function! ddu#ui#filer#_highlight_items(
+function ddu#ui#filer#_highlight_items(
       \ params, bufnr, max_lines, highlight_items, selected_items) abort
   " Buffer must be loaded
   if !(a:bufnr->bufloaded())
@@ -68,7 +68,7 @@ function! ddu#ui#filer#_highlight_items(
     redraw
   endif
 endfunction
-function! ddu#ui#filer#_highlight(
+function ddu#ui#filer#_highlight(
       \ highlight, prop_type, priority, id, bufnr, row, col, length) abort
   if !has('nvim')
     " Add prop_type
@@ -99,7 +99,7 @@ function! ddu#ui#filer#_highlight(
   endif
 endfunction
 
-function! ddu#ui#filer#_save_cursor(path) abort
+function ddu#ui#filer#_save_cursor(path) abort
   if a:path ==# ''
     return
   endif
@@ -120,7 +120,7 @@ function! ddu#ui#filer#_save_cursor(path) abort
         \   text: b:ddu_ui_filer_cursor_text,
         \ }
 endfunction
-function! ddu#ui#filer#_restore_cursor(path) abort
+function ddu#ui#filer#_restore_cursor(path) abort
   const save_pos = b:->get('ddu_ui_filer_save_cursor', {})
   if save_pos->has_key(a:path)
     const save_cursor_pos = save_pos[a:path].pos
@@ -135,7 +135,7 @@ function! ddu#ui#filer#_restore_cursor(path) abort
   endif
 endfunction
 
-function! ddu#ui#filer#_open_preview_window(
+function ddu#ui#filer#_open_preview_window(
       \ params, bufnr, preview_bufnr, prev_winid, preview_winid) abort
   if a:preview_winid >= 0 && (!a:params.previewFloating || has('nvim'))
     call win_gotoid(a:preview_winid)

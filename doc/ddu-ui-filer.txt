@@ -409,7 +409,7 @@ EXAMPLES					*ddu-ui-filer-examples*
 	    \ })
 
 	autocmd FileType ddu-filer call s:ddu_filer_my_settings()
-	function! s:ddu_filer_my_settings() abort
+	function s:ddu_filer_my_settings() abort
 	  nnoremap <buffer> <CR>
 	  \ <Cmd>call ddu#ui#do_action('itemAction')<CR>
 	  nnoremap <buffer> o
@@ -432,7 +432,7 @@ A: >
 	\   },
 	\ })<CR>
 	
-	function! ToggleHidden()
+	function ToggleHidden()
 	  const current = ddu#custom#get_current(b:ddu_ui_name)
 	  const source_options = get(current, 'sourceOptions', {})
 	  const source_options_all = get(source_options, '_', {})
