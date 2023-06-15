@@ -125,7 +125,7 @@ function! ddu#ui#filer#_restore_cursor(path) abort
   if save_pos->has_key(a:path)
     const save_cursor_pos = save_pos[a:path].pos
   else
-    const save_cursor_pos = b:->get('ddu_ui_filer_cursor_pos', [])
+    const save_cursor_pos = []
   endif
 
   if !(save_cursor_pos->empty())
