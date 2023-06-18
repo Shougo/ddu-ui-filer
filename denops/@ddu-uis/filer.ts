@@ -8,18 +8,20 @@ import {
   PreviewContext,
   Previewer,
   SourceInfo,
-  TreePath,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v3.2.0/types.ts";
+} from "https://deno.land/x/ddu_vim@v3.2.1/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
-  pathsep,
   vars,
-} from "https://deno.land/x/ddu_vim@v3.2.0/deps.ts";
+} from "https://deno.land/x/ddu_vim@v3.2.1/deps.ts";
+import {
+  errorException,
+  treePath2Filename,
+} from "https://deno.land/x/ddu_vim@v3.2.1/utils.ts";
 import { extname } from "https://deno.land/std@0.192.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.3/env.js";
 import { PreviewUi } from "../@ddu-ui-filer/preview.ts";
@@ -1123,26 +1125,3 @@ const sortByTime = (a: DduItem, b: DduItem) => {
 const sortByNone = (_a: DduItem, _b: DduItem) => {
   return 0;
 };
-
-const treePath2Filename = (treePath: TreePath) => {
-  return typeof treePath === "string" ? treePath : treePath.join(pathsep);
-};
-
-async function errorException(denops: Denops, e: unknown, message: string) {
-  await denops.call(
-    "ddu#util#print_error",
-    message,
-  );
-  if (e instanceof Error) {
-    await denops.call(
-      "ddu#util#print_error",
-      e.message,
-    );
-    if (e.stack) {
-      await denops.call(
-        "ddu#util#print_error",
-        e.stack,
-      );
-    }
-  }
-}
