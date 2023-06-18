@@ -8,6 +8,7 @@ import {
   PreviewContext,
   Previewer,
   SourceInfo,
+  TreePath,
   UiActions,
   UiOptions,
 } from "https://deno.land/x/ddu_vim@v3.2.0/types.ts";
@@ -16,6 +17,7 @@ import {
   Denops,
   fn,
   op,
+  pathsep,
   vars,
 } from "https://deno.land/x/ddu_vim@v3.2.0/deps.ts";
 import { extname } from "https://deno.land/std@0.192.0/path/mod.ts";
@@ -1014,7 +1016,7 @@ export class Ui extends BaseUi<Params> {
       // Create root item from source directory
 
       // Replace the home directory.
-      let root = source.path;
+      let root = treePath2Filename(source.path);
       if (root === "") {
         root = await fn.getcwd(denops) as string;
       }
@@ -1101,8 +1103,8 @@ const sortByFilename = (a: DduItem, b: DduItem) => {
 };
 
 const sortByExtension = (a: DduItem, b: DduItem) => {
-  const nameA = extname(a.treePath ?? a.word);
-  const nameB = extname(b.treePath ?? b.word);
+  const nameA = extname(treePath2Filename(a.treePath ?? a.word));
+  const nameB = extname(treePath2Filename(b.treePath ?? b.word));
   return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
 };
 
@@ -1121,6 +1123,10 @@ const sortByTime = (a: DduItem, b: DduItem) => {
 const sortByNone = (_a: DduItem, _b: DduItem) => {
   return 0;
 };
+
+function treePath2Filename(treePath: TreePath) {
+  return typeof treePath === "string" ? treePath : treePath.join(pathsep);
+}
 
 async function errorException(denops: Denops, e: unknown, message: string) {
   await denops.call(
