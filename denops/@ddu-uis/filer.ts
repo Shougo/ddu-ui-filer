@@ -1124,9 +1124,9 @@ const sortByNone = (_a: DduItem, _b: DduItem) => {
   return 0;
 };
 
-function treePath2Filename(treePath: TreePath) {
+const treePath2Filename = (treePath: TreePath) => {
   return typeof treePath === "string" ? treePath : treePath.join(pathsep);
-}
+};
 
 async function errorException(denops: Denops, e: unknown, message: string) {
   await denops.call(
