@@ -10,18 +10,18 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v3.2.1/types.ts";
+} from "https://deno.land/x/ddu_vim@v3.2.3/types.ts";
 import {
   batch,
   Denops,
   fn,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v3.2.1/deps.ts";
+} from "https://deno.land/x/ddu_vim@v3.2.3/deps.ts";
 import {
   errorException,
   treePath2Filename,
-} from "https://deno.land/x/ddu_vim@v3.2.1/utils.ts";
+} from "https://deno.land/x/ddu_vim@v3.2.3/utils.ts";
 import { extname } from "https://deno.land/std@0.192.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.3/env.js";
 import { PreviewUi } from "../@ddu-ui-filer/preview.ts";
@@ -628,12 +628,11 @@ export class Ui extends BaseUi<Params> {
       options: DduOptions;
       actionParams: unknown;
     }) => {
-      const idx = await this.getIndex(args.denops);
-      if (idx < 0) {
+      const item = await this.getItem(args.denops);
+      if (!item) {
         return ActionFlags.None;
       }
 
-      const item = this.items[idx];
       const params = args.actionParams as ExpandItemParams;
 
       if (item.__expanded) {
@@ -656,14 +655,24 @@ export class Ui extends BaseUi<Params> {
       denops: Denops;
       options: DduOptions;
     }) => {
-      const idx = await this.getIndex(args.denops);
-      if (idx < 0) {
-        return ActionFlags.None;
-      }
-
-      const item = this.items[idx];
+      const item = await this.getItem(args.denops);
       const bufnr = await this.getBufnr(args.denops);
-      await fn.setbufvar(args.denops, bufnr, "ddu_ui_item", item);
+      await fn.setbufvar(args.denops, bufnr, "ddu_ui_item", item ?? {});
+
+      return ActionFlags.None;
+    },
+    getItems: async (args: {
+      denops: Denops;
+      options: DduOptions;
+    }) => {
+      const bufnr = await this.getBufnr(args.denops);
+      await fn.setbufvar(args.denops, bufnr, "ddu_ui_items", this.items);
+
+      const ft = await op.filetype.getLocal(args.denops);
+      if (ft === "ddu-ff-filter") {
+        // Set for filter window
+        await vars.b.set(args.denops, "ddu_ui_items", this.items);
+      }
 
       return ActionFlags.None;
     },
@@ -744,12 +753,7 @@ export class Ui extends BaseUi<Params> {
         previewContext: PreviewContext,
       ) => Promise<Previewer | undefined>;
     }) => {
-      const idx = await this.getIndex(args.denops);
-      if (idx < 0) {
-        return ActionFlags.None;
-      }
-
-      const item = this.items[idx];
+      const item = await this.getItem(args.denops);
       if (!item) {
         return ActionFlags.None;
       }
@@ -871,14 +875,43 @@ export class Ui extends BaseUi<Params> {
     };
   }
 
+  private async getIndex(
+    denops: Denops,
+  ): Promise<number> {
+    // Convert viewItems index to items index.
+    const bufnr = await this.getBufnr(denops);
+    const cursorPos = await fn.getbufvar(
+      denops,
+      bufnr,
+      "ddu_ui_filer_cursor_pos",
+      [],
+    ) as number[];
+    if (cursorPos.length === 0) {
+      return -1;
+    }
+
+    const viewItem = this.viewItems[cursorPos[1] - 1];
+    return this.items.findIndex(
+      (item: DduItem) => item === viewItem,
+    );
+  }
+
+  private async getItem(
+    denops: Denops,
+  ): Promise<DduItem | null> {
+    const idx = await this.getIndex(denops);
+    return idx >= 0 ? this.items[idx] : null;
+  }
+
   private async getItems(denops: Denops): Promise<DduItem[]> {
     let items: DduItem[];
     if (this.selectedItems.size === 0) {
-      const idx = await this.getIndex(denops);
-      if (idx < 0) {
+      const item = await this.getItem(denops);
+      if (!item) {
         return [];
       }
-      items = [this.items[idx]];
+
+      items = [item];
     } else {
       items = [...this.selectedItems].map((i) => this.items[i]);
     }
@@ -887,14 +920,8 @@ export class Ui extends BaseUi<Params> {
   }
 
   private async collapseItemAction(denops: Denops, options: DduOptions) {
-    const index = await this.getIndex(denops);
-    if (index < 0) {
-      return ActionFlags.None;
-    }
-
-    const closeItem = this.items[index];
-
-    if (!closeItem.isTree) {
+    const item = await this.getItem(denops);
+    if (!item || !item.isTree) {
       return ActionFlags.None;
     }
 
@@ -902,7 +929,7 @@ export class Ui extends BaseUi<Params> {
       "ddu#redraw_tree",
       options.name,
       "collapse",
-      [{ item: closeItem }],
+      [{ item }],
     );
 
     return ActionFlags.None;
@@ -976,27 +1003,6 @@ export class Ui extends BaseUi<Params> {
     denops: Denops,
   ): Promise<number> {
     return await fn.bufnr(denops, this.bufferName);
-  }
-
-  private async getIndex(
-    denops: Denops,
-  ): Promise<number> {
-    // Convert viewItems index to items index.
-    const bufnr = await this.getBufnr(denops);
-    const cursorPos = await fn.getbufvar(
-      denops,
-      bufnr,
-      "ddu_ui_filer_cursor_pos",
-      [],
-    ) as number[];
-    if (cursorPos.length === 0) {
-      return -1;
-    }
-
-    const viewItem = this.viewItems[cursorPos[1] - 1];
-    return this.items.findIndex(
-      (item: DduItem) => item === viewItem,
-    );
   }
 
   private async getSortedItems(
