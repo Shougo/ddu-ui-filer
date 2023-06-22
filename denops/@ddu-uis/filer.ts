@@ -221,6 +221,11 @@ export class Ui extends BaseUi<Params> {
       return;
     }
 
+    if (this.items.length === 0 && args.context.done) {
+      // Close preview window when empty items
+      await this.previewUi.close(args.denops, args.context, args.uiParams);
+    }
+
     this.bufferName = `ddu-filer-${args.options.name}`;
     const initialized = await fn.bufexists(args.denops, this.bufferName) &&
       await fn.bufnr(args.denops, this.bufferName);
