@@ -201,6 +201,7 @@ export class PreviewUi {
         "ddu#ui#filer#_open_preview_window",
         uiParams,
         bufnr,
+        bufnr,
         previousWinId,
         this.previewWinId,
       ) as number;
