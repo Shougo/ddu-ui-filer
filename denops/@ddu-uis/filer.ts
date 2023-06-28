@@ -24,7 +24,7 @@ import {
 } from "https://deno.land/x/ddu_vim@v3.2.7/utils.ts";
 import { extname } from "https://deno.land/std@0.192.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.3/env.js";
-import { PreviewUi } from "../@ddu-ui-filer/preview.ts";
+import { PreviewUi } from "./filer/preview.ts";
 
 const env = new Env();
 
