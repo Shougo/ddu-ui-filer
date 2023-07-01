@@ -388,13 +388,15 @@ export class Ui extends BaseUi<Params> {
           args.uiParams,
           bufnr,
           this.items.length,
-          this.items.map((c, i) => {
+          this.items.map((item, index) => {
             return {
-              highlights: c.highlights ?? [],
-              row: i + 1,
+              highlights: item.highlights ?? [],
+              row: index + 1,
               prefix: "",
             };
-          }).filter((c) => c.highlights.length > 0),
+          }).filter((item, index) =>
+            item.highlights.length > 0 && !this.selectedItems.has(index)
+          ),
           [...this.selectedItems],
         );
       });
