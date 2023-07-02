@@ -795,14 +795,14 @@ export class Ui extends BaseUi<Params> {
       options: DduOptions;
       uiParams: Params;
     }) => {
+      await args.denops.call("ddu#pop", args.options.name);
+
       await this.quit({
         denops: args.denops,
         context: args.context,
         options: args.options,
         uiParams: args.uiParams,
       });
-
-      await args.denops.call("ddu#pop", args.options.name);
 
       return ActionFlags.None;
     },
