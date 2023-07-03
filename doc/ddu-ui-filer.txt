@@ -438,6 +438,7 @@ FAQ 5:							|ddu-ui-filer-faq-5|
 FAQ 6:							|ddu-ui-filer-faq-6|
 	I want to check the current item is tree.
 
+
 ------------------------------------------------------------------------------
 							*ddu-ui-filer-faq-1*
 Q: I want to toggle hidden files by mappings.
