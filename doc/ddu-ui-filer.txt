@@ -420,6 +420,26 @@ EXAMPLES					*ddu-ui-filer-examples*
 ==============================================================================
 FREQUENTLY ASKED QUESTIONS (FAQ)			*ddu-ui-filer-faq*
 
+FAQ 1:							|ddu-ui-filer-faq-1|
+	I want to toggle hidden files by mappings.
+
+FAQ 2:							|ddu-ui-filer-faq-2|
+	I want to check updated items automatically.
+
+FAQ 3:							|ddu-ui-filer-faq-3|
+	I want to use icon fonts in ddu columns.
+
+FAQ 4:							|ddu-ui-filer-faq-4|
+	Flickering when moving directories using narrow action.
+
+FAQ 5:							|ddu-ui-filer-faq-5|
+	I want to use existing buffer to show preview.
+
+FAQ 6:							|ddu-ui-filer-faq-6|
+	I want to check the current item is tree.
+
+------------------------------------------------------------------------------
+							*ddu-ui-filer-faq-1*
 Q: I want to toggle hidden files by mappings.
 
 A: >
@@ -439,7 +459,9 @@ A: >
 	  const matchers = get(source_options_all, 'matchers', [])
 	  return empty(matchers) ? ['matcher_hidden'] : []
 	endfunction
+<
 
+							*ddu-ui-filer-faq-2*
 Q: I want to check updated items automatically.
 
 A: >
@@ -448,12 +470,14 @@ A: >
 
 NOTE: Source support is needed for |ddu-ui-filer-action-checkItems|.
 
+							*ddu-ui-filer-faq-3*
 Q: I want to use icon fonts in ddu columns.
 
 A: You can use "ddu-column-icon_filename".
 
 https://github.com/ryota2357/ddu-column-icon_filename
 
+							*ddu-ui-filer-faq-4*
 Q: Flickering when moving directories using narrow action.
 
 A: You need to set |ddu-action-option-quit| for narrow action. >
@@ -468,10 +492,12 @@ A: You need to set |ddu-action-option-quit| for narrow action. >
 	    \ })
 <
 
+							*ddu-ui-filer-faq-5*
 Q: I want to use existing buffer to show preview.
 
 A: Please use "no" in |ddu-ui-filer-param-previewSplit|.
 
+							*ddu-ui-filer-faq-6*
 Q: I want to check the current item is tree.
 
 A: >
