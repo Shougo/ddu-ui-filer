@@ -566,6 +566,14 @@ export class Ui extends BaseUi<Params> {
       this.selectedItems.clear();
       return Promise.resolve(ActionFlags.Redraw);
     },
+    closePreviewWindow: async (args: {
+      denops: Denops;
+      context: Context;
+      uiParams: Params;
+    }) => {
+      await this.previewUi.close(args.denops, args.context, args.uiParams);
+      return ActionFlags.None;
+    },
     collapseItem: async (args: {
       denops: Denops;
       options: DduOptions;

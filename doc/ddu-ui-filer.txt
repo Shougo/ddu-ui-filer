@@ -71,6 +71,10 @@ chooseAction
 clearSelectAllItems
 		Clear all selected items.
 
+				*ddu-ui-filer-action-closePreviewWindow*
+closePreviewWindow
+		Close the preview window.
+
 					*ddu-ui-filer-action-collapseItem*
 collapseItem
 		Collapse the item tree.
