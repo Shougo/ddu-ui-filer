@@ -150,6 +150,10 @@ preview
 toggleAllItems
 		Toggle selected state for the all items.
 
+					*ddu-ui-filer-action-togglePreview*
+togglePreview
+		Toggle |ddu-ui-filer-action-preview| for cursor item.
+
 					*ddu-ui-filer-action-toggleSelectItem*
 toggleSelectItem
 		Toggle selected item.
@@ -516,6 +520,9 @@ A: >
 
 ==============================================================================
 COMPATIBILITY					*ddu-ui-filer-compatibility*
+
+2023.07.12
+* "preview" action does not toggle.
 
 2023.03.19
 * Remove "ddu#ui#filer#get_item" and "ddu#ui#filer#is_tree()".  Please use
