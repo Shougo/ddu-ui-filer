@@ -473,6 +473,7 @@ export class Ui extends BaseUi<Params> {
     uiParams: Params;
   }): Promise<void> {
     await this.previewUi.close(args.denops, args.context, args.uiParams);
+    await this.previewUi.removePreviewedBuffers(args.denops);
 
     // Move to the UI window.
     const bufnr = await this.getBufnr(args.denops);
