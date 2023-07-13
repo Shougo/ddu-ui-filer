@@ -26,7 +26,7 @@ type PreviewParams = {
 export class PreviewUi {
   private previewWinId = -1;
   private previewedTarget?: DduItem;
-  private previewBufnrs: Set<number> = new Set();
+  private previewedBufnrs: Set<number> = new Set();
 
   async close(denops: Denops, context: Context, uiParams: Params) {
     if (this.previewWinId > 0 && (await fn.winnr(denops, "$")) !== 1) {
@@ -52,7 +52,7 @@ export class PreviewUi {
 
   async removePreviewedBuffers(denops: Denops) {
     await batch(denops, async (denops) => {
-      for (const bufnr of this.previewBufnrs) {
+      for (const bufnr of this.previewedBufnrs) {
         await denops.cmd(
           `if bufexists(${bufnr}) && winbufnr(${bufnr}) < 0 | silent bwipeout! ${bufnr} | endif`,
         );
@@ -174,8 +174,7 @@ export class PreviewUi {
       }
     }
 
-    const previewBufnr = await fn.bufnr(denops);
-    this.previewBufnrs.add(previewBufnr);
+    this.previewedBufnrs.add(await fn.bufnr(denops));
     this.previewedTarget = item;
     await fn.win_gotoid(denops, prevId);
 
