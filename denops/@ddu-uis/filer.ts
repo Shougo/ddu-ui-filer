@@ -68,6 +68,7 @@ type PreviewExecuteParams = {
 };
 
 export type Params = {
+  displayRoot: boolean;
   exprParams: (keyof Params)[];
   floatingBorder: FloatingBorder;
   floatingTitle: FloatingTitle;
@@ -928,6 +929,7 @@ export class Ui extends BaseUi<Params> {
 
   override params(): Params {
     return {
+      displayRoot: true,
       exprParams: [
         "previewCol",
         "previewRow",
@@ -1167,27 +1169,24 @@ export class Ui extends BaseUi<Params> {
       sourceItems[item.__sourceIndex].push(item);
     }
 
-    let ret: DduItem[] = [];
-    for (const source of sources) {
-      // Create root item from source directory
-
+    const createRoot = async (source: SourceInfo) => {
       // Replace the home directory.
-      let root = treePath2Filename(source.path);
-      if (root === "") {
-        root = await fn.getcwd(denops) as string;
+      let rootPath = treePath2Filename(source.path);
+      if (rootPath === "") {
+        rootPath = await fn.getcwd(denops) as string;
       }
-      let display = root;
+      let display = rootPath;
       const home = env.get("HOME", "");
       if (home && home !== "") {
         display = display.replace(home, "~");
       }
 
-      ret.push({
-        word: root,
+      return {
+        word: rootPath,
         display: `${source.name}:${display}`,
         action: {
           isDirectory: true,
-          path: root,
+          path: rootPath,
         },
         highlights: [
           {
@@ -1205,13 +1204,21 @@ export class Ui extends BaseUi<Params> {
         ],
         kind: source.kind,
         isTree: true,
-        treePath: root,
+        treePath: rootPath,
         matcherKey: "word",
         __sourceIndex: source.index,
         __sourceName: source.name,
         __level: -1,
         __expanded: true,
-      });
+      };
+    };
+
+    let ret: DduItem[] = [];
+    for (const source of sources) {
+      if (uiParams.displayRoot) {
+        // Create root item from source directory
+        ret.push(await createRoot(source));
+      }
 
       if (!sourceItems[source.index]) {
         continue;

@@ -172,6 +172,13 @@ updateOptions
 ==============================================================================
 PARAMS						*ddu-ui-filer-params*
 
+					*ddu-ui-filer-param-displayRoot*
+displayRoot	(boolean)
+		Display source root item.
+		It shows source path.
+
+		Default: v:true
+
 					*ddu-ui-filer-param-exprParams*
 exprParams	(string[])
 		Evaluate params list.
