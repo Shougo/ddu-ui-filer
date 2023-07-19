@@ -11,6 +11,7 @@ Interface		|ddu-ui-filer-interface|
   Functions		  |ddu-ui-filer-functions|
   Actions		  |ddu-ui-filer-actions|
   Params		  |ddu-ui-filer-params|
+  Params expression	  |ddu-ui-filer-params-expression|
 Examples		|ddu-ui-filer-examples|
 FAQ			|ddu-ui-filer-faq|
 Compatibility		|ddu-ui-filer-compatibility|
@@ -170,6 +171,23 @@ updateOptions
 
 ==============================================================================
 PARAMS						*ddu-ui-filer-params*
+
+					*ddu-ui-filer-param-exprParams*
+exprParams	(string[])
+		Evaluate params list.
+		If the param is string, it is evaluated as
+		|ddu-ui-filer-params-expression|.
+
+		Default: [
+		  "previewCol",
+		  "previewRow",
+		  "previewHeight",
+		  "previewWidth",
+		  "winCol",
+		  "winRow",
+		  "winHeight",
+		  "winWidth",
+		]
 
 					*ddu-ui-filer-param-floatingBorder*
 floatingBorder	(string | list)
@@ -373,14 +391,14 @@ statusline	(boolean)
 		Default: v:true
 
 						*ddu-ui-filer-param-winCol*
-winCol		(number)
+winCol		(number | string)
 		Set the column position of the window if
 		|ddu-ui-filer-param-split| is "floating".
 
-		Default: &columns / 4
+		Default: "(&columns - eval(uiParams.winWidth)) / 2"
 
 						*ddu-ui-filer-param-winHeight*
-winHeight	(number)
+winHeight	(number | string)
 		Set the height of the window if |ddu-ui-filer-param-split| is
 		"horizontal".
 		if |ddu-ui-filer-param-split| is "floating",
@@ -389,21 +407,57 @@ winHeight	(number)
 		Default: 20
 
 						*ddu-ui-filer-param-winRow*
-winRow		(number)
+winRow		(number | string)
 		Set the row position of the window if
 		|ddu-ui-filer-param-split| is "floating".
 
-		Default: &lines / 2 - 10
+		Default: "&lines / 2 - 10"
 
 						*ddu-ui-filer-param-winwidth*
-winWidth	(number)
+winWidth	(number | string)
 		Set the width of the window if |ddu-ui-filer-param-split| is
 		"vertical".
 		if |ddu-ui-filer-param-split| is "floating", set the width of
 		the floating window.
 
-		Default: &columns / 2
+		Default: "&columns / 2"
 
+
+==============================================================================
+PARAMS EXPRESSION			*ddu-ui-filer-params-expression*
+
+If the parameter value is a string, it can be evaluated as a Vim |expression|.
+Expressions must not have side effects.  The following variables exist in the
+expression context:
+
+	bufName		(string)
+	bufNr		(number)
+	itemCount	(number)
+	sources		(string[])
+	uiParams	(|ddu-ui-filer-params|)
+	winId		(number)
+
+An example of floating the UI window on the left side and the preview window
+on the right side of the screen: >
+
+	call ddu#custom#patch_global(#{
+	    \   ui: 'filer',
+	    \   uiParams: #{
+	    \     filer: #{
+	    \       split: 'floating',
+	    \       winHeight: '&lines - 8',
+	    \       winWidth: '&columns / 2 - 2',
+	    \       winRow: 1,
+	    \       winCol: 1,
+	    \       previewFloating: v:true,
+	    \       previewHeight: '&lines - 8',
+	    \       previewWidth: '&columns / 2 - 2',
+	    \       previewRow: 1,
+	    \       previewCol: '&columns / 2 + 1',
+	    \     }
+	    \   },
+	    \ })
+<
 
 ==============================================================================
 EXAMPLES					*ddu-ui-filer-examples*
@@ -424,7 +478,7 @@ EXAMPLES					*ddu-ui-filer-examples*
 	  nnoremap <buffer> o
 	  \ <Cmd>call ddu#ui#do_action('expandItem')<CR>
 	endfunction
-
+<
 
 ==============================================================================
 FREQUENTLY ASKED QUESTIONS (FAQ)			*ddu-ui-filer-faq*

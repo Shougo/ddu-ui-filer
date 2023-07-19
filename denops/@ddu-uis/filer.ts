@@ -10,18 +10,19 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v3.4.2/types.ts";
+} from "https://deno.land/x/ddu_vim@v3.4.3/types.ts";
 import {
   batch,
   Denops,
   fn,
+  is,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v3.4.2/deps.ts";
+} from "https://deno.land/x/ddu_vim@v3.4.3/deps.ts";
 import {
   errorException,
   treePath2Filename,
-} from "https://deno.land/x/ddu_vim@v3.4.2/utils.ts";
+} from "https://deno.land/x/ddu_vim@v3.4.3/utils.ts";
 import { extname } from "https://deno.land/std@0.194.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.3/env.js";
 import { PreviewUi } from "./filer/preview.ts";
@@ -53,6 +54,8 @@ type FloatingTitle =
 
 type WindowOption = [string, number | string];
 
+type ExprNumber = string | number;
+
 type OnPreviewArguments = {
   denops: Denops;
   context: Context;
@@ -65,20 +68,21 @@ type PreviewExecuteParams = {
 };
 
 export type Params = {
+  exprParams: (keyof Params)[];
   floatingBorder: FloatingBorder;
   floatingTitle: FloatingTitle;
   floatingTitlePos: "left" | "center" | "right";
   focus: boolean;
   highlights: HighlightGroup;
   onPreview: string | ((args: OnPreviewArguments) => Promise<void>);
-  previewCol: number;
+  previewCol: ExprNumber;
   previewFloating: boolean;
   previewFloatingBorder: FloatingBorder;
   previewFloatingZindex: number;
-  previewHeight: number;
-  previewRow: number;
+  previewHeight: ExprNumber;
+  previewRow: ExprNumber;
   previewSplit: "horizontal" | "vertical" | "no";
-  previewWidth: number;
+  previewWidth: ExprNumber;
   previewWindowOptions: WindowOption[];
   search: string;
   sort:
@@ -95,10 +99,10 @@ export type Params = {
   split: "horizontal" | "vertical" | "floating" | "no";
   splitDirection: "botright" | "topleft";
   statusline: boolean;
-  winCol: number;
-  winHeight: number;
-  winRow: number;
-  winWidth: number;
+  winCol: ExprNumber;
+  winHeight: ExprNumber;
+  winRow: ExprNumber;
+  winWidth: ExprNumber;
 };
 
 type CursorActionParams = {
@@ -236,7 +240,12 @@ export class Ui extends BaseUi<Params> {
     const bufnr = initialized ||
       await this.initBuffer(args.denops, this.bufferName);
 
-    await this.setDefaultParams(args.denops, args.uiParams);
+    args.uiParams = await this.resolveParams(
+      args.denops,
+      args.options,
+      args.uiParams,
+      args.context,
+    );
 
     const hasNvim = args.denops.meta.host === "nvim";
     const floating = args.uiParams.split === "floating" && hasNvim;
@@ -782,6 +791,13 @@ export class Ui extends BaseUi<Params> {
         return ActionFlags.None;
       }
 
+      args.uiParams = await this.resolveParams(
+        args.denops,
+        args.options,
+        args.uiParams,
+        args.context,
+      );
+
       return this.previewUi.previewContents(
         args.denops,
         args.context,
@@ -867,6 +883,13 @@ export class Ui extends BaseUi<Params> {
         return ActionFlags.None;
       }
 
+      args.uiParams = await this.resolveParams(
+        args.denops,
+        args.options,
+        args.uiParams,
+        args.context,
+      );
+
       // Close if the target is the same as the previous one
       if (this.previewUi.isAlreadyPreviewed(item)) {
         await this.previewUi.close(args.denops, args.context, args.uiParams);
@@ -905,6 +928,16 @@ export class Ui extends BaseUi<Params> {
 
   override params(): Params {
     return {
+      exprParams: [
+        "previewCol",
+        "previewRow",
+        "previewHeight",
+        "previewWidth",
+        "winCol",
+        "winRow",
+        "winHeight",
+        "winWidth",
+      ],
       floatingBorder: "none",
       floatingTitle: "",
       floatingTitlePos: "left",
@@ -934,10 +967,10 @@ export class Ui extends BaseUi<Params> {
       sort: "none",
       sortTreesFirst: false,
       statusline: true,
-      winCol: 0,
+      winCol: "(&columns - eval(uiParams.winWidth)) / 2",
       winHeight: 20,
-      winRow: 0,
-      winWidth: 0,
+      winRow: "&lines / 2 - 10",
+      winWidth: "&columns / 2",
     };
   }
 
@@ -1049,19 +1082,68 @@ export class Ui extends BaseUi<Params> {
     });
   }
 
-  private async setDefaultParams(denops: Denops, uiParams: Params) {
-    if (uiParams.winRow === 0) {
-      uiParams.winRow = Math.trunc(
-        (await denops.call("eval", "&lines") as number) / 2 - 10,
-      );
+  private async resolveParams(
+    denops: Denops,
+    options: DduOptions,
+    uiParams: Params,
+    context: Record<string, unknown>,
+  ): Promise<Params> {
+    const defaults = this.params();
+
+    context = {
+      sources: options.sources.map(
+        (source) => is.String(source) ? source : source.name,
+      ),
+      itemCount: this.items.length,
+      uiParams,
+      ...context,
+    };
+
+    const params = Object.assign(uiParams);
+    for (const name of uiParams.exprParams) {
+      if (name in uiParams) {
+        params[name] = await this.evalExprParam(
+          denops,
+          name,
+          params[name],
+          defaults[name],
+          context,
+        );
+      } else {
+        await denops.call(
+          "ddu#util#print_error",
+          `Invalid expr param: ${name}`,
+        );
+      }
     }
-    if (uiParams.winCol === 0) {
-      uiParams.winCol = Math.trunc(
-        (await op.columns.getGlobal(denops)) / 4,
-      );
+
+    return params;
+  }
+
+  private async evalExprParam(
+    denops: Denops,
+    name: string,
+    expr: string | unknown,
+    defaultExpr: string | unknown,
+    context: Record<string, unknown>,
+  ): Promise<unknown> {
+    if (!is.String(expr)) {
+      return expr;
     }
-    if (uiParams.winWidth === 0) {
-      uiParams.winWidth = Math.trunc((await op.columns.getGlobal(denops)) / 2);
+
+    try {
+      return await denops.eval(expr, context);
+    } catch (e) {
+      await errorException(
+        denops,
+        e,
+        `[ddu-ui-ff] invalid expression in option: ${name}`,
+      );
+
+      // Fallback to default param.
+      return is.String(defaultExpr)
+        ? await denops.eval(defaultExpr, context)
+        : defaultExpr;
     }
   }
 
