@@ -97,10 +97,10 @@ export class PreviewUi {
     const previewParams = ensure(actionParams, is.Record) as PreviewParams;
 
     const previewContext: PreviewContext = {
-      col: uiParams.previewCol,
-      row: uiParams.previewRow,
-      width: uiParams.previewWidth,
-      height: uiParams.previewHeight,
+      col: Number(uiParams.previewCol),
+      row: Number(uiParams.previewRow),
+      width: Number(uiParams.previewWidth),
+      height: Number(uiParams.previewHeight),
       isFloating: uiParams.previewFloating,
       split: uiParams.previewSplit,
     };
@@ -251,19 +251,14 @@ export class PreviewUi {
       });
     }
 
-    try {
-      this.previewWinId = await denops.call(
-        "ddu#ui#filer#_open_preview_window",
-        uiParams,
-        bufnr,
-        previewBufnr,
-        previousWinId,
-        this.previewWinId,
-      ) as number;
-    } catch (_) {
-      // Failed to open preview window
-      return ActionFlags.None;
-    }
+    this.previewWinId = await denops.call(
+      "ddu#ui#filer#_open_preview_window",
+      uiParams,
+      bufnr,
+      previewBufnr,
+      previousWinId,
+      this.previewWinId,
+    ) as number;
 
     const limit = actionParams.syntaxLimitChars ?? 400000;
     if (contents.join("\n").length < limit) {
@@ -326,10 +321,8 @@ export class PreviewUi {
 
     try {
       const bufferPath = previewer?.expr ?? previewer?.path;
-      if (
-        previewer.path && await exists(previewer.path) &&
-        !(await isDirectory(previewer.path))
-      ) {
+      const stat = await safeStat(previewer.path);
+      if (previewer.path && stat && !stat.isDirectory) {
         const data = Deno.readFileSync(previewer.path);
         const contents = new TextDecoder().decode(data).split("\n");
         return [undefined, contents];
@@ -370,28 +363,19 @@ export class PreviewUi {
   }
 }
 
-const exists = async (path: string) => {
-  // NOTE: Deno.stat() may be failed
-  try {
-    if (await Deno.stat(path)) {
-      return true;
-    }
-  } catch (_e: unknown) {
-    // Ignore
+const safeStat = async (
+  path: string | undefined,
+): Promise<Deno.FileInfo | null> => {
+  if (!path) {
+    return null;
   }
 
-  return false;
-};
-
-const isDirectory = async (path: string) => {
   // NOTE: Deno.stat() may be failed
   try {
-    if ((await Deno.stat(path)).isDirectory) {
-      return true;
-    }
-  } catch (_e: unknown) {
-    // Ignore
+    const stat = await Deno.stat(path);
+    return stat;
+  } catch (_: unknown) {
+    // Ignore stat exception
   }
-
-  return false;
+  return null;
 };

@@ -23,7 +23,7 @@ import {
   errorException,
   treePath2Filename,
 } from "https://deno.land/x/ddu_vim@v3.4.3/utils.ts";
-import { extname } from "https://deno.land/std@0.194.0/path/mod.ts";
+import { extname } from "https://deno.land/std@0.195.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.3/env.js";
 import { PreviewUi } from "./filer/preview.ts";
 
@@ -79,6 +79,8 @@ export type Params = {
   previewCol: ExprNumber;
   previewFloating: boolean;
   previewFloatingBorder: FloatingBorder;
+  previewFloatingTitle: FloatingTitle;
+  previewFloatingTitlePos: "left" | "center" | "right";
   previewFloatingZindex: number;
   previewHeight: ExprNumber;
   previewRow: ExprNumber;
@@ -951,6 +953,8 @@ export class Ui extends BaseUi<Params> {
       previewCol: 0,
       previewFloating: false,
       previewFloatingBorder: "none",
+      previewFloatingTitle: "",
+      previewFloatingTitlePos: "left",
       previewFloatingZindex: 100,
       previewHeight: 10,
       previewRow: 0,

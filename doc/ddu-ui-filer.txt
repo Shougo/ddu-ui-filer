@@ -283,6 +283,21 @@ previewFloatingBorder		(string | list)
 
 		Default: "none"
 
+				*ddu-ui-filer-param-previewFloatingTitle*
+previewFloatingTitle	(string | list)
+		Specify the title of the preview floating window with border
+		if |ddu-ui-filer-param-previewFloatingBorder| is not "none".
+
+		Default: ""
+
+				*ddu-ui-filer-param-previewFloatingTitlePos*
+previewFloatingTitlePos	(string)
+		Specify the title position of the preview floating window with
+		border if |ddu-ui-filer-param-previewFloatingBorder| is not
+		"none".
+
+		Default: "left"
+
 				*ddu-ui-filer-param-previewFloatingZindex*
 previewFloatingZindex		(number)
 		Specify the style of the preview window zindex if
