@@ -3,7 +3,7 @@
 Author: Shougo <Shougo.Matsu at gmail.com>
 License: MIT license
 
-CONTENTS					*ddu-ui-filer-contents*
+CONTENTS                                               *ddu-ui-filer-contents*
 
 Introduction		|ddu-ui-filer-introduction|
 Install			|ddu-ui-filer-install|
@@ -18,13 +18,13 @@ Compatibility		|ddu-ui-filer-compatibility|
 
 
 ==============================================================================
-INTRODUCTION					*ddu-ui-filer-introduction*
+INTRODUCTION                                       *ddu-ui-filer-introduction*
 
 This UI is standard file explorer.
 
 
 ==============================================================================
-INSTALL						*ddu-ui-filer-install*
+INSTALL                                                 *ddu-ui-filer-install*
 
 Please install both "ddu.vim" and "denops.vim".
 
@@ -37,64 +37,64 @@ installed on macOS. >
 	$ brew install desktop-file-utils
 
 ==============================================================================
-INTERFACE					*ddu-ui-filer-interface*
+INTERFACE                                             *ddu-ui-filer-interface*
 
 
 ------------------------------------------------------------------------------
-FUNCTIONS					*ddu-ui-filer-functions*
+FUNCTIONS                                             *ddu-ui-filer-functions*
 
-						*ddu#ui#filer#do_action()*
+                                                    *ddu#ui#filer#do_action()*
 ddu#ui#filer#do_action({action-name}[, {params}])
 		It is deprecated.  Please use |ddu#ui#do_action()| instead.
 
-						*ddu#ui#filer#multi_actions()*
+                                                *ddu#ui#filer#multi_actions()*
 ddu#ui#filer#multi_actions([{action-name1}[, {params1}], ...])
 		It is deprecated.  Please use |ddu#ui#multi_actions()|
 		instead.
 
 
 ------------------------------------------------------------------------------
-ACTIONS						*ddu-ui-filer-actions*
+ACTIONS                                                 *ddu-ui-filer-actions*
 
-					*ddu-ui-filer-action-checkItems*
+                                              *ddu-ui-filer-action-checkItems*
 checkItems
 		Check the items are updated.
 		NOTE: Source support is needed for the feature.
 
-					*ddu-ui-filer-action-chooseAction*
+                                            *ddu-ui-filer-action-chooseAction*
 chooseAction
 		Choose and fire the action.
 
 		NOTE: "ddu-source-action" is required.
 		https://github.com/Shougo/ddu-source-action
 
-				*ddu-ui-filer-action-clearSelectAllItems*
+                                     *ddu-ui-filer-action-clearSelectAllItems*
 clearSelectAllItems
 		Clear all selected items.
 
-				*ddu-ui-filer-action-closePreviewWindow*
+                                      *ddu-ui-filer-action-closePreviewWindow*
 closePreviewWindow
 		Close the preview window.
 
-					*ddu-ui-filer-action-collapseItem*
+                                            *ddu-ui-filer-action-collapseItem*
 collapseItem
 		Collapse the item tree.
 
-					*ddu-ui-filer-action-cursorNext*
+                                              *ddu-ui-filer-action-cursorNext*
 cursorNext
 		params:
 			{count}: Move count
 
 		Move the cursor to the next.
 
-					*ddu-ui-filer-action-cursorPrevious*
+                                          *ddu-ui-filer-action-cursorPrevious*
 cursorPrevious
 		params:
 			{count}: Move count
 
 		Move the cursor to the previous.
 
-					*ddu-ui-filer-action-expandItem*
+                                              *ddu-ui-filer-action-expandItem*
 expandItem
 		params:
 			{mode}: The supported values are:
@@ -109,19 +109,19 @@ expandItem
 
 		Expand the item tree.
 
-						*ddu-ui-filer-action-getItem*
+                                                 *ddu-ui-filer-action-getItem*
 getItem
 		Set current item to "b:ddu_ui_item" variable.
 
-					*ddu-ui-filer-action-getSelectedItems*
+                                        *ddu-ui-filer-action-getSelectedItems*
 getSelectedItems
 		Set selected items to "b:ddu_ui_selected_items" variable.
 
-					*ddu-ui-filer-action-inputAction*
+                                             *ddu-ui-filer-action-inputAction*
 inputAction
 		Choose and fire the action by |input()|.
 
-					*ddu-ui-filer-action-itemAction*
+                                              *ddu-ui-filer-action-itemAction*
 itemAction
 		params:
 			{name}: Action name
@@ -134,7 +134,7 @@ itemAction
 
 		NOTE: You cannot mix multiple kinds/sources.
 
-					*ddu-ui-filer-action-preview*
+                                                 *ddu-ui-filer-action-preview*
 preview
 		params:
 			{syntaxLimitChars}: 	Max number of chars to apply
@@ -148,19 +148,19 @@ preview
 
 		Preview the item in preview window.
 
-					*ddu-ui-filer-action-toggleAllItems*
+                                          *ddu-ui-filer-action-toggleAllItems*
 toggleAllItems
 		Toggle selected state for the all items.
 
-					*ddu-ui-filer-action-togglePreview*
+                                           *ddu-ui-filer-action-togglePreview*
 togglePreview
 		Toggle |ddu-ui-filer-action-preview| for cursor item.
 
-					*ddu-ui-filer-action-toggleSelectItem*
+                                        *ddu-ui-filer-action-toggleSelectItem*
 toggleSelectItem
 		Toggle selected item.
 
-					*ddu-ui-filer-action-updateOptions*
+                                           *ddu-ui-filer-action-updateOptions*
 updateOptions
 		params:
 			{option-name}: Option name and value
@@ -170,16 +170,16 @@ updateOptions
 
 
 ==============================================================================
-PARAMS						*ddu-ui-filer-params*
+PARAMS                                                   *ddu-ui-filer-params*
 
-					*ddu-ui-filer-param-displayRoot*
+                                              *ddu-ui-filer-param-displayRoot*
 displayRoot	(boolean)
 		Display source root item.
 		It shows source path.
 
 		Default: v:true
 
-					*ddu-ui-filer-param-exprParams*
+                                               *ddu-ui-filer-param-exprParams*
 exprParams	(string[])
 		Evaluate params list.
 		If the param is string, it is evaluated as
@@ -196,7 +196,7 @@ exprParams	(string[])
 		  "winWidth",
 		]
 
-					*ddu-ui-filer-param-floatingBorder*
+                                           *ddu-ui-filer-param-floatingBorder*
 floatingBorder	(string | list)
 		Specify the style of the window border if
 		|ddu-ui-filer-param-split| is "floating".
@@ -205,7 +205,7 @@ floatingBorder	(string | list)
 
 		Default: "none"
 
-					*ddu-ui-filer-param-floatingTitle*
+                                            *ddu-ui-filer-param-floatingTitle*
 floatingTitle		(string | list)
 		Specify the title of the window border if
 		|ddu-ui-filer-param-floatingBorder| is not "none".
@@ -213,7 +213,7 @@ floatingTitle		(string | list)
 
 		Default: ""
 
-					*ddu-ui-filer-param-floatingTitlePos*
+                                         *ddu-ui-filer-param-floatingTitlePos*
 floatingTitlePos	(string)
 		Specify the title position of the window border if
 		|ddu-ui-filer-param-floatingBorder| is not "none".
@@ -222,13 +222,13 @@ floatingTitlePos	(string)
 
 		Default: "left"
 
-						*ddu-ui-filer-param-focus*
+                                                    *ddu-ui-filer-param-focus*
 focus		(boolean)
 		Focus on the UI window after opening the UI window.
 
 		Default: v:true
 
-					*ddu-ui-filer-param-highlights*
+                                               *ddu-ui-filer-param-highlights*
 highlights	(dictionary)
 		It specifies ddu-ui-filer buffer highlights.
 		It can contain following keys
@@ -255,26 +255,26 @@ highlights	(dictionary)
 
 		Default: {}
 
-						*ddu-ui-filer-param-onPreview*
+                                                *ddu-ui-filer-param-onPreview*
 onPreview	(function)
 		It is called when |ddu-ui-filer-action-preview| is fired.
 		NOTE: The function must be registered by
 		|denops#callback#register()|.
 
-					*ddu-ui-filer-param-previewCol*
+                                               *ddu-ui-filer-param-previewCol*
 previewCol	(number)
 		Set the column position of the preview window if
 		|ddu-ui-filer-param-previewFloating| is v:true.
 
 		Default: 0
 
-					*ddu-ui-filer-param-previewFloating*
+                                          *ddu-ui-filer-param-previewFloating*
 previewFloating	(boolean)
 		Use floating window in |ddu-ui-filer-action-preview|.
 
 		Default: v:false
 
-				*ddu-ui-filer-param-previewFloatingBorder*
+                                    *ddu-ui-filer-param-previewFloatingBorder*
 previewFloatingBorder		(string | list)
 		Specify the style of the preview window border if
 		|ddu-ui-filer-param-previewFloating| is v:true.
@@ -283,14 +283,14 @@ previewFloatingBorder		(string | list)
 
 		Default: "none"
 
-				*ddu-ui-filer-param-previewFloatingTitle*
+                                     *ddu-ui-filer-param-previewFloatingTitle*
 previewFloatingTitle	(string | list)
 		Specify the title of the preview floating window with border
 		if |ddu-ui-filer-param-previewFloatingBorder| is not "none".
 
 		Default: ""
 
-				*ddu-ui-filer-param-previewFloatingTitlePos*
+                                  *ddu-ui-filer-param-previewFloatingTitlePos*
 previewFloatingTitlePos	(string)
 		Specify the title position of the preview floating window with
 		border if |ddu-ui-filer-param-previewFloatingBorder| is not
@@ -298,7 +298,7 @@ previewFloatingTitlePos	(string)
 
 		Default: "left"
 
-				*ddu-ui-filer-param-previewFloatingZindex*
+                                    *ddu-ui-filer-param-previewFloatingZindex*
 previewFloatingZindex		(number)
 		Specify the style of the preview window zindex if
 		|ddu-ui-filer-param-split| is "floating".
@@ -307,7 +307,7 @@ previewFloatingZindex		(number)
 
 		Default: 100
 
-					*ddu-ui-filer-param-previewHeight*
+                                            *ddu-ui-filer-param-previewHeight*
 previewHeight	(number)
 		Set the height of the |preview-window| in
 		|ddu-ui-filer-action-preview|.
@@ -316,14 +316,14 @@ previewHeight	(number)
 
 		Default: 10
 
-					*ddu-ui-filer-param-previewRow*
+                                               *ddu-ui-filer-param-previewRow*
 previewRow	(number)
 		Set the row position of the preview window if
 		|ddu-ui-filer-param-previewFloating| is v:true.
 
 		Default: 0
 
-					*ddu-ui-filer-param-previewSplit*
+                                             *ddu-ui-filer-param-previewSplit*
 previewSplit	(string)
 		Specify preview split mode in |ddu-ui-filer-action-preview|.
 
@@ -335,7 +335,7 @@ previewSplit	(string)
 
 		Default: "horizontal"
 
-					*ddu-ui-filer-param-previewWidth*
+                                             *ddu-ui-filer-param-previewWidth*
 previewWidth	(number)
 		Set the width of the |preview-window| in
 		|ddu-ui-filer-action-preview|.
@@ -344,7 +344,7 @@ previewWidth	(number)
 
 		Default: 80
 
-				*ddu-ui-filer-param-previewWindowOptions*
+                                     *ddu-ui-filer-param-previewWindowOptions*
 previewWindowOptions	(list)
 		Set the window options of the |preview-window| in
 		|ddu-ui-filer-action-preview|.
@@ -363,7 +363,7 @@ previewWindowOptions	(list)
 			["&wrap", 0],
 		]
 
-						*ddu-ui-filer-param-split*
+                                                    *ddu-ui-filer-param-split*
 split		(string)
 		Specify split mode.
 
@@ -376,7 +376,7 @@ split		(string)
 
 		Default: "horizontal"
 
-						*ddu-ui-filer-param-sort*
+                                                     *ddu-ui-filer-param-sort*
 sort		(string)
 
 		Sort method.
@@ -393,33 +393,33 @@ sort		(string)
 
 		Default: "none"
 
-				*ddu-ui-filer-param-sortTreesFirst*
+                                           *ddu-ui-filer-param-sortTreesFirst*
 sortTreesFirst	(boolean)
 		Sort trees in the first than non tree items.
 
 		Default: v:false
 
-					*ddu-ui-filer-param-splitDirection*
+                                           *ddu-ui-filer-param-splitDirection*
 splitDirection	(string)
 		Specify split direction.
 
 		Default: "botright"
 
-					*ddu-ui-filer-param-statusline*
+                                               *ddu-ui-filer-param-statusline*
 statusline	(boolean)
 		If it is true, the original 'statusline' value is set on the
 		buffer.
 
 		Default: v:true
 
-						*ddu-ui-filer-param-winCol*
+                                                   *ddu-ui-filer-param-winCol*
 winCol		(number | string)
 		Set the column position of the window if
 		|ddu-ui-filer-param-split| is "floating".
 
 		Default: "(&columns - eval(uiParams.winWidth)) / 2"
 
-						*ddu-ui-filer-param-winHeight*
+                                                *ddu-ui-filer-param-winHeight*
 winHeight	(number | string)
 		Set the height of the window if |ddu-ui-filer-param-split| is
 		"horizontal".
@@ -428,14 +428,14 @@ winHeight	(number | string)
 
 		Default: 20
 
-						*ddu-ui-filer-param-winRow*
+                                                   *ddu-ui-filer-param-winRow*
 winRow		(number | string)
 		Set the row position of the window if
 		|ddu-ui-filer-param-split| is "floating".
 
 		Default: "&lines / 2 - 10"
 
-						*ddu-ui-filer-param-winwidth*
+                                                 *ddu-ui-filer-param-winwidth*
 winWidth	(number | string)
 		Set the width of the window if |ddu-ui-filer-param-split| is
 		"vertical".
@@ -482,7 +482,7 @@ on the right side of the screen: >
 <
 
 ==============================================================================
-EXAMPLES					*ddu-ui-filer-examples*
+EXAMPLES                                               *ddu-ui-filer-examples*
 >
 	call ddu#custom#patch_global(#{
 	    \   ui: 'filer',
@@ -525,7 +525,7 @@ FAQ 6:							|ddu-ui-filer-faq-6|
 
 
 ------------------------------------------------------------------------------
-							*ddu-ui-filer-faq-1*
+                                                          *ddu-ui-filer-faq-1*
 Q: I want to toggle hidden files by mappings.
 
 A: >
@@ -547,7 +547,7 @@ A: >
 	endfunction
 <
 
-							*ddu-ui-filer-faq-2*
+                                                          *ddu-ui-filer-faq-2*
 Q: I want to check updated items automatically.
 
 A: >
@@ -556,14 +556,14 @@ A: >
 
 NOTE: Source support is needed for |ddu-ui-filer-action-checkItems|.
 
-							*ddu-ui-filer-faq-3*
+                                                          *ddu-ui-filer-faq-3*
 Q: I want to use icon fonts in ddu columns.
 
 A: You can use "ddu-column-icon_filename".
 
 https://github.com/ryota2357/ddu-column-icon_filename
 
-							*ddu-ui-filer-faq-4*
+                                                          *ddu-ui-filer-faq-4*
 Q: Flickering when moving directories using narrow action.
 
 A: You need to set |ddu-action-option-quit| for narrow action. >
@@ -578,12 +578,12 @@ A: You need to set |ddu-action-option-quit| for narrow action. >
 	    \ })
 <
 
-							*ddu-ui-filer-faq-5*
+                                                          *ddu-ui-filer-faq-5*
 Q: I want to use existing buffer to show preview.
 
 A: Please use "no" in |ddu-ui-filer-param-previewSplit|.
 
-							*ddu-ui-filer-faq-6*
+                                                          *ddu-ui-filer-faq-6*
 Q: I want to check the current item is tree.
 
 A: >
@@ -596,7 +596,7 @@ A: >
 
 
 ==============================================================================
-COMPATIBILITY					*ddu-ui-filer-compatibility*
+COMPATIBILITY                                     *ddu-ui-filer-compatibility*
 
 2023.07.12
 * "preview" action does not toggle.
