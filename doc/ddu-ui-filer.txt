@@ -403,7 +403,7 @@ sortTreesFirst	(boolean)
 splitDirection	(string)
 		Specify split direction.
 
-		Default: "botright"
+		Default: "belowright"
 
                                                *ddu-ui-filer-param-statusline*
 statusline	(boolean)

@@ -100,7 +100,7 @@ export type Params = {
     | "Time";
   sortTreesFirst: boolean;
   split: "horizontal" | "vertical" | "floating" | "no";
-  splitDirection: "botright" | "topleft";
+  splitDirection: "belowright" | "aboveleft";
   statusline: boolean;
   winCol: ExprNumber;
   winHeight: ExprNumber;
@@ -969,7 +969,7 @@ export class Ui extends BaseUi<Params> {
       ],
       search: "",
       split: "horizontal",
-      splitDirection: "botright",
+      splitDirection: "belowright",
       sort: "none",
       sortTreesFirst: false,
       statusline: true,
