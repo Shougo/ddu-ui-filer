@@ -10,7 +10,7 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v3.4.3/types.ts";
+} from "https://deno.land/x/ddu_vim@v3.4.5/types.ts";
 import {
   batch,
   Denops,
@@ -18,12 +18,12 @@ import {
   is,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v3.4.3/deps.ts";
+} from "https://deno.land/x/ddu_vim@v3.4.5/deps.ts";
 import {
   errorException,
   treePath2Filename,
-} from "https://deno.land/x/ddu_vim@v3.4.3/utils.ts";
-import { extname } from "https://deno.land/std@0.195.0/path/mod.ts";
+} from "https://deno.land/x/ddu_vim@v3.4.5/utils.ts";
+import { extname } from "https://deno.land/std@0.196.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.3/env.js";
 import { PreviewUi } from "./filer/preview.ts";
 
