@@ -252,11 +252,20 @@ export class Ui extends BaseUi<Params> {
 
     const hasNvim = args.denops.meta.host === "nvim";
     const floating = args.uiParams.split === "floating" && hasNvim;
-    const winHeight = Number(args.uiParams.winHeight);
+    const winWidth = Number(args.uiParams.winWidth);
+    let winHeight = Number(args.uiParams.winHeight);
     const winid = await fn.bufwinid(args.denops, bufnr);
 
     const direction = args.uiParams.splitDirection;
     if (args.uiParams.split === "horizontal") {
+      // NOTE: If winHeight is bigger than `&lines / 2`, it will be resized.
+      const maxWinHeight = Math.floor(
+        await op.lines.getGlobal(args.denops) * 4 / 10,
+      );
+      if (winHeight > maxWinHeight) {
+        winHeight = maxWinHeight;
+      }
+
       if (winid >= 0) {
         await fn.win_execute(
           args.denops,
@@ -274,13 +283,12 @@ export class Ui extends BaseUi<Params> {
         await fn.win_execute(
           args.denops,
           winid,
-          `vertical resize ${args.uiParams.winWidth}`,
+          `vertical resize ${winWidth}`,
         );
       } else {
         const header = `silent keepalt vertical ${direction} `;
         await args.denops.cmd(
-          header +
-            `sbuffer +vertical\\ resize\\ ${args.uiParams.winWidth} ${bufnr}`,
+          header + `sbuffer +vertical\\ resize\\ ${winWidth} ${bufnr}`,
         );
       }
     } else if (floating) {
@@ -288,7 +296,7 @@ export class Ui extends BaseUi<Params> {
         "relative": "editor",
         "row": Number(args.uiParams.winRow),
         "col": Number(args.uiParams.winCol),
-        "width": Number(args.uiParams.winWidth),
+        "width": winWidth,
         "height": winHeight,
         "border": args.uiParams.floatingBorder,
         "title": args.uiParams.floatingTitle,

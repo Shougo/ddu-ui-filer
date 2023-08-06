@@ -267,6 +267,12 @@ function ddu#ui#filer#_open_preview_window(
         const winid = a:preview_bufnr->popup_create(winopts)
       endif
     else
+      " NOTE: If winHeight is bigger than `&lines / 2`, it will be resized.
+      const maxheight = &lines * 4 / 10
+      if preview_height > maxheight
+        let preview_height = maxheight
+      endif
+
       call win_gotoid(winnr)
       execute 'silent aboveleft sbuffer' a:preview_bufnr
       execute 'resize ' .. preview_height

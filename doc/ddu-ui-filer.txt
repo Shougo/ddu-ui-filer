@@ -314,6 +314,8 @@ previewHeight	(number)
 		|ddu-ui-filer-action-preview|.
 		If |ddu-ui-filer-param-previewFloating|, set the height of the
 		floating window.
+		NOTE: If |ddu-ui-filer-param-previewSplit| is "horizontal",
+		the value must be less than `&lines - 2`.
 
 		Default: 10
 
@@ -426,6 +428,8 @@ winHeight	(number | string)
 		"horizontal".
 		if |ddu-ui-filer-param-split| is "floating",
 		set the height of the floating window.
+		NOTE: If |ddu-ui-ff-param-previewSplit| is "horizontal", the
+		value must be less than `&lines - 2`.
 
 		Default: 20
 
