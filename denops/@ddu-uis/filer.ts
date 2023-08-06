@@ -253,11 +253,19 @@ export class Ui extends BaseUi<Params> {
     const hasNvim = args.denops.meta.host === "nvim";
     const floating = args.uiParams.split === "floating" && hasNvim;
     const winWidth = Number(args.uiParams.winWidth);
-    const winHeight = Number(args.uiParams.winHeight);
+    let winHeight = Number(args.uiParams.winHeight);
     const winid = await fn.bufwinid(args.denops, bufnr);
 
     const direction = args.uiParams.splitDirection;
     if (args.uiParams.split === "horizontal") {
+      // NOTE: If winHeight is bigger than `&lines / 2`, it will be resized.
+      const maxWinHeight = Math.floor(
+        await op.lines.getGlobal(args.denops) * 4 / 10,
+      );
+      if (winHeight > maxWinHeight) {
+        winHeight = maxWinHeight;
+      }
+
       if (winid >= 0) {
         await fn.win_execute(
           args.denops,
