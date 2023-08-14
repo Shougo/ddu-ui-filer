@@ -121,6 +121,7 @@ export type Params = {
 
 type CursorActionParams = {
   count?: number;
+  loop?: boolean;
 };
 
 type DoActionParams = {
@@ -637,6 +638,7 @@ export class Ui extends BaseUi<Params> {
 
       const params = args.actionParams as CursorActionParams;
       const count = params.count ?? 1;
+      const loop = params.loop ?? false;
       if (count === 0) {
         return ActionFlags.Persist;
       }
@@ -644,9 +646,9 @@ export class Ui extends BaseUi<Params> {
       // Move to the next
       cursorPos[1] += count;
       if (cursorPos[1] <= 0) {
-        cursorPos[1] = 1;
+        cursorPos[1] = loop ? this.viewItems.length : 1;
       } else if (cursorPos[1] > this.viewItems.length) {
-        cursorPos[1] = this.viewItems.length;
+        cursorPos[1] = loop ? 1 : this.viewItems.length;
       }
 
       await fn.setbufvar(
@@ -676,6 +678,7 @@ export class Ui extends BaseUi<Params> {
 
       const params = args.actionParams as CursorActionParams;
       const count = params.count ?? 1;
+      const loop = params.loop ?? false;
       if (count === 0) {
         return ActionFlags.Persist;
       }
@@ -683,9 +686,9 @@ export class Ui extends BaseUi<Params> {
       // Move to the previous
       cursorPos[1] -= count;
       if (cursorPos[1] <= 0) {
-        cursorPos[1] = 1;
+        cursorPos[1] = loop ? this.viewItems.length : 1;
       } else if (cursorPos[1] > this.viewItems.length) {
-        cursorPos[1] = this.viewItems.length;
+        cursorPos[1] = loop ? 1 : this.viewItems.length;
       }
 
       await fn.setbufvar(
