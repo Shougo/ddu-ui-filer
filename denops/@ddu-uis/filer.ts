@@ -814,7 +814,7 @@ export class Ui extends BaseUi<Params> {
       options: DduOptions;
       uiParams: Params;
       actionParams: unknown;
-      getPreviewer: (
+      getPreviewer?: (
         denops: Denops,
         item: DduItem,
         actionParams: BaseActionParams,
@@ -838,9 +838,9 @@ export class Ui extends BaseUi<Params> {
         args.context,
         args.uiParams,
         args.actionParams,
-        args.getPreviewer,
         await this.getBufnr(args.denops),
         item,
+        args.getPreviewer,
       );
     },
     previewExecute: async (args: {
@@ -906,7 +906,7 @@ export class Ui extends BaseUi<Params> {
       options: DduOptions;
       uiParams: Params;
       actionParams: unknown;
-      getPreviewer: (
+      getPreviewer?: (
         denops: Denops,
         item: DduItem,
         actionParams: BaseActionParams,
@@ -936,9 +936,9 @@ export class Ui extends BaseUi<Params> {
         args.context,
         args.uiParams,
         args.actionParams,
-        args.getPreviewer,
         await this.getBufnr(args.denops),
         item,
+        args.getPreviewer,
       );
     },
     toggleSelectItem: async (args: {
