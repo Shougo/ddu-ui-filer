@@ -628,7 +628,7 @@ export class Ui extends BaseUi<Params> {
       const cursorPos = await fn.getbufvar(
         args.denops,
         bufnr,
-        "ddu_ui_ff_cursor_pos",
+        "ddu_ui_filer_cursor_pos",
         [],
       ) as number[];
       if (cursorPos.length === 0) {
@@ -640,14 +640,18 @@ export class Ui extends BaseUi<Params> {
 
       // Move to the next
       cursorPos[1] += count;
-      if (0 < cursorPos[1] && cursorPos[1] <= this.viewItems.length) {
-        await fn.setbufvar(
-          args.denops,
-          bufnr,
-          "ddu_ui_ff_cursor_pos",
-          cursorPos,
-        );
+      if (0 < cursorPos[1]) {
+        cursorPos[1] = 0;
+      } else if (cursorPos[1] > this.viewItems.length) {
+        cursorPos[1] = this.viewItems.length;
       }
+
+      await fn.setbufvar(
+        args.denops,
+        bufnr,
+        "ddu_ui_filer_cursor_pos",
+        cursorPos,
+      );
 
       return ActionFlags.Persist;
     },
@@ -672,14 +676,18 @@ export class Ui extends BaseUi<Params> {
 
       // Move to the previous
       cursorPos[1] -= count;
-      if (0 < cursorPos[1] && cursorPos[1] <= this.viewItems.length) {
-        await fn.setbufvar(
-          args.denops,
-          bufnr,
-          "ddu_ui_filer_cursor_pos",
-          cursorPos,
-        );
+      if (0 < cursorPos[1]) {
+        cursorPos[1] = 0;
+      } else if (cursorPos[1] > this.viewItems.length) {
+        cursorPos[1] = this.viewItems.length;
       }
+
+      await fn.setbufvar(
+        args.denops,
+        bufnr,
+        "ddu_ui_filer_cursor_pos",
+        cursorPos,
+      );
 
       return ActionFlags.Persist;
     },
