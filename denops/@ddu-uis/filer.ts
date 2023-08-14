@@ -641,7 +641,7 @@ export class Ui extends BaseUi<Params> {
       // Move to the next
       cursorPos[1] += count;
       if (cursorPos[1] < 0) {
-        cursorPos[1] = 0;
+        cursorPos[1] = 1;
       } else if (cursorPos[1] > this.viewItems.length) {
         cursorPos[1] = this.viewItems.length;
       }
@@ -677,7 +677,7 @@ export class Ui extends BaseUi<Params> {
       // Move to the previous
       cursorPos[1] -= count;
       if (cursorPos[1] < 0) {
-        cursorPos[1] = 0;
+        cursorPos[1] = 1;
       } else if (cursorPos[1] > this.viewItems.length) {
         cursorPos[1] = this.viewItems.length;
       }
