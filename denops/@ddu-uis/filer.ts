@@ -637,10 +637,13 @@ export class Ui extends BaseUi<Params> {
 
       const params = args.actionParams as CursorActionParams;
       const count = params.count ?? 1;
+      if (count === 0) {
+        return ActionFlags.Persist;
+      }
 
       // Move to the next
       cursorPos[1] += count;
-      if (cursorPos[1] < 0) {
+      if (cursorPos[1] <= 0) {
         cursorPos[1] = 1;
       } else if (cursorPos[1] > this.viewItems.length) {
         cursorPos[1] = this.viewItems.length;
@@ -673,10 +676,13 @@ export class Ui extends BaseUi<Params> {
 
       const params = args.actionParams as CursorActionParams;
       const count = params.count ?? 1;
+      if (count === 0) {
+        return ActionFlags.Persist;
+      }
 
       // Move to the previous
       cursorPos[1] -= count;
-      if (cursorPos[1] < 0) {
+      if (cursorPos[1] <= 0) {
         cursorPos[1] = 1;
       } else if (cursorPos[1] > this.viewItems.length) {
         cursorPos[1] = this.viewItems.length;
