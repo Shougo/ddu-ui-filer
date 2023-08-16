@@ -189,6 +189,7 @@ function ddu#ui#filer#_open_preview_window(
       else
         const winopts = #{
               \   pos: 'topleft',
+              \   posinvert: v:false,
               \   line: win_row + 1,
               \   col: win_col + 1,
               \   border: [],
@@ -259,6 +260,7 @@ function ddu#ui#filer#_open_preview_window(
         endif
         const winopts = #{
               \   pos: 'topleft',
+              \   posinvert: v:false,
               \   line: win_row + 1,
               \   col: win_col + 1,
               \   border: [],
