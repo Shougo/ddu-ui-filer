@@ -24,7 +24,7 @@ import {
   treePath2Filename,
 } from "https://deno.land/x/ddu_vim@v3.5.0/utils.ts";
 import { extname } from "https://deno.land/std@0.198.0/path/mod.ts";
-import { Env } from "https://deno.land/x/env@v2.2.3/env.js";
+import { Env } from "https://deno.land/x/env@v2.2.4/env.js";
 import { PreviewUi } from "./filer/preview.ts";
 
 const env = new Env();

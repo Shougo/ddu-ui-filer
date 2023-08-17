@@ -75,6 +75,10 @@ export class PreviewUi {
       JSON.stringify(item) === JSON.stringify(this.previewedTarget);
   }
 
+  visible(): boolean {
+    return this.previewWinId > 0;
+  }
+
   async previewContents(
     denops: Denops,
     context: Context,
@@ -180,10 +184,6 @@ export class PreviewUi {
     await fn.win_gotoid(denops, prevId);
 
     return ActionFlags.Persist;
-  }
-
-  visible(): boolean {
-    return this.previewWinId > 0;
   }
 
   private async previewContentsTerminal(
