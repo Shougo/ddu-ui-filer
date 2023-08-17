@@ -494,8 +494,6 @@ export class Ui extends BaseUi<Params> {
 
   override async winId(args: {
     denops: Denops;
-    context: Context;
-    options: DduOptions;
     uiParams: Params;
   }): Promise<number> {
     const bufnr = await this.getBufnr(args.denops);
