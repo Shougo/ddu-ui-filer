@@ -29,7 +29,7 @@ export class PreviewUi {
   private previewedBufnrs: Set<number> = new Set();
 
   async close(denops: Denops, context: Context, uiParams: Params) {
-    if (this.previewWinId > 0 && (await fn.winnr(denops, "$")) !== 1) {
+    if (this.visible() && (await fn.winnr(denops, "$")) !== 1) {
       if (uiParams.previewFloating && denops.meta.host !== "nvim") {
         await denops.call("popup_close", this.previewWinId);
       } else {
@@ -64,14 +64,14 @@ export class PreviewUi {
     denops: Denops,
     command: string,
   ) {
-    if (this.previewWinId < 0) {
+    if (!this.visible()) {
       return;
     }
     await fn.win_execute(denops, this.previewWinId, command);
   }
 
   isAlreadyPreviewed(item: DduItem): boolean {
-    return this.previewWinId > 0 &&
+    return this.visible() &&
       JSON.stringify(item) === JSON.stringify(this.previewedTarget);
   }
 
@@ -182,6 +182,10 @@ export class PreviewUi {
     return ActionFlags.Persist;
   }
 
+  visible(): boolean {
+    return this.previewWinId > 0;
+  }
+
   private async previewContentsTerminal(
     denops: Denops,
     previewer: TerminalPreviewer,
@@ -189,7 +193,7 @@ export class PreviewUi {
     bufnr: number,
     previousWinId: number,
   ): Promise<ActionFlags> {
-    if (this.previewWinId < 0) {
+    if (!this.visible()) {
       this.previewWinId = await denops.call(
         "ddu#ui#filer#_open_preview_window",
         uiParams,

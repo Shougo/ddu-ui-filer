@@ -831,7 +831,7 @@ export class Ui extends BaseUi<Params> {
       ) => Promise<Previewer | undefined>;
     }) => {
       const item = await this.getItem(args.denops);
-      if (!item) {
+      if (!item || !args.getPreviewer) {
         return ActionFlags.None;
       }
 
@@ -923,7 +923,7 @@ export class Ui extends BaseUi<Params> {
       ) => Promise<Previewer | undefined>;
     }) => {
       const item = await this.getItem(args.denops);
-      if (!item) {
+      if (!item || !args.getPreviewer) {
         return ActionFlags.None;
       }
 
@@ -1122,9 +1122,9 @@ export class Ui extends BaseUi<Params> {
       await fn.setbufvar(denops, bufnr, "&swapfile", 0);
 
       if (uiParams.split === "horizontal") {
-        await fn.setbufvar(denops, bufnr, "&winfixheight", 1);
+        await fn.setwinvar(denops, winid, "&winfixheight", 1);
       } else if (uiParams.split === "vertical") {
-        await fn.setbufvar(denops, bufnr, "&winfixwidth", 1);
+        await fn.setwinvar(denops, winid, "&winfixwidth", 1);
       }
     });
   }
