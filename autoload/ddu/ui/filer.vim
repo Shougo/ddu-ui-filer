@@ -113,27 +113,10 @@ function ddu#ui#filer#_save_cursor(path) abort
     return
   endif
 
-  if !exists('b:ddu_ui_filer_save_cursor')
-    let b:ddu_ui_filer_save_cursor = {}
+  if !exists('b:ddu_ui_filer_save_cursor_item')
+    let b:ddu_ui_filer_save_cursor_item = {}
   endif
-  let b:ddu_ui_filer_save_cursor[a:path] = #{
-        \   pos: b:ddu_ui_filer_cursor_pos,
-        \   text: b:ddu_ui_filer_cursor_text,
-        \ }
-endfunction
-function ddu#ui#filer#_restore_cursor(path) abort
-  const save_pos = b:->get('ddu_ui_filer_save_cursor', {})
-  if save_pos->has_key(a:path)
-    const save_cursor_pos = save_pos[a:path].pos
-  else
-    const save_cursor_pos = []
-  endif
-
-  if !(save_cursor_pos->empty())
-    call cursor(save_cursor_pos[1], save_cursor_pos[2])
-  else
-    call cursor(1, 1)
-  endif
+  let b:ddu_ui_filer_save_cursor_item[a:path] = ddu#ui#get_item()
 endfunction
 
 function ddu#ui#filer#_open_preview_window(

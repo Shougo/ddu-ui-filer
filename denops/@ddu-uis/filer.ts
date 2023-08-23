@@ -14,6 +14,7 @@ import {
 import {
   batch,
   Denops,
+  equal,
   fn,
   is,
   op,
@@ -224,11 +225,11 @@ export class Ui extends BaseUi<Params> {
     denops: Denops;
     item: DduItem;
   }) {
-    const pos = this.items.findIndex((item) => item === args.item);
+    const pos = this.items.findIndex((item) => equal(item, args.item));
 
     if (pos > 0) {
       await fn.cursor(args.denops, pos + 1, 0);
-      await args.denops.cmd("normal! zz");
+      await args.denops.cmd("normal! zb");
     }
   }
 
@@ -450,16 +451,30 @@ export class Ui extends BaseUi<Params> {
 
     this.viewItems = Array.from(this.items);
 
-    await args.denops.call("ddu#ui#filer#_restore_cursor", args.context.path);
-    await vars.b.set(args.denops, "ddu_ui_filer_path", args.context.path);
-    await vars.t.set(args.denops, "ddu_ui_filer_path", args.context.path);
+    // Restore cursor
+    const path = treePath2Filename(args.context.path);
+    const saveItem = await fn.getbufvar(
+      args.denops,
+      bufnr,
+      "ddu_ui_ff_save_cursor_item",
+      {},
+    ) as Record<string, DduItem>;
+    if (saveItem[path]) {
+      this.searchItem({
+        denops: args.denops,
+        item: saveItem[path],
+      });
+    }
+
+    await vars.b.set(args.denops, "ddu_ui_filer_path", path);
+    await vars.t.set(args.denops, "ddu_ui_filer_path", path);
 
     // Save cursor when cursor moved
     await args.denops.cmd(
       `autocmd ${augroupName} CursorMoved <buffer>` +
         " call ddu#ui#filer#_save_cursor(b:ddu_ui_filer_path)",
     );
-    await args.denops.call("ddu#ui#filer#_save_cursor", args.context.path);
+    await args.denops.call("ddu#ui#filer#_save_cursor", path);
 
     if (args.context.done) {
       await fn.setbufvar(
@@ -870,7 +885,7 @@ export class Ui extends BaseUi<Params> {
         uiParams: args.uiParams,
       });
 
-      await args.denops.dispatcher.pop(args.options.name);
+      args.denops.dispatcher.pop(args.options.name);
 
       return ActionFlags.None;
     },
