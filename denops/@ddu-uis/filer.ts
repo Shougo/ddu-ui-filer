@@ -574,11 +574,12 @@ export class Ui extends BaseUi<Params> {
   }
 
   override actions: UiActions<Params> = {
-    checkItems: async (args: {
+    checkItems: (args: {
       denops: Denops;
       options: DduOptions;
     }) => {
-      await args.denops.dispatcher.redraw(args.options.name, {
+      // NOTE: await may freeze UI
+      args.denops.dispatcher.redraw(args.options.name, {
         check: true,
         refreshItems: true,
       });
