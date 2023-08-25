@@ -10,7 +10,7 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v3.5.1/types.ts";
+} from "https://deno.land/x/ddu_vim@v3.6.0/types.ts";
 import {
   batch,
   Denops,
@@ -19,12 +19,12 @@ import {
   is,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v3.5.1/deps.ts";
+} from "https://deno.land/x/ddu_vim@v3.6.0/deps.ts";
 import {
   errorException,
   treePath2Filename,
-} from "https://deno.land/x/ddu_vim@v3.5.1/utils.ts";
-import { extname } from "https://deno.land/std@0.198.0/path/mod.ts";
+} from "https://deno.land/x/ddu_vim@v3.6.0/utils.ts";
+import { extname } from "https://deno.land/std@0.200.0/path/mod.ts";
 import { Env } from "https://deno.land/x/env@v2.2.4/env.js";
 import { PreviewUi } from "./filer/preview.ts";
 
@@ -592,8 +592,7 @@ export class Ui extends BaseUi<Params> {
     }) => {
       const items = await this.getItems(args.denops);
 
-      const actions = await args.denops.call(
-        "ddu#get_item_actions",
+      const actions = await args.denops.dispatcher.getItemActionNames(
         args.options.name,
         items,
       );
@@ -783,8 +782,7 @@ export class Ui extends BaseUi<Params> {
     }) => {
       const items = await this.getItems(args.denops);
 
-      const actions = await args.denops.call(
-        "ddu#get_item_actions",
+      const actions = await args.denops.dispatcher.getItemActionNames(
         args.options.name,
         items,
       );
