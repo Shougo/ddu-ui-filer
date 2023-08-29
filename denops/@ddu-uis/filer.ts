@@ -66,6 +66,8 @@ type FloatingTitle =
 
 type WindowOption = [string, number | string];
 
+type CursorPos = [] | [lnum: number, col: number, off?: number];
+
 type ExprNumber = string | number;
 
 type OnPreviewArguments = {
@@ -228,7 +230,8 @@ export class Ui extends BaseUi<Params> {
     const pos = this.items.findIndex((item) => equal(item, args.item));
 
     if (pos > 0) {
-      await fn.cursor(args.denops, pos + 1, 0);
+      const bufnr = await this.getBufnr(args.denops);
+      await this.cursor(args.denops, bufnr, [pos + 1, 0]);
       await args.denops.cmd("normal! zb");
     }
   }
@@ -366,49 +369,15 @@ export class Ui extends BaseUi<Params> {
     await args.denops.cmd(`augroup ${augroupName}`);
     await args.denops.cmd(`autocmd! ${augroupName}`);
 
-    const header =
-      `[ddu-${args.options.name}] ${this.items.length}/${args.context.maxItems}`;
-    const linenr = "printf('%'.(len(line('$'))+2).'d/%d',line('.'),line('$'))";
-    const async = `${args.context.done ? "" : "[async]"}`;
-    const laststatus = await op.laststatus.get(args.denops);
-    if (hasNvim && (floating || laststatus === 0)) {
-      if (
-        (await vars.g.get(args.denops, "ddu#ui#filer#_save_title", "")) === ""
-      ) {
-        const saveTitle = await args.denops.call(
-          "nvim_get_option",
-          "titlestring",
-        ) as string;
-        await vars.g.set(args.denops, "ddu#ui#filer#_save_title", saveTitle);
-      }
-
-      if (await fn.exists(args.denops, "##WinClosed")) {
-        await args.denops.cmd(
-          `autocmd ${augroupName} WinClosed,BufLeave <buffer>` +
-            " let &titlestring=g:ddu#ui#filer#_save_title",
-        );
-      }
-
-      const titleString = `${header} %{${linenr}}%*${async}`;
-      await vars.b.set(args.denops, "ddu_ui_filer_title", titleString);
-
-      await args.denops.call(
-        "nvim_set_option",
-        "titlestring",
-        titleString,
-      );
-      await args.denops.cmd(
-        `autocmd ${augroupName} WinEnter,BufEnter <buffer>` +
-          " let &titlestring=b:ddu_ui_filer_title",
-      );
-    } else if (args.uiParams.statusline) {
-      await fn.setwinvar(
-        args.denops,
-        await fn.bufwinnr(args.denops, bufnr),
-        "&statusline",
-        header + " %#LineNR#%{" + linenr + "}%*" + async,
-      );
-    }
+    await this.setStatusline(
+      args.denops,
+      args.context,
+      args.options,
+      args.uiParams,
+      bufnr,
+      floating,
+      augroupName,
+    );
 
     // Update main buffer
     try {
@@ -464,6 +433,9 @@ export class Ui extends BaseUi<Params> {
         denops: args.denops,
         item: saveItem[path],
       });
+    } else {
+      // Default cursor
+      await this.cursor(args.denops, bufnr, [1, 0]);
     }
 
     await vars.b.set(args.denops, "ddu_ui_filer_path", path);
@@ -644,7 +616,7 @@ export class Ui extends BaseUi<Params> {
         bufnr,
         "ddu_ui_filer_cursor_pos",
         [],
-      ) as number[];
+      ) as CursorPos;
       if (cursorPos.length === 0) {
         return ActionFlags.Persist;
       }
@@ -664,12 +636,7 @@ export class Ui extends BaseUi<Params> {
         cursorPos[1] = loop ? 1 : this.viewItems.length;
       }
 
-      await fn.setbufvar(
-        args.denops,
-        bufnr,
-        "ddu_ui_filer_cursor_pos",
-        cursorPos,
-      );
+      await this.cursor(args.denops, bufnr, cursorPos);
 
       return ActionFlags.Persist;
     },
@@ -684,7 +651,7 @@ export class Ui extends BaseUi<Params> {
         bufnr,
         "ddu_ui_filer_cursor_pos",
         [],
-      ) as number[];
+      ) as CursorPos;
       if (cursorPos.length === 0) {
         return ActionFlags.Persist;
       }
@@ -704,12 +671,7 @@ export class Ui extends BaseUi<Params> {
         cursorPos[1] = loop ? 1 : this.viewItems.length;
       }
 
-      await fn.setbufvar(
-        args.denops,
-        bufnr,
-        "ddu_ui_filer_cursor_pos",
-        cursorPos,
-      );
+      await this.cursor(args.denops, bufnr, cursorPos);
 
       return ActionFlags.Persist;
     },
@@ -1042,7 +1004,7 @@ export class Ui extends BaseUi<Params> {
       bufnr,
       "ddu_ui_filer_cursor_pos",
       [],
-    ) as number[];
+    ) as CursorPos;
     if (cursorPos.length === 0) {
       return -1;
     }
@@ -1311,6 +1273,75 @@ export class Ui extends BaseUi<Params> {
     } else {
       return sortedItems;
     }
+  }
+
+  private async setStatusline(
+    denops: Denops,
+    context: Context,
+    options: DduOptions,
+    uiParams: Params,
+    bufnr: number,
+    floating: boolean,
+    augroupName: string,
+  ): Promise<void> {
+    const header = `[ddu-${options.name}]`;
+    const linenr =
+      "printf('%'.('$'->line())->len().'d/%d','.'->line(),'$'->line())";
+    const laststatus = await op.laststatus.get(denops);
+    const hasNvim = denops.meta.host === "nvim";
+    const async = `${context.done ? "" : " [async]"}`;
+
+    if (hasNvim && (floating || laststatus === 0)) {
+      if (
+        (await vars.g.get(denops, "ddu#ui#filer#_save_title", "")) === ""
+      ) {
+        const saveTitle = await denops.call(
+          "nvim_get_option",
+          "titlestring",
+        ) as string;
+        await vars.g.set(denops, "ddu#ui#filer#_save_title", saveTitle);
+      }
+
+      if (await fn.exists(denops, "##WinClosed")) {
+        await denops.cmd(
+          `autocmd ${augroupName} WinClosed,BufLeave <buffer>` +
+            " let &titlestring=g:ddu#ui#filer#_save_title",
+        );
+      }
+
+      const titleString = `${header} %{${linenr}}%*${async}`;
+      await vars.b.set(denops, "ddu_ui_filer_title", titleString);
+
+      await denops.call(
+        "nvim_set_option",
+        "titlestring",
+        titleString,
+      );
+      await denops.cmd(
+        `autocmd ${augroupName} WinEnter,BufEnter <buffer>` +
+          " let &titlestring=b:ddu_ui_filer_title",
+      );
+    } else if (uiParams.statusline) {
+      await fn.setwinvar(
+        denops,
+        await fn.bufwinnr(denops, bufnr),
+        "&statusline",
+        header + " %#LineNR#%{" + linenr + "}%*" + async,
+      );
+    }
+  }
+
+  private async cursor(denops: Denops, bufnr: number, pos: CursorPos): Promise<void> {
+    if (pos.length !== 0) {
+      await fn.cursor(denops, pos);
+    }
+
+    await fn.setbufvar(
+      denops,
+      bufnr,
+      "ddu_ui_filer_cursor_pos",
+      pos,
+    );
   }
 }
 
