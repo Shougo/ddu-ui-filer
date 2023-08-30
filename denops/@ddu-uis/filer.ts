@@ -144,6 +144,7 @@ export class Ui extends BaseUi<Params> {
   private viewItems: DduItem[] = [];
   private selectedItems: Set<number> = new Set();
   private previewUi = new PreviewUi();
+  private refreshed = false;
 
   override async refreshItems(args: {
     denops: Denops;
@@ -159,6 +160,7 @@ export class Ui extends BaseUi<Params> {
       args.items,
     );
     this.selectedItems.clear();
+    this.refreshed = true;
   }
 
   override expandItem(args: {
@@ -433,7 +435,7 @@ export class Ui extends BaseUi<Params> {
         denops: args.denops,
         item: saveItem[path],
       });
-    } else {
+    } else if (this.refreshed) {
       // Default cursor
       await this.cursor(args.denops, bufnr, [1, 0]);
     }
@@ -460,6 +462,8 @@ export class Ui extends BaseUi<Params> {
     if (!args.uiParams.focus) {
       await fn.win_gotoid(args.denops, args.context.winId);
     }
+
+    this.refreshed = false;
   }
 
   override async visible(args: {
