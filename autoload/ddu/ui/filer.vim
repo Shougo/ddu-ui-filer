@@ -15,9 +15,23 @@ function ddu#ui#filer#_update_buffer(
 
   call setbufvar(a:bufnr, '&modifiable', 1)
 
-  call setbufline(a:bufnr, 1, a:lines)
-  if current_lines > max_lines
-    silent call deletebufline(a:bufnr, max_lines + 1, '$')
+  if a:lines->empty()
+    " Clear buffer
+    if current_lines > 1
+      if '%'->bufnr() ==# a:bufnr
+        silent % delete _
+      else
+        silent call deletebufline(a:bufnr, 1, '$')
+      endif
+    else
+      call setbufline(a:bufnr, 1, [''])
+    endif
+  else
+    call setbufline(a:bufnr, 1, a:lines)
+
+    if current_lines > 1 && current_lines > max_lines
+      silent call deletebufline(a:bufnr, max_lines + 1, '$')
+    endif
   endif
 
   call setbufvar(a:bufnr, '&modifiable', 0)
