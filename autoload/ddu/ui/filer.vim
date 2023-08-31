@@ -10,11 +10,12 @@ endfunction
 
 function ddu#ui#filer#_update_buffer(
       \ params, bufnr, lines, refreshed, pos) abort
-  const max_lines = a:lines->len()
   const current_lines = '$'->line(a:bufnr->bufwinid())
 
   call setbufvar(a:bufnr, '&modifiable', 1)
 
+  " NOTE: deletebufline() changes cursor position.
+  let changed_cursor = v:false
   if a:lines->empty()
     " Clear buffer
     if current_lines > 1
@@ -23,26 +24,31 @@ function ddu#ui#filer#_update_buffer(
       else
         silent call deletebufline(a:bufnr, 1, '$')
       endif
+
+      let changed_cursor = v:false
     else
       call setbufline(a:bufnr, 1, [''])
     endif
   else
     call setbufline(a:bufnr, 1, a:lines)
 
-    if current_lines > 1 && current_lines > max_lines
-      silent call deletebufline(a:bufnr, max_lines + 1, '$')
+    if current_lines > a:lines->len()
+      silent call deletebufline(a:bufnr, a:lines->len() + 1, '$')
+      let changed_cursor = v:false
     endif
   endif
 
   call setbufvar(a:bufnr, '&modifiable', 0)
   call setbufvar(a:bufnr, '&modified', 0)
 
-  if a:refreshed
-    " Init the cursor
-    call win_execute(bufwinid(a:bufnr),
-          \ printf('call cursor(%d, 0)', a:pos + 1))
-    redraw
+  if !a:refreshed && !changed_cursor
+    return
   endif
+
+  " Init the cursor
+  call win_execute(bufwinid(a:bufnr),
+        \ printf('call cursor(%d, 0)', a:pos + 1))
+  redraw
 endfunction
 
 function ddu#ui#filer#_highlight_items(
