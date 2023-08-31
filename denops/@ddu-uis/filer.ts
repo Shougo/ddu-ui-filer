@@ -234,7 +234,6 @@ export class Ui extends BaseUi<Params> {
     if (pos > 0) {
       const bufnr = await this.getBufnr(args.denops);
       await this.cursor(args.denops, bufnr, [pos + 1, 0]);
-      await args.denops.cmd("normal! zb");
     }
   }
 
