@@ -1334,16 +1334,28 @@ export class Ui extends BaseUi<Params> {
     }
   }
 
-  private async cursor(denops: Denops, bufnr: number, pos: CursorPos): Promise<void> {
+  private async cursor(
+    denops: Denops,
+    bufnr: number,
+    pos: CursorPos,
+  ): Promise<void> {
     if (pos.length !== 0) {
       await fn.cursor(denops, pos);
+    }
+
+    const newPos = await fn.getcurpos(denops);
+    if (pos[1]) {
+      newPos[1] = pos[1];
+    }
+    if (pos[2]) {
+      newPos[2] = pos[2];
     }
 
     await fn.setbufvar(
       denops,
       bufnr,
       "ddu_ui_filer_cursor_pos",
-      pos,
+      newPos,
     );
   }
 }
