@@ -530,6 +530,9 @@ FAQ 5:							|ddu-ui-filer-faq-5|
 FAQ 6:							|ddu-ui-filer-faq-6|
 	I want to check the current item is tree.
 
+FAQ 7:							|ddu-ui-filer-faq-7|
+	I want to open ddu-ui-filer automatically when |:edit| directory.
+
 
 ------------------------------------------------------------------------------
                                                           *ddu-ui-filer-faq-1*
@@ -600,6 +603,11 @@ A: >
 	\  {'name': 'narrow'})<CR>" :
 	\ "<Cmd>call ddu#ui#do_action('itemAction',
 	\  {'name': 'open'})<CR>"
+<
+                                                          *ddu-ui-filer-faq-7*
+Q: I want to open ddu-ui-filer automatically when |:edit| directory.
+
+A: I don't provide the solution.  Because it cannot be implmented properly.
 
 
 ==============================================================================
