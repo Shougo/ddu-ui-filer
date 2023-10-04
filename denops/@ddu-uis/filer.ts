@@ -25,10 +25,8 @@ import {
   treePath2Filename,
 } from "https://deno.land/x/ddu_vim@v3.6.0/utils.ts";
 import { extname } from "https://deno.land/std@0.203.0/path/mod.ts";
-import { Env } from "https://deno.land/x/env@v3.0.1/env.js";
 import { PreviewUi } from "./filer/preview.ts";
 
-const env = new Env();
 
 type HighlightGroup = {
   floating?: string;
@@ -1196,7 +1194,7 @@ export class Ui extends BaseUi<Params> {
         rootPath = await fn.getcwd(denops) as string;
       }
       let display = rootPath;
-      const home = env.get("HOME", "");
+      const home = Deno.env.get("HOME");
       if (home && home !== "") {
         display = display.replace(home, "~");
       }
