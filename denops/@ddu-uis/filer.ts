@@ -511,12 +511,12 @@ export class Ui extends BaseUi<Params> {
         continue;
       }
 
-      await fn.win_gotoid(args.denops, winid);
-
       if (
         args.uiParams.split === "no" ||
         (await fn.winnr(args.denops, "$")) === 1
       ) {
+        await fn.win_gotoid(args.denops, winid);
+
         const prevName = await fn.bufname(args.denops, args.context.bufNr);
         await args.denops.cmd(
           prevName !== args.context.bufName || args.context.bufNr == bufnr
@@ -524,7 +524,7 @@ export class Ui extends BaseUi<Params> {
             : `buffer ${args.context.bufNr}`,
         );
       } else {
-        await args.denops.cmd("close!");
+        await args.denops.cmd(`silent! close! ${winid}`);
         await fn.win_gotoid(args.denops, args.context.winId);
       }
     }
