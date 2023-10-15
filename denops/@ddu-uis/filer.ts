@@ -307,6 +307,9 @@ export class Ui extends BaseUi<Params> {
         );
       }
     } else if (floating) {
+      // statusline must be set for floating window
+      const currentStatusline = await op.statusline.get(args.denops);
+
       const winOpts: FloatingOpts = {
         "relative": "editor",
         "row": Number(args.uiParams.winRow),
@@ -337,15 +340,22 @@ export class Ui extends BaseUi<Params> {
         );
       }
 
+      const winnr = await fn.bufwinnr(args.denops, bufnr);
       const highlight = args.uiParams.highlights?.floating ?? "NormalFloat";
       const floatingHighlight = args.uiParams.highlights?.floatingBorder ??
         "FloatBorder";
 
       await fn.setwinvar(
         args.denops,
-        await fn.bufwinnr(args.denops, bufnr),
+        winnr,
         "&winhighlight",
         `Normal:${highlight},FloatBorder:${floatingHighlight}`,
+      );
+      await fn.setwinvar(
+        args.denops,
+        winnr,
+        "&statusline",
+        currentStatusline,
       );
     } else if (args.uiParams.split === "no") {
       if (winid < 0) {
