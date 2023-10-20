@@ -24,7 +24,7 @@ import {
   errorException,
   treePath2Filename,
 } from "https://deno.land/x/ddu_vim@v3.6.0/utils.ts";
-import { extname } from "https://deno.land/std@0.203.0/path/mod.ts";
+import { extname } from "https://deno.land/std@0.204.0/path/mod.ts";
 import { PreviewUi } from "./filer/preview.ts";
 
 
@@ -857,7 +857,7 @@ export class Ui extends BaseUi<Params> {
         uiParams: args.uiParams,
       });
 
-      args.denops.dispatcher.pop(args.options.name);
+      await args.denops.dispatcher.pop(args.options.name);
 
       return ActionFlags.None;
     },
