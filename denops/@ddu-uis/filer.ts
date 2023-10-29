@@ -534,7 +534,8 @@ export class Ui extends BaseUi<Params> {
             : `buffer ${args.context.bufNr}`,
         );
       } else {
-        await args.denops.cmd(`silent! close! ${winid}`);
+        await fn.win_gotoid(args.denops, winid);
+        await args.denops.cmd("close!");
         await fn.win_gotoid(args.denops, args.context.winId);
       }
     }
