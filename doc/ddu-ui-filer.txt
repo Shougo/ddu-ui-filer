@@ -150,6 +150,13 @@ preview
 
 		Preview the item in preview window.
 
+                                          *ddu-ui-filer-action-previewExecute*
+previewExecute
+		params:
+			{command}: 	Command to execute
+
+		Execute command in preview window.
+
                                           *ddu-ui-filer-action-toggleAllItems*
 toggleAllItems
 		Toggle selected state for the all items.

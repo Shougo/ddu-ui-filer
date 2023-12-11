@@ -54,7 +54,7 @@ endfunction
 function ddu#ui#filer#_highlight_items(
       \ params, bufnr, max_lines, highlight_items, selected_items) abort
   " Buffer must be loaded
-  if !(a:bufnr->bufloaded())
+  if !a:bufnr->bufloaded()
     return
   endif
 
