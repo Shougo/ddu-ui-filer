@@ -10,7 +10,7 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v3.8.1/types.ts";
+} from "https://deno.land/x/ddu_vim@v3.9.0/types.ts";
 import {
   batch,
   Denops,
@@ -19,12 +19,12 @@ import {
   is,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v3.8.1/deps.ts";
+} from "https://deno.land/x/ddu_vim@v3.9.0/deps.ts";
 import {
   errorException,
   treePath2Filename,
-} from "https://deno.land/x/ddu_vim@v3.8.1/utils.ts";
-import { extname } from "https://deno.land/std@0.208.0/path/mod.ts";
+} from "https://deno.land/x/ddu_vim@v3.9.0/utils.ts";
+import { extname } from "https://deno.land/std@0.210.0/path/mod.ts";
 import { PreviewUi } from "./filer/preview.ts";
 
 
@@ -490,13 +490,13 @@ export class Ui extends BaseUi<Params> {
     }
   }
 
-  override async winId(args: {
+  override async winIds(args: {
     denops: Denops;
     uiParams: Params;
-  }): Promise<number> {
+  }): Promise<number[]> {
     const bufnr = await this.getBufnr(args.denops);
     const winIds = await fn.win_findbuf(args.denops, bufnr) as number[];
-    return winIds.length > 0 ? winIds[0] : -1;
+    return winIds;
   }
 
   override async quit(args: {
