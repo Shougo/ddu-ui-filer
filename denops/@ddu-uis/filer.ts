@@ -647,7 +647,7 @@ export class Ui extends BaseUi<Params> {
         cursorPos[1] = loop ? 1 : this.#viewItems.length;
       }
 
-      await this.#cursor(args.denops, bufnr, cursorPos);
+      await this.#cursor(args.denops, bufnr, cursorPos.slice(1));
 
       return ActionFlags.Persist;
     },
@@ -682,7 +682,7 @@ export class Ui extends BaseUi<Params> {
         cursorPos[1] = loop ? 1 : this.#viewItems.length;
       }
 
-      await this.#cursor(args.denops, bufnr, cursorPos);
+      await this.#cursor(args.denops, bufnr, cursorPos.slice(1));
 
       return ActionFlags.Persist;
     },
