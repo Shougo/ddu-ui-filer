@@ -628,7 +628,7 @@ export class Ui extends BaseUi<Params> {
         "ddu_ui_filer_cursor_pos",
         [],
       ) as CursorPos;
-      if (cursorPos.length === 0) {
+      if (cursorPos.length === 0 || !cursorPos[1] || !cursorPos[2]) {
         return ActionFlags.Persist;
       }
 
@@ -647,7 +647,7 @@ export class Ui extends BaseUi<Params> {
         cursorPos[1] = loop ? 1 : this.#viewItems.length;
       }
 
-      await this.#cursor(args.denops, bufnr, cursorPos.slice(1));
+      await this.#cursor(args.denops, bufnr, [cursorPos[1], cursorPos[2]]);
 
       return ActionFlags.Persist;
     },
@@ -663,7 +663,7 @@ export class Ui extends BaseUi<Params> {
         "ddu_ui_filer_cursor_pos",
         [],
       ) as CursorPos;
-      if (cursorPos.length === 0) {
+      if (cursorPos.length === 0 || !cursorPos[1] || !cursorPos[2]) {
         return ActionFlags.Persist;
       }
 
@@ -682,7 +682,7 @@ export class Ui extends BaseUi<Params> {
         cursorPos[1] = loop ? 1 : this.#viewItems.length;
       }
 
-      await this.#cursor(args.denops, bufnr, cursorPos.slice(1));
+      await this.#cursor(args.denops, bufnr, [cursorPos[1], cursorPos[2]]);
 
       return ActionFlags.Persist;
     },
@@ -1352,11 +1352,11 @@ export class Ui extends BaseUi<Params> {
     }
 
     const newPos = await fn.getcurpos(denops);
-    if (pos[1]) {
-      newPos[1] = pos[1];
+    if (pos[0]) {
+      newPos[1] = pos[0];
     }
-    if (pos[2]) {
-      newPos[2] = pos[2];
+    if (pos[1]) {
+      newPos[2] = pos[1];
     }
 
     await fn.setbufvar(
