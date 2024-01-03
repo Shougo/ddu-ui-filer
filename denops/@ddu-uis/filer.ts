@@ -137,12 +137,12 @@ type ExpandItemParams = {
 };
 
 export class Ui extends BaseUi<Params> {
-  private bufferName = "";
-  private items: DduItem[] = [];
-  private viewItems: DduItem[] = [];
-  private selectedItems: Set<number> = new Set();
-  private previewUi = new PreviewUi();
-  private refreshed = false;
+  #bufferName = "";
+  #items: DduItem[] = [];
+  #viewItems: DduItem[] = [];
+  #selectedItems: Set<number> = new Set();
+  #previewUi = new PreviewUi();
+  #refreshed = false;
 
   override async refreshItems(args: {
     denops: Denops;
@@ -151,14 +151,14 @@ export class Ui extends BaseUi<Params> {
     sources: SourceInfo[];
     items: DduItem[];
   }): Promise<void> {
-    this.items = await this.getSortedItems(
+    this.#items = await this.#getSortedItems(
       args.denops,
       args.sources,
       args.uiParams,
       args.items,
     );
-    this.selectedItems.clear();
-    this.refreshed = true;
+    this.#selectedItems.clear();
+    this.#refreshed = true;
   }
 
   override expandItem(args: {
@@ -168,24 +168,24 @@ export class Ui extends BaseUi<Params> {
   }) {
     // NOTE: treePath may be list.  So it must be compared by JSON.
     const searchPath = JSON.stringify(args.parent.treePath);
-    const index = this.items.findIndex(
+    const index = this.#items.findIndex(
       (item: DduItem) =>
         JSON.stringify(item.treePath) === searchPath &&
         item.__sourceIndex === args.parent.__sourceIndex,
     );
 
-    const insertItems = this.sortItems(args.uiParams, args.children);
+    const insertItems = this.#sortItems(args.uiParams, args.children);
 
     if (index >= 0) {
-      this.items = this.items.slice(0, index + 1).concat(insertItems).concat(
-        this.items.slice(index + 1),
+      this.#items = this.#items.slice(0, index + 1).concat(insertItems).concat(
+        this.#items.slice(index + 1),
       );
-      this.items[index] = args.parent;
+      this.#items[index] = args.parent;
     } else {
-      this.items = this.items.concat(insertItems);
+      this.#items = this.#items.concat(insertItems);
     }
 
-    this.selectedItems.clear();
+    this.#selectedItems.clear();
 
     return Promise.resolve();
   }
@@ -195,7 +195,7 @@ export class Ui extends BaseUi<Params> {
   }) {
     // NOTE: treePath may be list.  So it must be compared by JSON.
     const searchPath = JSON.stringify(args.item.treePath);
-    const startIndex = this.items.findIndex(
+    const startIndex = this.#items.findIndex(
       (item: DduItem) =>
         JSON.stringify(item.treePath) === searchPath &&
         item.__sourceIndex === args.item.__sourceIndex,
@@ -204,21 +204,21 @@ export class Ui extends BaseUi<Params> {
       return Promise.resolve();
     }
 
-    const endIndex = this.items.slice(startIndex + 1).findIndex(
+    const endIndex = this.#items.slice(startIndex + 1).findIndex(
       (item: DduItem) => item.__level <= args.item.__level,
     );
 
     if (endIndex < 0) {
-      this.items = this.items.slice(0, startIndex + 1);
+      this.#items = this.#items.slice(0, startIndex + 1);
     } else {
-      this.items = this.items.slice(0, startIndex + 1).concat(
-        this.items.slice(startIndex + endIndex + 1),
+      this.#items = this.#items.slice(0, startIndex + 1).concat(
+        this.#items.slice(startIndex + endIndex + 1),
       );
     }
 
-    this.items[startIndex] = args.item;
+    this.#items[startIndex] = args.item;
 
-    this.selectedItems.clear();
+    this.#selectedItems.clear();
 
     return Promise.resolve();
   }
@@ -227,11 +227,11 @@ export class Ui extends BaseUi<Params> {
     denops: Denops;
     item: DduItem;
   }) {
-    const pos = this.items.findIndex((item) => equal(item, args.item));
+    const pos = this.#items.findIndex((item) => equal(item, args.item));
 
     if (pos > 0) {
-      const bufnr = await this.getBufnr(args.denops);
-      await this.cursor(args.denops, bufnr, [pos + 1, 0]);
+      const bufnr = await this.#getBufnr(args.denops);
+      await this.#cursor(args.denops, bufnr, [pos + 1, 0]);
     }
   }
 
@@ -247,18 +247,18 @@ export class Ui extends BaseUi<Params> {
       return;
     }
 
-    if (this.items.length === 0 && args.context.done) {
+    if (this.#items.length === 0 && args.context.done) {
       // Close preview window when empty items
-      await this.previewUi.close(args.denops, args.context, args.uiParams);
+      await this.#previewUi.close(args.denops, args.context, args.uiParams);
     }
 
-    this.bufferName = `ddu-filer-${args.options.name}`;
-    const initialized = await fn.bufexists(args.denops, this.bufferName) &&
-      await fn.bufnr(args.denops, this.bufferName);
+    this.#bufferName = `ddu-filer-${args.options.name}`;
+    const initialized = await fn.bufexists(args.denops, this.#bufferName) &&
+      await fn.bufnr(args.denops, this.#bufferName);
     const bufnr = initialized ||
-      await this.initBuffer(args.denops, this.bufferName);
+      await this.#initBuffer(args.denops, this.#bufferName);
 
-    args.uiParams = await this.resolveParams(
+    args.uiParams = await this.#resolveParams(
       args.denops,
       args.options,
       args.uiParams,
@@ -371,14 +371,14 @@ export class Ui extends BaseUi<Params> {
 
     // NOTE: buffers may be restored
     if (!initialized || winid < 0) {
-      await this.initOptions(args.denops, args.options, args.uiParams, bufnr);
+      await this.#initOptions(args.denops, args.options, args.uiParams, bufnr);
     }
 
     const augroupName = `${await op.filetype.getLocal(args.denops)}-${bufnr}`;
     await args.denops.cmd(`augroup ${augroupName}`);
     await args.denops.cmd(`autocmd! ${augroupName}`);
 
-    await this.setStatusline(
+    await this.#setStatusline(
       args.denops,
       args.context,
       args.options,
@@ -396,7 +396,7 @@ export class Ui extends BaseUi<Params> {
           "ddu#ui#filer#_update_buffer",
           args.uiParams,
           bufnr,
-          this.items.map((c) => (c.display ?? c.word)),
+          this.#items.map((c) => (c.display ?? c.word)),
           false,
           0,
         );
@@ -405,17 +405,17 @@ export class Ui extends BaseUi<Params> {
           "ddu#ui#filer#_highlight_items",
           args.uiParams,
           bufnr,
-          this.items.length,
-          this.items.map((item, index) => {
+          this.#items.length,
+          this.#items.map((item, index) => {
             return {
               highlights: item.highlights ?? [],
               row: index + 1,
               prefix: "",
             };
           }).filter((item, index) =>
-            item.highlights.length > 0 && !this.selectedItems.has(index)
+            item.highlights.length > 0 && !this.#selectedItems.has(index)
           ),
-          [...this.selectedItems],
+          [...this.#selectedItems],
         );
       });
     } catch (e) {
@@ -427,7 +427,7 @@ export class Ui extends BaseUi<Params> {
       return;
     }
 
-    this.viewItems = Array.from(this.items);
+    this.#viewItems = Array.from(this.#items);
 
     // Restore cursor
     const path = treePath2Filename(args.context.path);
@@ -442,9 +442,9 @@ export class Ui extends BaseUi<Params> {
         denops: args.denops,
         item: saveItem[path],
       });
-    } else if (this.refreshed) {
+    } else if (this.#refreshed) {
       // Default cursor
-      await this.cursor(args.denops, bufnr, [1, 0]);
+      await this.#cursor(args.denops, bufnr, [1, 0]);
     }
 
     await vars.b.set(args.denops, "ddu_ui_filer_path", path);
@@ -470,7 +470,7 @@ export class Ui extends BaseUi<Params> {
       await fn.win_gotoid(args.denops, args.context.winId);
     }
 
-    this.refreshed = false;
+    this.#refreshed = false;
   }
 
   override async visible(args: {
@@ -480,7 +480,7 @@ export class Ui extends BaseUi<Params> {
     uiParams: Params;
     tabNr: number;
   }): Promise<boolean> {
-    const bufnr = await this.getBufnr(args.denops);
+    const bufnr = await this.#getBufnr(args.denops);
     if (args.tabNr > 0) {
       return (await fn.tabpagebuflist(args.denops, args.tabNr) as number[])
         .includes(bufnr);
@@ -494,7 +494,7 @@ export class Ui extends BaseUi<Params> {
     denops: Denops;
     uiParams: Params;
   }): Promise<number[]> {
-    const bufnr = await this.getBufnr(args.denops);
+    const bufnr = await this.#getBufnr(args.denops);
     const winIds = await fn.win_findbuf(args.denops, bufnr) as number[];
     return winIds;
   }
@@ -505,11 +505,11 @@ export class Ui extends BaseUi<Params> {
     options: DduOptions;
     uiParams: Params;
   }): Promise<void> {
-    await this.previewUi.close(args.denops, args.context, args.uiParams);
-    await this.previewUi.removePreviewedBuffers(args.denops);
+    await this.#previewUi.close(args.denops, args.context, args.uiParams);
+    await this.#previewUi.removePreviewedBuffers(args.denops);
 
     // Move to the UI window.
-    const bufnr = await this.getBufnr(args.denops);
+    const bufnr = await this.#getBufnr(args.denops);
     if (!bufnr) {
       return;
     }
@@ -574,7 +574,7 @@ export class Ui extends BaseUi<Params> {
       denops: Denops;
       options: DduOptions;
     }) => {
-      const items = await this.getItems(args.denops);
+      const items = await this.#getItems(args.denops);
 
       const actions = await args.denops.dispatcher.getItemActionNames(
         args.options.name,
@@ -600,7 +600,7 @@ export class Ui extends BaseUi<Params> {
       return ActionFlags.None;
     },
     clearSelectAllItems: (_) => {
-      this.selectedItems.clear();
+      this.#selectedItems.clear();
       return Promise.resolve(ActionFlags.Redraw);
     },
     closePreviewWindow: async (args: {
@@ -608,21 +608,21 @@ export class Ui extends BaseUi<Params> {
       context: Context;
       uiParams: Params;
     }) => {
-      await this.previewUi.close(args.denops, args.context, args.uiParams);
+      await this.#previewUi.close(args.denops, args.context, args.uiParams);
       return ActionFlags.None;
     },
     collapseItem: async (args: {
       denops: Denops;
       options: DduOptions;
     }) => {
-      return await this.collapseItemAction(args.denops, args.options);
+      return await this.#collapseItemAction(args.denops, args.options);
     },
     cursorNext: async (args: {
       denops: Denops;
       uiParams: Params;
       actionParams: unknown;
     }) => {
-      const bufnr = await this.getBufnr(args.denops);
+      const bufnr = await this.#getBufnr(args.denops);
       const cursorPos = await fn.getbufvar(
         args.denops,
         bufnr,
@@ -643,12 +643,12 @@ export class Ui extends BaseUi<Params> {
       // Move to the next
       cursorPos[1] += count;
       if (cursorPos[1] <= 0) {
-        cursorPos[1] = loop ? this.viewItems.length : 1;
-      } else if (cursorPos[1] > this.viewItems.length) {
-        cursorPos[1] = loop ? 1 : this.viewItems.length;
+        cursorPos[1] = loop ? this.#viewItems.length : 1;
+      } else if (cursorPos[1] > this.#viewItems.length) {
+        cursorPos[1] = loop ? 1 : this.#viewItems.length;
       }
 
-      await this.cursor(args.denops, bufnr, cursorPos);
+      await this.#cursor(args.denops, bufnr, cursorPos);
 
       return ActionFlags.Persist;
     },
@@ -657,7 +657,7 @@ export class Ui extends BaseUi<Params> {
       uiParams: Params;
       actionParams: unknown;
     }) => {
-      const bufnr = await this.getBufnr(args.denops);
+      const bufnr = await this.#getBufnr(args.denops);
       const cursorPos = await fn.getbufvar(
         args.denops,
         bufnr,
@@ -678,12 +678,12 @@ export class Ui extends BaseUi<Params> {
       // Move to the previous
       cursorPos[1] -= count;
       if (cursorPos[1] <= 0) {
-        cursorPos[1] = loop ? this.viewItems.length : 1;
-      } else if (cursorPos[1] > this.viewItems.length) {
-        cursorPos[1] = loop ? 1 : this.viewItems.length;
+        cursorPos[1] = loop ? this.#viewItems.length : 1;
+      } else if (cursorPos[1] > this.#viewItems.length) {
+        cursorPos[1] = loop ? 1 : this.#viewItems.length;
       }
 
-      await this.cursor(args.denops, bufnr, cursorPos);
+      await this.#cursor(args.denops, bufnr, cursorPos);
 
       return ActionFlags.Persist;
     },
@@ -692,7 +692,7 @@ export class Ui extends BaseUi<Params> {
       options: DduOptions;
       actionParams: unknown;
     }) => {
-      const item = await this.getItem(args.denops);
+      const item = await this.#getItem(args.denops);
       if (!item) {
         return ActionFlags.None;
       }
@@ -701,7 +701,7 @@ export class Ui extends BaseUi<Params> {
 
       if (item.__expanded) {
         if (params.mode === "toggle") {
-          return await this.collapseItemAction(args.denops, args.options);
+          return await this.#collapseItemAction(args.denops, args.options);
         }
         return ActionFlags.None;
       }
@@ -718,8 +718,8 @@ export class Ui extends BaseUi<Params> {
       denops: Denops;
       options: DduOptions;
     }) => {
-      const item = await this.getItem(args.denops);
-      const bufnr = await this.getBufnr(args.denops);
+      const item = await this.#getItem(args.denops);
+      const bufnr = await this.#getBufnr(args.denops);
       await fn.setbufvar(args.denops, bufnr, "ddu_ui_item", item ?? {});
 
       return ActionFlags.None;
@@ -728,13 +728,13 @@ export class Ui extends BaseUi<Params> {
       denops: Denops;
       options: DduOptions;
     }) => {
-      const bufnr = await this.getBufnr(args.denops);
-      await fn.setbufvar(args.denops, bufnr, "ddu_ui_items", this.items);
+      const bufnr = await this.#getBufnr(args.denops);
+      await fn.setbufvar(args.denops, bufnr, "ddu_ui_items", this.#items);
 
       const ft = await op.filetype.getLocal(args.denops);
       if (ft === "ddu-ff-filter") {
         // Set for filter window
-        await vars.b.set(args.denops, "ddu_ui_items", this.items);
+        await vars.b.set(args.denops, "ddu_ui_items", this.#items);
       }
 
       return ActionFlags.None;
@@ -743,8 +743,8 @@ export class Ui extends BaseUi<Params> {
       denops: Denops;
       options: DduOptions;
     }) => {
-      const items = await this.getItems(args.denops);
-      const bufnr = await this.getBufnr(args.denops);
+      const items = await this.#getItems(args.denops);
+      const bufnr = await this.#getBufnr(args.denops);
       await fn.setbufvar(args.denops, bufnr, "ddu_ui_selected_items", items);
 
       return ActionFlags.None;
@@ -754,7 +754,7 @@ export class Ui extends BaseUi<Params> {
       options: DduOptions;
       uiParams: Params;
     }) => {
-      const items = await this.getItems(args.denops);
+      const items = await this.#getItems(args.denops);
 
       const actions = await args.denops.dispatcher.getItemActionNames(
         args.options.name,
@@ -787,7 +787,7 @@ export class Ui extends BaseUi<Params> {
     }) => {
       const params = args.actionParams as DoActionParams;
 
-      const items = params.items ?? await this.getItems(args.denops);
+      const items = params.items ?? await this.#getItems(args.denops);
       if (items.length === 0) {
         return ActionFlags.Persist;
       }
@@ -815,24 +815,24 @@ export class Ui extends BaseUi<Params> {
         previewContext: PreviewContext,
       ) => Promise<Previewer | undefined>;
     }) => {
-      const item = await this.getItem(args.denops);
+      const item = await this.#getItem(args.denops);
       if (!item || !args.getPreviewer) {
         return ActionFlags.None;
       }
 
-      args.uiParams = await this.resolveParams(
+      args.uiParams = await this.#resolveParams(
         args.denops,
         args.options,
         args.uiParams,
         args.context,
       );
 
-      return this.previewUi.previewContents(
+      return this.#previewUi.previewContents(
         args.denops,
         args.context,
         args.uiParams,
         args.actionParams,
-        await this.getBufnr(args.denops),
+        await this.#getBufnr(args.denops),
         item,
         args.getPreviewer,
       );
@@ -842,7 +842,7 @@ export class Ui extends BaseUi<Params> {
       actionParams: unknown;
     }) => {
       const command = (args.actionParams as PreviewExecuteParams).command;
-      await this.previewUi.execute(args.denops, command);
+      await this.#previewUi.execute(args.denops, command);
       return ActionFlags.Persist;
     },
     quit: async (args: {
@@ -877,17 +877,17 @@ export class Ui extends BaseUi<Params> {
       return ActionFlags.None;
     },
     toggleAllItems: (_) => {
-      if (this.items.length === 0) {
+      if (this.#items.length === 0) {
         return Promise.resolve(ActionFlags.None);
       }
 
-      this.items.forEach((_, idx) => {
+      this.#items.forEach((_, idx) => {
         // Skip root
-        if (this.items[idx].__level >= 0) {
-          if (this.selectedItems.has(idx)) {
-            this.selectedItems.delete(idx);
+        if (this.#items[idx].__level >= 0) {
+          if (this.#selectedItems.has(idx)) {
+            this.#selectedItems.delete(idx);
           } else {
-            this.selectedItems.add(idx);
+            this.#selectedItems.add(idx);
           }
         }
       });
@@ -907,12 +907,12 @@ export class Ui extends BaseUi<Params> {
         previewContext: PreviewContext,
       ) => Promise<Previewer | undefined>;
     }) => {
-      const item = await this.getItem(args.denops);
+      const item = await this.#getItem(args.denops);
       if (!item || !args.getPreviewer) {
         return ActionFlags.None;
       }
 
-      args.uiParams = await this.resolveParams(
+      args.uiParams = await this.#resolveParams(
         args.denops,
         args.options,
         args.uiParams,
@@ -920,17 +920,17 @@ export class Ui extends BaseUi<Params> {
       );
 
       // Close if the target is the same as the previous one
-      if (this.previewUi.isAlreadyPreviewed(item)) {
-        await this.previewUi.close(args.denops, args.context, args.uiParams);
+      if (this.#previewUi.isAlreadyPreviewed(item)) {
+        await this.#previewUi.close(args.denops, args.context, args.uiParams);
         return ActionFlags.None;
       }
 
-      return this.previewUi.previewContents(
+      return this.#previewUi.previewContents(
         args.denops,
         args.context,
         args.uiParams,
         args.actionParams,
-        await this.getBufnr(args.denops),
+        await this.#getBufnr(args.denops),
         item,
         args.getPreviewer,
       );
@@ -940,15 +940,15 @@ export class Ui extends BaseUi<Params> {
       options: DduOptions;
       uiParams: Params;
     }) => {
-      const idx = await this.getIndex(args.denops);
+      const idx = await this.#getIndex(args.denops);
       if (idx < 0) {
         return ActionFlags.None;
       }
 
-      if (this.selectedItems.has(idx)) {
-        this.selectedItems.delete(idx);
+      if (this.#selectedItems.has(idx)) {
+        this.#selectedItems.delete(idx);
       } else {
-        this.selectedItems.add(idx);
+        this.#selectedItems.add(idx);
       }
 
       return ActionFlags.Redraw;
@@ -1006,11 +1006,11 @@ export class Ui extends BaseUi<Params> {
     };
   }
 
-  private async getIndex(
+  async #getIndex(
     denops: Denops,
   ): Promise<number> {
     // Convert viewItems index to items index.
-    const bufnr = await this.getBufnr(denops);
+    const bufnr = await this.#getBufnr(denops);
     const cursorPos = await fn.getbufvar(
       denops,
       bufnr,
@@ -1021,37 +1021,37 @@ export class Ui extends BaseUi<Params> {
       return -1;
     }
 
-    const viewItem = this.viewItems[cursorPos[1] - 1];
-    return this.items.findIndex(
+    const viewItem = this.#viewItems[cursorPos[1] - 1];
+    return this.#items.findIndex(
       (item: DduItem) => item === viewItem,
     );
   }
 
-  private async getItem(
+  async #getItem(
     denops: Denops,
   ): Promise<DduItem | null> {
-    const idx = await this.getIndex(denops);
-    return idx >= 0 ? this.items[idx] : null;
+    const idx = await this.#getIndex(denops);
+    return idx >= 0 ? this.#items[idx] : null;
   }
 
-  private async getItems(denops: Denops): Promise<DduItem[]> {
+  async #getItems(denops: Denops): Promise<DduItem[]> {
     let items: DduItem[];
-    if (this.selectedItems.size === 0) {
-      const item = await this.getItem(denops);
+    if (this.#selectedItems.size === 0) {
+      const item = await this.#getItem(denops);
       if (!item) {
         return [];
       }
 
       items = [item];
     } else {
-      items = [...this.selectedItems].map((i) => this.items[i]);
+      items = [...this.#selectedItems].map((i) => this.#items[i]);
     }
 
     return items.filter((item) => item);
   }
 
-  private async collapseItemAction(denops: Denops, options: DduOptions) {
-    const item = await this.getItem(denops);
+  async #collapseItemAction(denops: Denops, options: DduOptions) {
+    const item = await this.#getItem(denops);
     if (!item || !item.isTree) {
       return ActionFlags.None;
     }
@@ -1065,7 +1065,7 @@ export class Ui extends BaseUi<Params> {
     return ActionFlags.None;
   }
 
-  private async initBuffer(
+  async #initBuffer(
     denops: Denops,
     bufferName: string,
   ): Promise<number> {
@@ -1074,7 +1074,7 @@ export class Ui extends BaseUi<Params> {
     return bufnr;
   }
 
-  private async initOptions(
+  async #initOptions(
     denops: Denops,
     options: DduOptions,
     uiParams: Params,
@@ -1113,7 +1113,7 @@ export class Ui extends BaseUi<Params> {
     });
   }
 
-  private async resolveParams(
+  async #resolveParams(
     denops: Denops,
     options: DduOptions,
     uiParams: Params,
@@ -1125,7 +1125,7 @@ export class Ui extends BaseUi<Params> {
       sources: options.sources.map(
         (source) => is.String(source) ? source : source.name,
       ),
-      itemCount: this.items.length,
+      itemCount: this.#items.length,
       uiParams,
       ...context,
     };
@@ -1133,7 +1133,7 @@ export class Ui extends BaseUi<Params> {
     const params = Object.assign(uiParams);
     for (const name of uiParams.exprParams) {
       if (name in uiParams) {
-        params[name] = await this.evalExprParam(
+        params[name] = await this.#evalExprParam(
           denops,
           name,
           params[name],
@@ -1151,7 +1151,7 @@ export class Ui extends BaseUi<Params> {
     return params;
   }
 
-  private async evalExprParam(
+  async #evalExprParam(
     denops: Denops,
     name: string,
     expr: string | unknown,
@@ -1178,13 +1178,13 @@ export class Ui extends BaseUi<Params> {
     }
   }
 
-  private async getBufnr(
+  async #getBufnr(
     denops: Denops,
   ): Promise<number> {
-    return await fn.bufnr(denops, this.bufferName);
+    return await fn.bufnr(denops, this.#bufferName);
   }
 
-  private async getSortedItems(
+  async #getSortedItems(
     denops: Denops,
     sources: SourceInfo[],
     uiParams: Params,
@@ -1253,12 +1253,12 @@ export class Ui extends BaseUi<Params> {
         continue;
       }
 
-      ret = ret.concat(this.sortItems(uiParams, sourceItems[source.index]));
+      ret = ret.concat(this.#sortItems(uiParams, sourceItems[source.index]));
     }
     return ret;
   }
 
-  private sortItems(
+  #sortItems(
     uiParams: Params,
     items: DduItem[],
   ): DduItem[] {
@@ -1287,7 +1287,7 @@ export class Ui extends BaseUi<Params> {
     }
   }
 
-  private async setStatusline(
+  async #setStatusline(
     denops: Denops,
     context: Context,
     options: DduOptions,
@@ -1343,7 +1343,7 @@ export class Ui extends BaseUi<Params> {
     }
   }
 
-  private async cursor(
+  async #cursor(
     denops: Denops,
     bufnr: number,
     pos: CursorPos,
