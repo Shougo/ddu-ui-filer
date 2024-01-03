@@ -27,7 +27,6 @@ import {
 import { extname } from "https://deno.land/std@0.210.0/path/mod.ts";
 import { PreviewUi } from "./filer/preview.ts";
 
-
 type HighlightGroup = {
   floating?: string;
   floatingBorder?: string;
