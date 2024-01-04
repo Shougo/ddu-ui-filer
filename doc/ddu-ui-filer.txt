@@ -540,6 +540,9 @@ FAQ 6:							|ddu-ui-filer-faq-6|
 FAQ 7:							|ddu-ui-filer-faq-7|
 	I want to open ddu-ui-filer automatically when |:edit| directory.
 
+FAQ 8:							|ddu-ui-filer-faq-8|
+	I want to open the item by |:drop| command.
+
 
 ------------------------------------------------------------------------------
                                                           *ddu-ui-filer-faq-1*
@@ -547,10 +550,10 @@ Q: I want to toggle hidden files by mappings.
 
 A: >
 	nnoremap <buffer> >
-	\ <Cmd>call ddu#ui#do_action('updateOptions', {
-	\   'sourceOptions': {
-	\     '_': {
-	\       'matchers': ToggleHidden(),
+	\ <Cmd>call ddu#ui#do_action('updateOptions', #{
+	\   sourceOptions: #{
+	\     _: #{
+	\       matchers: ToggleHidden(),
 	\     },
 	\   },
 	\ })<CR>
@@ -607,15 +610,23 @@ A: >
 	nnoremap <buffer><expr> <CR>
 	\ ddu#ui#get_item()->get('isTree', v:false) ?
 	\ "<Cmd>call ddu#ui#do_action('itemAction',
-	\  {'name': 'narrow'})<CR>" :
+	\  #{ name: 'narrow' })<CR>" :
 	\ "<Cmd>call ddu#ui#do_action('itemAction',
-	\  {'name': 'open'})<CR>"
+	\  #{ name: 'open' })<CR>"
 <
                                                           *ddu-ui-filer-faq-7*
 Q: I want to open ddu-ui-filer automatically when |:edit| directory.
 
 A: I don't provide the solution.  Because it cannot be implmented properly.
 
+                                                          *ddu-ui-filer-faq-8*
+Q: I want to open the item by |:drop| command.
+
+A: >
+	nnoremap <buffer> <CR>
+	\ <Cmd>call ddu#ui#do_action('itemAction',
+	\ #{ name: 'open', params: #{ command: 'drop' } })<CR>
+<
 
 ==============================================================================
 COMPATIBILITY                                     *ddu-ui-filer-compatibility*
