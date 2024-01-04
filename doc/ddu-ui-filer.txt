@@ -543,6 +543,10 @@ FAQ 7:							|ddu-ui-filer-faq-7|
 FAQ 8:							|ddu-ui-filer-faq-8|
 	I want to open the item by |:drop| command.
 
+FAQ 9:							|ddu-ui-filer-faq-9|
+	I want to open the item by previous window and I don't want to close
+	UI window.
+
 
 ------------------------------------------------------------------------------
                                                           *ddu-ui-filer-faq-1*
@@ -626,6 +630,24 @@ A: >
 	nnoremap <buffer> <CR>
 	\ <Cmd>call ddu#ui#do_action('itemAction',
 	\ #{ name: 'open', params: #{ command: 'drop' } })<CR>
+<
+
+                                                          *ddu-ui-filer-faq-9*
+Q: I want to open the item by previous window and I don't want to close UI
+window.
+
+A: >
+	call ddu#custom#patch_global(#{
+	    \   ui: 'filer',
+	    \   actionOptions: #{
+	    \     open: #{
+	    \       quit: v:false,
+	    \     },
+	    \   },
+	    \ })
+	nnoremap <buffer> <CR>
+	\ <Cmd>call ddu#ui#do_action('itemAction',
+	\ #{ name: 'open', params: #{ command: 'wincmd p <Bar> drop' } })<CR>
 <
 
 ==============================================================================
