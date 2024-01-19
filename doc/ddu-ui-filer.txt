@@ -157,6 +157,20 @@ previewExecute
 
 		Execute command in preview window.
 
+                                                  *ddu-ui-filer-action-redraw*
+redraw
+		params:
+			{method}: Redraw method
+
+			"refreshItems": Gather all source items and refresh UI
+			items.
+			"uiRedraw": Redraw current UI window.
+			"uiRefresh": Refresh all UI items. (Default)
+
+		Redraw the UI.
+		NOTE: The expanded trees are restored if {method} is not
+		"uiRedraw".
+
                                           *ddu-ui-filer-action-toggleAllItems*
 toggleAllItems
 		Toggle selected state for the all items.
@@ -176,8 +190,7 @@ updateOptions
 
 		Update current options and redraw the UI.
 		Refer to |ddu-options| about options.
-		NOTE: It does not refresh items.
-		NOTE: The expanded trees are restored.
+		NOTE: It does not redraw items.
 
 
 ==============================================================================
@@ -563,6 +576,7 @@ A: >
 	\     },
 	\   },
 	\ })<CR>
+	\<Cmd>call ddu#ui#do_action('redraw')<CR>
 	
 	function ToggleHidden()
 	  const current = ddu#custom#get_current(b:ddu_ui_name)
@@ -654,6 +668,10 @@ A: >
 
 ==============================================================================
 COMPATIBILITY                                     *ddu-ui-filer-compatibility*
+
+2024.01.19
+* Rename "refreshItems" action to "redraw".
+* "updateOptions" action does not redraw automatically.
 
 2023.07.12
 * "preview" action does not toggle.
