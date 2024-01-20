@@ -1,10 +1,14 @@
 let s:namespace = has('nvim') ? nvim_create_namespace('ddu-ui-filer') : 0
 
 function ddu#ui#filer#do_action(name, options = {}) abort
+  call ddu#util#print_error("ddu#ui#filer#do_action() is deprecated.")
+  call ddu#util#print_error("Please use ddu#ui#do_action() instead.")
   return ddu#ui#do_action(a:name, a:options)
 endfunction
 
 function ddu#ui#filer#multi_actions(actions) abort
+  call ddu#util#print_error("ddu#ui#filer#multi_actions() is deprecated.")
+  call ddu#util#print_error("Please use ddu#ui#multi_actions() instead.")
   return ddu#ui#multi_actions(a:actions)
 endfunction
 
