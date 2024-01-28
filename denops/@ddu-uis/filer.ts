@@ -179,7 +179,7 @@ export class Ui extends BaseUi<Params> {
 
     const insertItems = this.#sortItems(args.uiParams, args.children);
 
-    const prevLength = this.#item.length;
+    const prevLength = this.#items.length;
     if (index >= 0) {
       this.#items = this.#items.slice(0, index + 1).concat(insertItems).concat(
         this.#items.slice(index + 1),
@@ -212,7 +212,7 @@ export class Ui extends BaseUi<Params> {
       (item: DduItem) => item.__level <= args.item.__level,
     );
 
-    const prevLength = this.#item.length;
+    const prevLength = this.#items.length;
     if (endIndex < 0) {
       this.#items = this.#items.slice(0, startIndex + 1);
     } else {
