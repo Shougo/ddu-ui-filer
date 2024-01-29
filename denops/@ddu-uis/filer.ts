@@ -501,6 +501,9 @@ export class Ui extends BaseUi<Params> {
   }): Promise<number[]> {
     const bufnr = await this.#getBufnr(args.denops);
     const winIds = await fn.win_findbuf(args.denops, bufnr) as number[];
+    if (this.#previewUi.visible()) {
+      winIds.push(this.#previewUi.previewWinId);
+    }
     return winIds;
   }
 

@@ -84,6 +84,10 @@ export class PreviewUi {
     return this.#previewWinId > 0;
   }
 
+  get previewWinId(): number {
+    return this.#previewWinId;
+  }
+
   async previewContents(
     denops: Denops,
     context: Context,
