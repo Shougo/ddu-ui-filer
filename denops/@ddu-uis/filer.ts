@@ -573,7 +573,7 @@ export class Ui extends BaseUi<Params> {
       // NOTE: await may freeze UI
       args.denops.dispatcher.redraw(args.options.name, {
         check: true,
-        refreshItems: true,
+        method: "refreshItems",
       });
 
       return ActionFlags.None;
