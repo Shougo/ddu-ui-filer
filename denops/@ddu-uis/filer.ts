@@ -24,7 +24,7 @@ import {
   errorException,
   treePath2Filename,
 } from "https://deno.land/x/ddu_vim@v3.10.2/utils.ts";
-import { extname } from "https://deno.land/std@0.213.0/path/mod.ts";
+import { extname } from "https://deno.land/std@0.217.0/path/mod.ts";
 import { PreviewUi } from "./filer/preview.ts";
 
 type HighlightGroup = {
@@ -66,6 +66,13 @@ type WindowOption = [string, number | string];
 type CursorPos = [] | [lnum: number, col: number, off?: number];
 
 type ExprNumber = string | number;
+
+type WinInfo = {
+  columns: number;
+  lines: number;
+  winid: number;
+  tabpagebuflist: number[];
+};
 
 type OnPreviewArguments = {
   denops: Denops;
@@ -147,6 +154,8 @@ export class Ui extends BaseUi<Params> {
   #selectedItems: Set<number> = new Set();
   #previewUi = new PreviewUi();
   #refreshed = false;
+  #restcmd = "";
+  #prevWinInfo: WinInfo | null = null;
 
   override async refreshItems(args: {
     denops: Denops;
@@ -283,6 +292,12 @@ export class Ui extends BaseUi<Params> {
     const winWidth = Number(args.uiParams.winWidth);
     let winHeight = Number(args.uiParams.winHeight);
     const winid = await fn.bufwinid(args.denops, bufnr);
+
+    if (winid < 0) {
+      // The layout must be saved.
+      this.#restcmd = await fn.winrestcmd(args.denops);
+      this.#prevWinInfo = await this.#getWinInfo(args.denops);
+    }
 
     const direction = args.uiParams.splitDirection;
     if (args.uiParams.split === "horizontal") {
@@ -568,6 +583,17 @@ export class Ui extends BaseUi<Params> {
         "titlestring",
         saveTitle,
       );
+    }
+
+    if (
+      this.#restcmd !== "" &&
+      JSON.stringify(this.#prevWinInfo) ===
+        JSON.stringify(await this.#getWinInfo(args.denops))
+    ) {
+      // Restore the layout.
+      await args.denops.cmd(this.#restcmd);
+      this.#restcmd = "";
+      this.#prevWinInfo = null;
     }
 
     await args.denops.dispatcher.event(args.options.name, "close");
@@ -1408,6 +1434,17 @@ export class Ui extends BaseUi<Params> {
       "ddu_ui_filer_cursor_pos",
       newPos,
     );
+  }
+
+  async #getWinInfo(
+    denops: Denops,
+  ): Promise<WinInfo> {
+    return {
+      columns: await op.columns.getGlobal(denops),
+      lines: await op.lines.getGlobal(denops),
+      winid: await fn.win_getid(denops),
+      tabpagebuflist: await fn.tabpagebuflist(denops) as number[],
+    };
   }
 }
 
