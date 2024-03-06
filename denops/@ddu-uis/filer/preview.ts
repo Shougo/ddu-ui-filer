@@ -290,12 +290,15 @@ export class PreviewUi {
           "&filetype",
           previewer.filetype,
         );
-      } else if (previewer.kind === "buffer") {
-        await fn.win_execute(denops, this.#previewWinId, "filetype detect");
       }
 
       if (previewer.syntax) {
-        await fn.setbufvar(denops, previewBufnr, "&syntax", previewer.syntax);
+        await fn.setbufvar(
+          denops,
+          previewBufnr,
+          "&syntax",
+          previewer.syntax
+        );
       }
     }
 
