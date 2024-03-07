@@ -10,7 +10,7 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v3.10.2/types.ts";
+} from "https://deno.land/x/ddu_vim@v3.10.3/types.ts";
 import {
   batch,
   Denops,
@@ -19,12 +19,12 @@ import {
   is,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v3.10.2/deps.ts";
+} from "https://deno.land/x/ddu_vim@v3.10.3/deps.ts";
 import {
   errorException,
   treePath2Filename,
-} from "https://deno.land/x/ddu_vim@v3.10.2/utils.ts";
-import { extname } from "https://deno.land/std@0.217.0/path/mod.ts";
+} from "https://deno.land/x/ddu_vim@v3.10.3/utils.ts";
+import { extname } from "https://deno.land/std@0.218.2/path/mod.ts";
 import { PreviewUi } from "./filer/preview.ts";
 
 type HighlightGroup = {
