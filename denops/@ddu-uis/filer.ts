@@ -1249,7 +1249,9 @@ export class Ui extends BaseUi<Params> {
   async #getBufnr(
     denops: Denops,
   ): Promise<number> {
-    return await fn.bufnr(denops, this.#bufferName);
+    return this.#bufferName.length === 0
+      ? -1
+      : await fn.bufnr(denops, this.#bufferName);
   }
 
   async #getSortedItems(
