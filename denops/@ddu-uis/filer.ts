@@ -24,7 +24,7 @@ import {
   errorException,
   treePath2Filename,
 } from "https://deno.land/x/ddu_vim@v3.10.3/utils.ts";
-import { extname } from "https://deno.land/std@0.218.2/path/mod.ts";
+import { extname } from "https://deno.land/std@0.219.1/path/mod.ts";
 import { PreviewUi } from "./filer/preview.ts";
 
 type HighlightGroup = {
@@ -1150,6 +1150,7 @@ export class Ui extends BaseUi<Params> {
   ): Promise<void> {
     const winid = await fn.bufwinid(denops, bufnr);
     const existsStatusColumn = await fn.exists(denops, "+statuscolumn");
+    const existsWinFixBuf = await fn.exists(denops, "+winfixbuf");
 
     await batch(denops, async (denops: Denops) => {
       await fn.setbufvar(denops, bufnr, "ddu_ui_name", options.name);
@@ -1166,6 +1167,9 @@ export class Ui extends BaseUi<Params> {
       await fn.setwinvar(denops, winid, "&wrap", 0);
       if (existsStatusColumn) {
         await fn.setwinvar(denops, winid, "&statuscolumn", "");
+      }
+      if (existsWinFixBuf && uiParams.split !== "no") {
+        await fn.setwinvar(denops, winid, "&winfixbuf", true);
       }
 
       await fn.setbufvar(denops, bufnr, "&bufhidden", "hide");
@@ -1305,6 +1309,7 @@ export class Ui extends BaseUi<Params> {
         isTree: true,
         treePath: rootPath,
         matcherKey: "word",
+        __groupedPath: "",
         __sourceIndex: source.index,
         __sourceName: source.name,
         __level: -1,

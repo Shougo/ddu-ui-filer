@@ -318,6 +318,9 @@ function ddu#ui#filer#_open_preview_window(
     call setwinvar(winid, '&previewwindow', v:true)
   endif
   call setwinvar(winid, '&cursorline', v:false)
+  if '+winfixbuf'->exists()
+    call setwinvar(winid, '&winfixbuf', v:true)
+  endif
 
   return winid
 endfunction
