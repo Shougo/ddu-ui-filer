@@ -539,33 +539,33 @@ EXAMPLES                                               *ddu-ui-filer-examples*
 <
 
 ==============================================================================
-FREQUENTLY ASKED QUESTIONS (FAQ)			*ddu-ui-filer-faq*
+FREQUENTLY ASKED QUESTIONS (FAQ)                            *ddu-ui-filer-faq*
 
-FAQ 1:							|ddu-ui-filer-faq-1|
+FAQ 1:                                                    |ddu-ui-filer-faq-1|
 	I want to toggle hidden files by mappings.
 
-FAQ 2:							|ddu-ui-filer-faq-2|
+FAQ 2:                                                    |ddu-ui-filer-faq-2|
 	I want to check updated items automatically.
 
-FAQ 3:							|ddu-ui-filer-faq-3|
+FAQ 3:                                                    |ddu-ui-filer-faq-3|
 	I want to use icon fonts in ddu columns.
 
-FAQ 4:							|ddu-ui-filer-faq-4|
+FAQ 4:                                                    |ddu-ui-filer-faq-4|
 	Flickering when moving directories using narrow action.
 
-FAQ 5:							|ddu-ui-filer-faq-5|
+FAQ 5:                                                    |ddu-ui-filer-faq-5|
 	I want to use existing buffer to show preview.
 
-FAQ 6:							|ddu-ui-filer-faq-6|
+FAQ 6:                                                    |ddu-ui-filer-faq-6|
 	I want to check the current item is tree.
 
-FAQ 7:							|ddu-ui-filer-faq-7|
+FAQ 7:                                                    |ddu-ui-filer-faq-7|
 	I want to open ddu-ui-filer automatically when |:edit| directory.
 
-FAQ 8:							|ddu-ui-filer-faq-8|
+FAQ 8:                                                    |ddu-ui-filer-faq-8|
 	I want to open the item by |:drop| command.
 
-FAQ 9:							|ddu-ui-filer-faq-9|
+FAQ 9:                                                    |ddu-ui-filer-faq-9|
 	I want to open the item by previous window and I don't want to close
 	UI window.
 
