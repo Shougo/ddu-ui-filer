@@ -24,7 +24,7 @@ import {
   errorException,
   treePath2Filename,
 } from "https://deno.land/x/ddu_vim@v3.10.3/utils.ts";
-import { extname } from "https://deno.land/std@0.219.1/path/mod.ts";
+import { extname } from "https://deno.land/std@0.220.1/path/mod.ts";
 import { PreviewUi } from "./filer/preview.ts";
 
 type HighlightGroup = {
@@ -567,6 +567,8 @@ export class Ui extends BaseUi<Params> {
       } else {
         await fn.win_gotoid(args.denops, winid);
         await args.denops.cmd("close!");
+
+        // Focus to the previous window
         await fn.win_gotoid(args.denops, args.context.winId);
       }
     }
