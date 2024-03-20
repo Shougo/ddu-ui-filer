@@ -181,10 +181,9 @@ export class Ui extends BaseUi<Params> {
     isGrouped: boolean;
   }) {
     // NOTE: treePath may be list.  So it must be compared by JSON.
-    const searchPath = JSON.stringify(args.parent.treePath);
     const index = this.#items.findIndex(
       (item: DduItem) =>
-        JSON.stringify(item.treePath) === searchPath &&
+        equal(item.treePath, args.parent.treePath) &&
         item.__sourceIndex === args.parent.__sourceIndex,
     );
 
@@ -215,10 +214,9 @@ export class Ui extends BaseUi<Params> {
     item: DduItem;
   }) {
     // NOTE: treePath may be list.  So it must be compared by JSON.
-    const searchPath = JSON.stringify(args.item.treePath);
     const startIndex = this.#items.findIndex(
       (item: DduItem) =>
-        JSON.stringify(item.treePath) === searchPath &&
+        equal(item.treePath, args.item.treePath) &&
         item.__sourceIndex === args.item.__sourceIndex,
     );
     if (startIndex < 0) {
@@ -589,8 +587,7 @@ export class Ui extends BaseUi<Params> {
 
     if (
       this.#restcmd !== "" &&
-      JSON.stringify(this.#prevWinInfo) ===
-        JSON.stringify(await this.#getWinInfo(args.denops))
+      equal(this.#prevWinInfo, await this.#getWinInfo(args.denops))
     ) {
       // Restore the layout.
       await args.denops.cmd(this.#restcmd);
