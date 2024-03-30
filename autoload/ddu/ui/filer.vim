@@ -76,7 +76,7 @@ function ddu#ui#filer#_highlight_items(
             \ hl.hl_group, hl.name, 1,
             \ s:namespace, a:bufnr,
             \ item.row,
-            \ hl.col + strwidth(item.prefix), hl.width)
+            \ hl.col + item.prefix->strlen(), hl.width)
     endfor
   endfor
 
