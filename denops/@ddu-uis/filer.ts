@@ -10,7 +10,7 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v3.10.3/types.ts";
+} from "https://deno.land/x/ddu_vim@v4.0.0/types.ts";
 import {
   batch,
   Denops,
@@ -19,12 +19,12 @@ import {
   is,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v3.10.3/deps.ts";
+} from "https://deno.land/x/ddu_vim@v4.0.0/deps.ts";
 import {
-  errorException,
+  printError,
   treePath2Filename,
-} from "https://deno.land/x/ddu_vim@v3.10.3/utils.ts";
-import { extname } from "https://deno.land/std@0.220.1/path/mod.ts";
+} from "https://deno.land/x/ddu_vim@v4.0.0/utils.ts";
+import { extname } from "https://deno.land/std@0.222.1/path/mod.ts";
 import { PreviewUi } from "./filer/preview.ts";
 
 type HighlightGroup = {
@@ -388,8 +388,8 @@ export class Ui extends BaseUi<Params> {
         await args.denops.cmd(`silent keepalt buffer ${bufnr}`);
       }
     } else {
-      await args.denops.call(
-        "ddu#util#print_error",
+      await printError(
+        args.denops,
         `Invalid split param: ${args.uiParams.split}`,
       );
       return;
@@ -445,7 +445,7 @@ export class Ui extends BaseUi<Params> {
         );
       });
     } catch (e) {
-      await errorException(
+      await printError(
         args.denops,
         e,
         "[ddu-ui-filer] update buffer failed",
@@ -1212,8 +1212,8 @@ export class Ui extends BaseUi<Params> {
           context,
         );
       } else {
-        await denops.call(
-          "ddu#util#print_error",
+        await printError(
+          denops,
           `Invalid expr param: ${name}`,
         );
       }
@@ -1236,7 +1236,7 @@ export class Ui extends BaseUi<Params> {
     try {
       return await denops.eval(expr, context);
     } catch (e) {
-      await errorException(
+      await printError(
         denops,
         e,
         `[ddu-ui-ff] invalid expression in option: ${name}`,
