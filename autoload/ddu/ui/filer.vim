@@ -102,10 +102,12 @@ function ddu#ui#filer#_highlight(
 
   if !has('nvim')
     " Add prop_type
-    if a:prop_type->prop_type_get()->empty()
+    if a:prop_type->prop_type_get(#{ bufnr: a:bufnr })->empty()
       call prop_type_add(a:prop_type, #{
+            \   bufnr: a:bufnr,
             \   highlight: a:highlight,
             \   priority: a:priority,
+            \   override: v:true,
             \ })
     endif
   endif
