@@ -385,7 +385,7 @@ export class PreviewUi {
     }
 
     try {
-      const bufferPath = previewer?.expr ?? previewer?.path;
+      const bufferPath = previewer.expr ?? previewer.path;
       const stat = await safeStat(previewer.path);
       if (previewer.path && stat && !stat.isDirectory) {
         const data = Deno.readFileSync(previewer.path);
