@@ -24,7 +24,7 @@ import {
   printError,
   treePath2Filename,
 } from "https://deno.land/x/ddu_vim@v4.0.0/utils.ts";
-import { extname } from "https://deno.land/std@0.222.1/path/mod.ts";
+import { extname } from "jsr:@std/path@0.224.0";
 import { PreviewUi } from "./filer/preview.ts";
 
 type HighlightGroup = {
