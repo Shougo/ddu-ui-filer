@@ -43,16 +43,6 @@ INTERFACE                                             *ddu-ui-filer-interface*
 ------------------------------------------------------------------------------
 FUNCTIONS                                             *ddu-ui-filer-functions*
 
-                                                    *ddu#ui#filer#do_action()*
-ddu#ui#filer#do_action({action-name}[, {params}])
-		It is deprecated.  Please use |ddu#ui#do_action()| instead.
-
-                                                *ddu#ui#filer#multi_actions()*
-ddu#ui#filer#multi_actions([{action-name1}[, {params1}], ...])
-		It is deprecated.  Please use |ddu#ui#multi_actions()|
-		instead.
-
-
 ------------------------------------------------------------------------------
 ACTIONS                                                 *ddu-ui-filer-actions*
 
