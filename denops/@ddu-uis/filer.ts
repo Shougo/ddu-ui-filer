@@ -424,7 +424,6 @@ export class Ui extends BaseUi<Params> {
           bufnr,
           this.#items.map((c) => (c.display ?? c.word)),
           false,
-          0,
         );
 
         await denops.call(
