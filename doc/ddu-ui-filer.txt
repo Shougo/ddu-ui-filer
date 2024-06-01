@@ -395,6 +395,7 @@ split		(string)
 		"horizontal": horizontal split
 		"vertical": vertical split
 		"floating": use neovim floating window feature
+		"tab": use new tab
 		"no": no split
 
 		Default: "horizontal"

@@ -10,7 +10,7 @@ import {
   SourceInfo,
   UiActions,
   UiOptions,
-} from "https://deno.land/x/ddu_vim@v4.0.0/types.ts";
+} from "https://deno.land/x/ddu_vim@v4.1.0/types.ts";
 import {
   batch,
   Denops,
@@ -19,12 +19,12 @@ import {
   is,
   op,
   vars,
-} from "https://deno.land/x/ddu_vim@v4.0.0/deps.ts";
+} from "https://deno.land/x/ddu_vim@v4.1.0/deps.ts";
 import {
   printError,
   treePath2Filename,
-} from "https://deno.land/x/ddu_vim@v4.0.0/utils.ts";
-import { extname } from "jsr:@std/path@0.224.0";
+} from "https://deno.land/x/ddu_vim@v4.1.0/utils.ts";
+import { extname } from "jsr:@std/path@0.225.1";
 import { PreviewUi } from "./filer/preview.ts";
 
 type HighlightGroup = {
@@ -121,7 +121,7 @@ export type Params = {
     | "Size"
     | "Time";
   sortTreesFirst: boolean;
-  split: "horizontal" | "vertical" | "floating" | "no";
+  split: "horizontal" | "vertical" | "floating" | "tab" | "no";
   splitDirection: "belowright" | "aboveleft";
   statusline: boolean;
   winCol: ExprNumber;
@@ -383,6 +383,12 @@ export class Ui extends BaseUi<Params> {
         "&statusline",
         currentStatusline,
       );
+    } else if (args.uiParams.split === "tab") {
+      if (winid >= 0) {
+        await fn.win_gotoid(args.denops, winid);
+      } else {
+        await args.denops.cmd(`tabnew | silent keepalt buffer ${bufnr}`);
+      }
     } else if (args.uiParams.split === "no") {
       if (winid < 0) {
         await args.denops.cmd(`silent keepalt buffer ${bufnr}`);
@@ -1166,7 +1172,9 @@ export class Ui extends BaseUi<Params> {
       if (existsStatusColumn) {
         await fn.setwinvar(denops, winid, "&statuscolumn", "");
       }
-      if (existsWinFixBuf && uiParams.split !== "no") {
+      if (
+        existsWinFixBuf && uiParams.split !== "no" && uiParams.split !== "tab"
+      ) {
         await fn.setwinvar(denops, winid, "&winfixbuf", true);
       }
 
@@ -1312,6 +1320,7 @@ export class Ui extends BaseUi<Params> {
         __sourceName: source.name,
         __level: -1,
         __expanded: true,
+        __columnTexts: [],
       };
     };
 
