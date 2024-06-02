@@ -1313,7 +1313,7 @@ export class Ui extends BaseUi<Params> {
           },
         ],
         kind: source.kind,
-        isTree: true,
+        isTree: false,
         treePath: rootPath,
         matcherKey: "word",
         __groupedPath: "",
