@@ -166,6 +166,7 @@ export class Ui extends BaseUi<Params> {
   }): Promise<void> {
     this.#items = await this.#getSortedItems(
       args.denops,
+      args.context,
       args.sources,
       args.uiParams,
       args.items,
@@ -1267,6 +1268,7 @@ export class Ui extends BaseUi<Params> {
 
   async #getSortedItems(
     denops: Denops,
+    context: Context,
     sources: SourceInfo[],
     uiParams: Params,
     items: DduItem[],
@@ -1281,10 +1283,9 @@ export class Ui extends BaseUi<Params> {
 
     const createRoot = async (source: SourceInfo) => {
       // Replace the home directory.
-      let rootPath = treePath2Filename(source.path);
-      if (rootPath === "") {
-        rootPath = await fn.getcwd(denops) as string;
-      }
+      const rootPath = treePath2Filename(
+        source.path.length === 0 ? context.path : source.path,
+      );
       let display = rootPath;
       const home = Deno.env.get("HOME");
       if (home && home !== "") {
