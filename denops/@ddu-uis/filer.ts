@@ -248,11 +248,25 @@ export class Ui extends BaseUi<Params> {
     denops: Denops;
     item: DduItem;
   }) {
-    const pos = this.#items.findIndex((item) => equal(item, args.item));
+    const cursorPos = this.#items.findIndex(
+      (item) => equal(item, args.item),
+    ) + 1;
 
-    if (pos > 0) {
-      const bufnr = await this.#getBufnr(args.denops);
-      await this.#cursor(args.denops, bufnr, [pos + 1, 0]);
+    if (cursorPos < 1) {
+      return;
+    }
+
+    const bufnr = await this.#getBufnr(args.denops);
+    const winHeight = await fn.winheight(args.denops, 0);
+    const maxLine = await fn.line(args.denops, "$");
+    if ((maxLine - cursorPos) < winHeight / 2) {
+      // Adjust cursor position when cursor is near bottom.
+      await args.denops.cmd("normal! Gzb");
+    }
+    await this.#cursor(args.denops, bufnr, [cursorPos, 0]);
+    if (cursorPos < winHeight / 2) {
+      // Adjust cursor position when cursor is near top.
+      await args.denops.cmd("normal! zb");
     }
   }
 
@@ -676,7 +690,7 @@ export class Ui extends BaseUi<Params> {
         bufnr,
         "ddu_ui_filer_cursor_pos",
         [],
-      ) as CursorPos;
+      ) as number[];
       if (cursorPos.length === 0 || !cursorPos[1] || !cursorPos[2]) {
         return ActionFlags.Persist;
       }
@@ -711,7 +725,7 @@ export class Ui extends BaseUi<Params> {
         bufnr,
         "ddu_ui_filer_cursor_pos",
         [],
-      ) as CursorPos;
+      ) as number[];
       if (cursorPos.length === 0 || !cursorPos[1] || !cursorPos[2]) {
         return ActionFlags.Persist;
       }
@@ -1090,7 +1104,7 @@ export class Ui extends BaseUi<Params> {
       bufnr,
       "ddu_ui_filer_cursor_pos",
       [],
-    ) as CursorPos;
+    ) as number[];
     if (cursorPos.length === 0) {
       return -1;
     }
