@@ -3,7 +3,7 @@ let s:namespace = has('nvim') ? nvim_create_namespace('ddu-ui-filer') : 0
 function ddu#ui#filer#_update_buffer(params, bufnr, lines, refreshed) abort
   const current_lines = '$'->line(a:bufnr->bufwinid())
 
-  call setbufvar(a:bufnr, '&modifiable', 1)
+  call setbufvar(a:bufnr, '&modifiable', v:true)
 
   " NOTE: deletebufline() changes cursor position.
   if a:lines->empty()
@@ -25,8 +25,8 @@ function ddu#ui#filer#_update_buffer(params, bufnr, lines, refreshed) abort
     endif
   endif
 
-  call setbufvar(a:bufnr, '&modifiable', 0)
-  call setbufvar(a:bufnr, '&modified', 0)
+  call setbufvar(a:bufnr, '&modifiable', v:false)
+  call setbufvar(a:bufnr, '&modified', v:false)
 endfunction
 
 function ddu#ui#filer#_highlight_items(

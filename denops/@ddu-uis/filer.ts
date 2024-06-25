@@ -1162,6 +1162,7 @@ export class Ui extends BaseUi<Params> {
     bufferName: string,
   ): Promise<number> {
     const bufnr = await fn.bufadd(denops, bufferName);
+    await fn.setbufvar(denops, bufnr, "&modifiable", false);
     await fn.bufload(denops, bufnr);
     return bufnr;
   }
