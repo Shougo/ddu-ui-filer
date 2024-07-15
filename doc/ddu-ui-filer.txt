@@ -69,6 +69,7 @@ closePreviewWindow
                                             *ddu-ui-filer-action-collapseItem*
 collapseItem
 		Collapse the item tree.
+		If the item is already collapsed, the parent item is used.
 
                                               *ddu-ui-filer-action-cursorNext*
 cursorNext

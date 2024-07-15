@@ -18,6 +18,7 @@ import {
   fn,
   is,
   op,
+  pathsep,
   vars,
 } from "https://deno.land/x/ddu_vim@v4.1.0/deps.ts";
 import {
@@ -1143,9 +1144,33 @@ export class Ui extends BaseUi<Params> {
   }
 
   async #collapseItemAction(denops: Denops, options: DduOptions) {
-    const item = await this.#getItem(denops);
-    if (!item || !item.isTree || item.__level < 0) {
+    let item = await this.#getItem(denops);
+    if (!item || !item.treePath) {
       return ActionFlags.None;
+    }
+
+    if (!item.isTree || !item.__expanded) {
+      // Use parent item instead.
+      const treePath = typeof item.treePath === "string"
+        ? item.treePath.split(pathsep)
+        : item.treePath;
+      const parentPath = treePath.slice(0, -1);
+
+      const parent = this.#items.find(
+        (itm) =>
+          equal(
+            parentPath,
+            typeof itm.treePath === "string"
+              ? itm.treePath.split(pathsep)
+              : itm.treePath,
+          ),
+      );
+
+      if (!parent?.treePath || !parent?.isTree || !parent?.__expanded) {
+        return ActionFlags.None;
+      }
+
+      item = parent;
     }
 
     await denops.dispatcher.redrawTree(
