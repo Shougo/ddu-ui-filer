@@ -105,7 +105,7 @@ function ddu#ui#filer#_highlight(
   endif
 endfunction
 
-function ddu#ui#filer#_save_cursor(path) abort
+function ddu#ui#filer#_update_cursor(path) abort
   if a:path ==# ''
     return
   endif
@@ -117,6 +117,8 @@ function ddu#ui#filer#_save_cursor(path) abort
   if '$'->line() == 1 && b:ddu_ui_filer_cursor_text ==# ''
     return
   endif
+
+  call ddu#ui#update_cursor()
 
   if !exists('b:ddu_ui_filer_save_cursor_item')
     let b:ddu_ui_filer_save_cursor_item = {}
