@@ -1294,7 +1294,7 @@ export class Ui extends BaseUi<Params> {
       await printError(
         denops,
         e,
-        `[ddu-ui-ff] invalid expression in option: ${name}`,
+        `[ddu-ui-filer] invalid expression in option: ${name}`,
       );
 
       // Fallback to default param.

@@ -1,5 +1,5 @@
 {
-  "name": "@shougo/ddu-ui-ff",
+  "name": "@shougo/ddu-ui-filer",
   "version": "0.0.0",
   "exports": {
     ".": "./denops/@ddu-uis/filer.ts",
