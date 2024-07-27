@@ -8,6 +8,7 @@ import {
   type Denops,
   type PreviewContext,
   type Previewer,
+  type SourceInfo,
   type UiActions,
   type UiOptions,
 } from "jsr:@shougo/ddu-vim@5.0.0-pre10/types";
