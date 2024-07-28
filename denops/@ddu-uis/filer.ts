@@ -11,11 +11,11 @@ import {
   type SourceInfo,
   type UiActions,
   type UiOptions,
-} from "jsr:@shougo/ddu-vim@5.0.0-pre10/types";
+} from "jsr:@shougo/ddu-vim@5.0.0/types";
 import {
   printError,
   treePath2Filename,
-} from "jsr:@shougo/ddu-vim@5.0.0-pre10/utils";
+} from "jsr:@shougo/ddu-vim@5.0.0/utils";
 
 import { batch } from "jsr:@denops/std@7.0.0/batch";
 import * as op from "jsr:@denops/std@7.0.0/option";
