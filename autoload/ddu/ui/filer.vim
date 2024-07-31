@@ -69,6 +69,12 @@ function ddu#ui#filer#_highlight_items(
 endfunction
 function ddu#ui#filer#_highlight(
       \ highlight, prop_type, priority, id, bufnr, row, col, length) abort
+  if !a:highlight->hlexists()
+    call ddu#util#print_error(
+          \ printf('highlight "%s" does not exist', a:highlight))
+    return
+  endif
+
   if a:row <= 0 || a:col <= 0
     " Invalid range
     return
