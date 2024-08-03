@@ -9,13 +9,13 @@ import {
   type PreviewContext,
   type Previewer,
   type TerminalPreviewer,
-} from "jsr:@shougo/ddu-vim@5.0.0/types";
+} from "jsr:@shougo/ddu-vim@~5.0.0/types";
 
-import { batch } from "jsr:@denops/std@7.0.0/batch";
-import * as fn from "jsr:@denops/std@7.0.0/function";
-import { equal } from "jsr:@std/assert@1.0.0";
-import { replace } from "jsr:@denops/std@7.0.0/buffer";
-import { ensure, is } from "jsr:@core/unknownutil@3.18.1";
+import { batch } from "jsr:@denops/std@~7.0.0/batch";
+import * as fn from "jsr:@denops/std@~7.0.0/function";
+import { equal } from "jsr:@std/assert@~1.0.0";
+import { replace } from "jsr:@denops/std@~7.0.0/buffer";
+import { ensure, is } from "jsr:@core/unknownutil@~4.0.0";
 
 import type { Params } from "../filer.ts";
 
