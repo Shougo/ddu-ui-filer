@@ -2,11 +2,11 @@
   "name": "@shougo/ddu-ui-filer",
   "version": "0.0.0",
   "exports": {
-    ".": "./denops/@ddu-uis/filer.ts",
+    ".": "./denops/@ddu-uis/filer.ts"
   },
   "publish": {
     "include": [
-      "denops/@ddu-uis/**/*.ts",
+      "denops/@ddu-uis/**/*.ts"
     ]
   },
   "imports": {

@@ -1,21 +1,23 @@
 import {
   ActionFlags,
-  type BaseActionParams,
+  type BaseParams,
   type BufferPreviewer,
   type Context,
   type DduItem,
-  type Denops,
   type NoFilePreviewer,
   type PreviewContext,
   type Previewer,
   type TerminalPreviewer,
-} from "jsr:@shougo/ddu-vim@~5.0.0/types";
+} from "jsr:@shougo/ddu-vim@~6.0.0/types";
 
-import { batch } from "jsr:@denops/std@~7.0.0/batch";
-import * as fn from "jsr:@denops/std@~7.0.0/function";
-import { equal } from "jsr:@std/assert@~1.0.0";
-import { replace } from "jsr:@denops/std@~7.0.0/buffer";
-import { ensure, is } from "jsr:@core/unknownutil@~4.0.0";
+import type { Denops } from "jsr:@denops/std@~7.1.0";
+import { batch } from "jsr:@denops/std@~7.1.0/batch";
+import * as fn from "jsr:@denops/std@~7.1.0/function";
+
+import { equal } from "jsr:@std/assert@~1.0.0/equal";
+import { replace } from "jsr:@denops/std@~7.1.0/buffer";
+import { ensure } from "jsr:@core/unknownutil@~4.3.0/ensure";
+import { is } from "jsr:@core/unknownutil@~4.3.0/is";
 
 import type { Params } from "../filer.ts";
 
@@ -91,13 +93,13 @@ export class PreviewUi {
     denops: Denops,
     context: Context,
     uiParams: Params,
-    actionParams: unknown,
+    actionParams: BaseParams,
     bufnr: number,
     item: DduItem,
     getPreviewer?: (
       denops: Denops,
       item: DduItem,
-      actionParams: BaseActionParams,
+      actionParams: BaseParams,
       previewContext: PreviewContext,
     ) => Promise<Previewer | undefined>,
   ): Promise<ActionFlags> {
@@ -119,7 +121,7 @@ export class PreviewUi {
     const previewer = await getPreviewer(
       denops,
       item,
-      actionParams as BaseActionParams,
+      actionParams,
       previewContext,
     );
 
