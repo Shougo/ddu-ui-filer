@@ -8,12 +8,12 @@ import {
   type Previewer,
   type SourceInfo,
   type UiOptions,
-} from "jsr:@shougo/ddu-vim@~6.1.0/types";
-import { BaseUi, type UiActions } from "jsr:@shougo/ddu-vim@~6.1.0/ui";
+} from "jsr:@shougo/ddu-vim@~6.2.0/types";
+import { BaseUi, type UiActions } from "jsr:@shougo/ddu-vim@~6.2.0/ui";
 import {
   printError,
   treePath2Filename,
-} from "jsr:@shougo/ddu-vim@~6.1.0/utils";
+} from "jsr:@shougo/ddu-vim@~6.2.0/utils";
 
 import type { Denops } from "jsr:@denops/std@~7.1.0";
 import { batch } from "jsr:@denops/std@~7.1.0/batch";
@@ -564,6 +564,12 @@ export class Ui extends BaseUi<Params> {
     const item = await this.#getItem(args.denops);
     const bufnr = await this.#getBufnr(args.denops);
     await fn.setbufvar(args.denops, bufnr, "ddu_ui_item", item ?? {});
+  }
+
+  override async clearSelectedItems(args: {
+    denops: Denops;
+  }) {
+    await this.#clearSelectedItems(args.denops);
   }
 
   override async quit(args: {
