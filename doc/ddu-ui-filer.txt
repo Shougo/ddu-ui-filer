@@ -87,6 +87,16 @@ cursorPrevious
 
 		Move the cursor to the previous.
 
+                                        *ddu-ui-filer-action-cursorTreeBottom*
+cursorTreeBottom
+
+		Move the cursor to the bottom of current tree.
+
+                                           *ddu-ui-filer-action-cursorTreeTop*
+cursorTreeTop
+
+		Move the cursor to the top of current tree.
+
                                               *ddu-ui-filer-action-expandItem*
 expandItem
 		params:
