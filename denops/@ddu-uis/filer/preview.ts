@@ -10,12 +10,12 @@ import {
   type TerminalPreviewer,
 } from "jsr:@shougo/ddu-vim@~6.2.0/types";
 
-import type { Denops } from "jsr:@denops/std@~7.1.0";
-import { batch } from "jsr:@denops/std@~7.1.0/batch";
-import * as fn from "jsr:@denops/std@~7.1.0/function";
+import type { Denops } from "jsr:@denops/std@~7.2.0";
+import { batch } from "jsr:@denops/std@~7.2.0/batch";
+import * as fn from "jsr:@denops/std@~7.2.0/function";
 
 import { equal } from "jsr:@std/assert@~1.0.0/equal";
-import { replace } from "jsr:@denops/std@~7.1.0/buffer";
+import { replace } from "jsr:@denops/std@~7.2.0/buffer";
 import { ensure } from "jsr:@core/unknownutil@~4.3.0/ensure";
 import { is } from "jsr:@core/unknownutil@~4.3.0/is";
 
