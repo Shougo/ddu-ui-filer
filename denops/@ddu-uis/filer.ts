@@ -176,6 +176,32 @@ export class Ui extends BaseUi<Params> {
     this.#enabledAutoAction = args.uiParams.startAutoAction;
   }
 
+  override async onBeforeAction(args: {
+    denops: Denops;
+  }): Promise<void> {
+    await vars.g.set(args.denops, "ddu#ui#filer#_in_action", true);
+
+    const bufnr = await fn.bufnr(args.denops, this.#bufferName);
+    if (await fn.bufnr(args.denops, "%") === bufnr) {
+      await vars.b.set(
+        args.denops,
+        "ddu_ui_filer_cursor_pos",
+        await fn.getcurpos(args.denops),
+      );
+      await vars.b.set(
+        args.denops,
+        "ddu_ui_filer_cursor_text",
+        await fn.getline(args.denops, "."),
+      );
+    }
+  }
+
+  override async onAfterAction(args: {
+    denops: Denops;
+  }): Promise<void> {
+    await vars.g.set(args.denops, "ddu#ui#filer#_in_action", false);
+  }
+
   override async refreshItems(args: {
     denops: Denops;
     context: Context;
@@ -543,10 +569,7 @@ export class Ui extends BaseUi<Params> {
       await fn.win_gotoid(args.denops, args.context.winId);
     }
 
-    if (this.#enabledAutoAction) {
-      // Call auto action
-      await args.denops.call("ddu#ui#filer#_do_auto_action");
-    }
+    await this.#doAutoAction(args.denops);
 
     await fn.setbufvar(args.denops, bufnr, "ddu_ui_items", this.#items);
 
@@ -604,7 +627,7 @@ export class Ui extends BaseUi<Params> {
   }): Promise<void> {
     await this.#previewUi.close(args.denops, args.context, args.uiParams);
     await this.#previewUi.removePreviewedBuffers(args.denops);
-    await args.denops.call("ddu#ui#filer#_reset_auto_action");
+    await this.#resetAutoAction(args.denops);
 
     // Move to the UI window.
     const bufnr = await this.#getBufnr(args.denops);
@@ -1101,10 +1124,8 @@ export class Ui extends BaseUi<Params> {
         winIds.length > 0 ? winIds[0] : -1,
       );
 
-      if (this.#enabledAutoAction) {
-        // Call auto action
-        await args.denops.call("ddu#ui#filer#_do_auto_action");
-      } else {
+      await this.#doAutoAction(args.denops);
+      if (!this.#enabledAutoAction) {
         await this.#previewUi.close(args.denops, args.context, args.uiParams);
       }
 
@@ -1607,12 +1628,18 @@ export class Ui extends BaseUi<Params> {
     }
   }
 
+  async #doAutoAction(denops: Denops) {
+    if (this.#enabledAutoAction) {
+      await denops.call("ddu#ui#filer#_do_auto_action");
+    }
+  }
+
   async #setAutoAction(denops: Denops, uiParams: Params, winId: number) {
     const hasAutoAction = "name" in uiParams.autoAction &&
       this.#enabledAutoAction;
 
     await batch(denops, async (denops: Denops) => {
-      await denops.call("ddu#ui#filer#_reset_auto_action");
+      await this.#resetAutoAction(denops);
       if (hasAutoAction) {
         const autoAction = Object.assign(
           { delay: 100, params: {}, sync: true },
@@ -1627,6 +1654,10 @@ export class Ui extends BaseUi<Params> {
     });
   }
 
+  async #resetAutoAction(denops: Denops) {
+    await denops.call("ddu#ui#filer#_reset_auto_action");
+  }
+
   async #cursor(
     denops: Denops,
     pos: CursorPos,
@@ -1639,10 +1670,7 @@ export class Ui extends BaseUi<Params> {
         await fn.getcurpos(denops),
       );
 
-      if (this.#enabledAutoAction) {
-        // Call auto action
-        await denops.call("ddu#ui#filer#_do_auto_action");
-      }
+      await this.#doAutoAction(denops);
     }
 
     await this.updateCursor({ denops });

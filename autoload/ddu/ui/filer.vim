@@ -353,6 +353,7 @@ endfunction
 function ddu#ui#filer#_set_auto_action(winid, auto_action) abort
   const prev_winid = win_getid()
   let s:auto_action = a:auto_action
+  let s:auto_action.bufnr = '%'->bufnr()
 
   call win_gotoid(a:winid)
 
@@ -368,14 +369,12 @@ function ddu#ui#filer#_set_auto_action(winid, auto_action) abort
 endfunction
 
 function s:do_auto_action() abort
-  if &l:filetype !=# 'ddu-filer'
+  const bufnr = '%'->bufnr()
+  if bufnr != s:auto_action.bufnr
     return
   endif
 
-  const winid = win_getid()
-  const bufnr = winid->winbufnr()
-
-  const text = bufnr->getbufline(winid->getcurpos()[1])->get(0, '')
+  const text = bufnr->getbufline(win_getid()->getcurpos()[1])->get(0, '')
   if text ==# s:cursor_text
     return
   endif

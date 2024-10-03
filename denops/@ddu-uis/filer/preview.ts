@@ -358,17 +358,17 @@ export class PreviewUi {
             };
           }
         } else if (!name.length) {
-          bufname = `ddu-ff:no-name:${previewer.expr}`;
+          bufname = `ddu-filer:no-name:${previewer.expr}`;
         } else {
-          bufname = `ddu-ff:${name}`;
+          bufname = `ddu-filer:${name}`;
         }
       } else {
-        bufname = `ddu-ff:${previewer.path}`;
+        bufname = `ddu-filer:${previewer.path}`;
       }
     } else if (previewer.kind === "nofile") {
-      bufname = `ddu-ff:preview`;
+      bufname = `ddu-filer:preview`;
     } else {
-      bufname = `ddu-ff:${item.word}`;
+      bufname = `ddu-filer:${item.word}`;
     }
 
     return {
