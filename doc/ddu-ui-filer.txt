@@ -46,6 +46,35 @@ FUNCTIONS                                             *ddu-ui-filer-functions*
 ------------------------------------------------------------------------------
 ACTIONS                                                 *ddu-ui-filer-actions*
 
+                                               *ddu-ui-filer-param-autoAction*
+autoAction	(dictionary)
+		If it is specified, the UI action is executed when the cursor
+		is moved. It has the following keys.
+		NOTE: If you want to enable autoAction when UI started, you
+		must set |ddu-ui-filer-param-startAutoAction|.
+
+		delay				(number)	(Optional)
+		Time in milliseconds to delay the auto action.
+		If you feel slow, specify large value.
+		Set 0 to disable debouncing.
+		NOTE: It does not work in the filter window.
+
+		Default: 10
+
+		name				(string)	(Required)
+		Action name
+
+		params				(dictionary)	(Optional)
+		Action params
+
+		Default: {}
+
+		sync				(boolean)	(Optional)
+		If it is true, action is executed synchronously.
+		NOTE: If it is false, the screen may be flickered.
+
+		Default: v:true
+
                                               *ddu-ui-filer-action-checkItems*
 checkItems
 		Check the items are updated.
@@ -180,9 +209,21 @@ redraw
 		NOTE: The preview window is closed when |ddu-ui-filer-params|
 		is changed.
 
+                                          *ddu-ui-filer-param-startAutoAction*
+startAutoAction	(boolean)
+		If it is true, |ddu-ui-filer-param-autoAction| is fired
+		automatically.
+		Note: It must be set before UI initialization.
+
+		Default: v:false
+
                                           *ddu-ui-filer-action-toggleAllItems*
 toggleAllItems
 		Toggle selected state for the all items.
+
+                                        *ddu-ui-filer-action-toggleAutoAction*
+toggleAutoAction
+		Toggle auto action state(enabled/disabled).
 
                                            *ddu-ui-filer-action-togglePreview*
 togglePreview
@@ -573,6 +614,9 @@ FAQ 9:                                                    |ddu-ui-filer-faq-9|
 	I want to open the item by previous window and I don't want to close
 	UI window.
 
+FAQ 10:                                                  |ddu-ui-filer-faq-10|
+	I want to preview selected item automatically.
+
 
 ------------------------------------------------------------------------------
                                                           *ddu-ui-filer-faq-1*
@@ -675,6 +719,21 @@ A: >
 	nnoremap <buffer> <CR>
 	\ <Cmd>call ddu#ui#do_action('itemAction',
 	\ #{ name: 'open', params: #{ command: 'wincmd p <Bar> drop' } })<CR>
+<
+                                                         *ddu-ui-filer-faq-10*
+Q: I want to preview selected item automatically.
+
+A: You need to set |ddu-ui-filer-param-autoAction| like this. >
+	call ddu#custom#patch_global(#{
+	      \   ui: 'filer',
+	      \   uiParams: #{
+	      \     ff: #{
+	      \       autoAction: #{
+	      \         name: 'preview',
+	      \       },
+	      \     },
+	      \   },
+	      \ })
 <
 
 ==============================================================================

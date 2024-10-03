@@ -322,3 +322,75 @@ function ddu#ui#filer#_open_preview_window(
 
   return winid
 endfunction
+
+let s:cursor_text = ''
+let s:auto_action = {}
+function ddu#ui#filer#_do_auto_action() abort
+  call s:stop_debounce_timer('s:debounce_auto_action_timer')
+
+  if empty(s:auto_action)
+    return
+  endif
+
+  if mode() ==# 'c'
+    " NOTE: In command line mode, timer_start() does not work
+    call s:do_auto_action()
+  else
+    let s:debounce_auto_action_timer = timer_start(
+          \ s:auto_action.delay, { -> s:do_auto_action() })
+  endif
+endfunction
+function ddu#ui#filer#_reset_auto_action() abort
+  let s:cursor_text = ''
+  let s:auto_action = {}
+
+  call s:stop_debounce_timer('s:debounce_auto_action_timer')
+
+  augroup ddu-ui-filer-auto_action
+    autocmd!
+  augroup END
+endfunction
+function ddu#ui#filer#_set_auto_action(winid, auto_action) abort
+  const prev_winid = win_getid()
+  let s:auto_action = a:auto_action
+
+  call win_gotoid(a:winid)
+
+  " NOTE: In action execution, auto action should be skipped
+  augroup ddu-ui-filer-auto_action
+    autocmd CursorMoved <buffer> ++nested
+          \ : if !g:->get('ddu#ui#filer#_in_action', v:false)
+          \ |   call ddu#ui#filer#_do_auto_action()
+          \ | endif
+  augroup END
+
+  call win_gotoid(prev_winid)
+endfunction
+
+function s:do_auto_action() abort
+  if &l:filetype !=# 'ddu-filer'
+    return
+  endif
+
+  const winid = win_getid()
+  const bufnr = winid->winbufnr()
+
+  const text = bufnr->getbufline(winid->getcurpos()[1])->get(0, '')
+  if text ==# s:cursor_text
+    return
+  endif
+
+  if s:auto_action.sync
+    call ddu#ui#sync_action(s:auto_action.name, s:auto_action.params)
+  else
+    call ddu#ui#do_action(s:auto_action.name, s:auto_action.params)
+  endif
+  let s:cursor_text = text
+endfunction
+
+function s:stop_debounce_timer(timer_name) abort
+  if a:timer_name->exists()
+    silent! call timer_stop({a:timer_name})
+    unlet {a:timer_name}
+  endif
+endfunction

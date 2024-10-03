@@ -36,6 +36,13 @@ type HighlightGroup = {
   sourcePath?: string;
 };
 
+type AutoAction = {
+  name?: string;
+  params?: unknown;
+  delay?: number;
+  sync?: boolean;
+};
+
 type FloatingOpts = {
   relative: "editor" | "win" | "cursor" | "mouse";
   row: number;
@@ -91,6 +98,7 @@ type RedrawParams = {
 };
 
 export type Params = {
+  autoAction: AutoAction;
   displayRoot: boolean;
   exprParams: (keyof Params)[];
   floatingBorder: FloatingBorder;
@@ -124,6 +132,7 @@ export type Params = {
   sortTreesFirst: boolean;
   split: "horizontal" | "vertical" | "floating" | "tab" | "no";
   splitDirection: "belowright" | "aboveleft";
+  startAutoAction: boolean;
   statusline: boolean;
   winCol: ExprNumber;
   winHeight: ExprNumber;
@@ -156,8 +165,16 @@ export class Ui extends BaseUi<Params> {
   #selectedItems: Set<number> = new Set();
   #previewUi = new PreviewUi();
   #refreshed = false;
+  #enabledAutoAction = false;
   #restcmd = "";
   #prevWinInfo: WinInfo | null = null;
+
+  override onInit(args: {
+    denops: Denops;
+    uiParams: Params;
+  }): void {
+    this.#enabledAutoAction = args.uiParams.startAutoAction;
+  }
 
   override async refreshItems(args: {
     denops: Denops;
@@ -429,6 +446,8 @@ export class Ui extends BaseUi<Params> {
       await this.#initOptions(args.denops, args.options, args.uiParams, bufnr);
     }
 
+    await this.#setAutoAction(args.denops, args.uiParams, winid);
+
     const augroupName = `${await op.filetype.getLocal(args.denops)}-${bufnr}`;
     await args.denops.cmd(`augroup ${augroupName}`);
     await args.denops.cmd(`autocmd! ${augroupName}`);
@@ -524,6 +543,11 @@ export class Ui extends BaseUi<Params> {
       await fn.win_gotoid(args.denops, args.context.winId);
     }
 
+    if (this.#enabledAutoAction) {
+      // Call auto action
+      await args.denops.call("ddu#ui#filer#_do_auto_action");
+    }
+
     await fn.setbufvar(args.denops, bufnr, "ddu_ui_items", this.#items);
 
     this.#refreshed = false;
@@ -580,6 +604,7 @@ export class Ui extends BaseUi<Params> {
   }): Promise<void> {
     await this.#previewUi.close(args.denops, args.context, args.uiParams);
     await this.#previewUi.removePreviewedBuffers(args.denops);
+    await args.denops.call("ddu#ui#filer#_reset_auto_action");
 
     // Move to the UI window.
     const bufnr = await this.#getBufnr(args.denops);
@@ -1058,6 +1083,33 @@ export class Ui extends BaseUi<Params> {
 
       return Promise.resolve(ActionFlags.Redraw);
     },
+    toggleAutoAction: async (args: {
+      denops: Denops;
+      context: Context;
+      uiParams: Params;
+    }) => {
+      // Toggle
+      this.#enabledAutoAction = !this.#enabledAutoAction;
+
+      const winIds = await this.winIds({
+        denops: args.denops,
+        uiParams: args.uiParams,
+      });
+      await this.#setAutoAction(
+        args.denops,
+        args.uiParams,
+        winIds.length > 0 ? winIds[0] : -1,
+      );
+
+      if (this.#enabledAutoAction) {
+        // Call auto action
+        await args.denops.call("ddu#ui#filer#_do_auto_action");
+      } else {
+        await this.#previewUi.close(args.denops, args.context, args.uiParams);
+      }
+
+      return ActionFlags.None;
+    },
     togglePreview: async (args: {
       denops: Denops;
       context: Context;
@@ -1128,6 +1180,7 @@ export class Ui extends BaseUi<Params> {
 
   override params(): Params {
     return {
+      autoAction: {},
       displayRoot: true,
       exprParams: [
         "previewCol",
@@ -1169,6 +1222,7 @@ export class Ui extends BaseUi<Params> {
       splitDirection: "belowright",
       sort: "none",
       sortTreesFirst: false,
+      startAutoAction: false,
       statusline: true,
       winCol: "(&columns - eval(uiParams.winWidth)) / 2",
       winHeight: 20,
@@ -1553,6 +1607,26 @@ export class Ui extends BaseUi<Params> {
     }
   }
 
+  async #setAutoAction(denops: Denops, uiParams: Params, winId: number) {
+    const hasAutoAction = "name" in uiParams.autoAction &&
+      this.#enabledAutoAction;
+
+    await batch(denops, async (denops: Denops) => {
+      await denops.call("ddu#ui#filer#_reset_auto_action");
+      if (hasAutoAction) {
+        const autoAction = Object.assign(
+          { delay: 100, params: {}, sync: true },
+          uiParams.autoAction,
+        );
+        await denops.call(
+          "ddu#ui#filer#_set_auto_action",
+          winId,
+          autoAction,
+        );
+      }
+    });
+  }
+
   async #cursor(
     denops: Denops,
     pos: CursorPos,
@@ -1564,6 +1638,11 @@ export class Ui extends BaseUi<Params> {
         "ddu_ui_filer_cursor_pos",
         await fn.getcurpos(denops),
       );
+
+      if (this.#enabledAutoAction) {
+        // Call auto action
+        await denops.call("ddu#ui#filer#_do_auto_action");
+      }
     }
 
     await this.updateCursor({ denops });
