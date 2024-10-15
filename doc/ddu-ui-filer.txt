@@ -271,6 +271,13 @@ exprParams	(string[])
 		  "winWidth",
 		]
 
+                                               *ddu-ui-filer-param-fileFilter*
+fileFilter	(string)
+		Filter regexp string for files.
+		NOTE: It is JavaScript regexp.
+
+		Default: ""
+
                                            *ddu-ui-filer-param-floatingBorder*
 floatingBorder	(string | list)
 		Specify the style of the window border if
@@ -617,6 +624,8 @@ FAQ 9:                                                    |ddu-ui-filer-faq-9|
 FAQ 10:                                                  |ddu-ui-filer-faq-10|
 	I want to preview selected item automatically.
 
+FAQ 11:                                                  |ddu-ui-filer-faq-11|
+	I want to filter files by regex string.
 
 ------------------------------------------------------------------------------
                                                           *ddu-ui-filer-faq-1*
@@ -735,6 +744,30 @@ A: You need to set |ddu-ui-filer-param-autoAction| like this. >
 	      \   },
 	      \ })
 <
+
+                                                         *ddu-ui-filer-faq-11*
+Q: I want to filter files by regex string.
+
+A: >
+	nnoremap <buffer> M
+	      \ <Cmd>call ddu#ui#multi_actions([
+	      \   [
+	      \     'updateOptions', #{
+	      \       uiParams: #{
+	      \         filer: #{
+	      \           fileFilter: 'fileFilter regexp: '
+	      \               ->input(ddu#custom#get_current(b:ddu_ui_name)
+	      \               ->get('uiParams', {})
+	      \               ->get('filer', {})
+	      \               ->get('fileFilter', '')),
+	      \         },
+	      \       },
+	      \     },
+	      \   ],
+	      \   [
+	      \      'redraw', #{ method: 'refreshItems' },
+	      \   ],
+	      \ ])<CR>
 
 ==============================================================================
 COMPATIBILITY                                     *ddu-ui-filer-compatibility*

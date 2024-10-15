@@ -101,6 +101,7 @@ export type Params = {
   autoAction: AutoAction;
   displayRoot: boolean;
   exprParams: (keyof Params)[];
+  fileFilter: string;
   floatingBorder: FloatingBorder;
   floatingTitle: FloatingTitle;
   floatingTitlePos: "left" | "center" | "right";
@@ -1213,6 +1214,7 @@ export class Ui extends BaseUi<Params> {
         "winHeight",
         "winWidth",
       ],
+      fileFilter: "",
       floatingBorder: "none",
       floatingTitle: "",
       floatingTitlePos: "left",
@@ -1559,6 +1561,11 @@ export class Ui extends BaseUi<Params> {
       : sortByNone;
     const reversed = uiParams.sort.toLowerCase() !== uiParams.sort;
 
+    if (uiParams.fileFilter !== "") {
+      const fileFilter = new RegExp(uiParams.fileFilter);
+      items = items.filter((item) => item.isTree || fileFilter.test(item.word));
+    }
+
     const sortedItems = reversed
       ? items.sort(sortFunc).reverse()
       : items.sort(sortFunc);
@@ -1586,6 +1593,9 @@ export class Ui extends BaseUi<Params> {
       "printf('%'.('$'->line())->len().'d/%d','.'->line(),'$'->line())";
     const laststatus = await op.laststatus.get(denops);
     const hasNvim = denops.meta.host === "nvim";
+    const filter = uiParams.fileFilter === ""
+      ? ""
+      : ` [${uiParams.fileFilter}]`;
     const async = `${context.done ? "" : " [async]"}`;
 
     if (hasNvim && (floating || laststatus === 0)) {
@@ -1606,7 +1616,7 @@ export class Ui extends BaseUi<Params> {
         );
       }
 
-      const titleString = `${header} %{${linenr}}%*${async}`;
+      const titleString = `${header} %{${linenr}}%*${filter}${async}`;
       await vars.b.set(denops, "ddu_ui_filer_title", titleString);
 
       await denops.call(
@@ -1623,7 +1633,9 @@ export class Ui extends BaseUi<Params> {
         denops,
         await fn.bufwinnr(denops, bufnr),
         "&statusline",
-        `${header.replaceAll("%", "%%")} %#LineNR#%{${linenr}}%*${async}`,
+        `${
+          header.replaceAll("%", "%%")
+        } %#LineNR#%{${linenr}}%*${filter}${async}`,
       );
     }
   }
