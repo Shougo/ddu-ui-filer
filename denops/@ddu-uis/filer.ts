@@ -99,6 +99,7 @@ type RedrawParams = {
 
 export type Params = {
   autoAction: AutoAction;
+  autoResize: boolean;
   displayRoot: boolean;
   exprParams: (keyof Params)[];
   fileFilter: string;
@@ -132,7 +133,7 @@ export type Params = {
     | "Time";
   sortTreesFirst: boolean;
   split: "horizontal" | "vertical" | "floating" | "tab" | "no";
-  splitDirection: "belowright" | "aboveleft";
+  splitDirection: "belowright" | "aboveleft" | "topleft" | "botright";
   startAutoAction: boolean;
   statusline: boolean;
   winCol: ExprNumber;
@@ -525,6 +526,21 @@ export class Ui extends BaseUi<Params> {
         "[ddu-ui-filer] update buffer failed",
       );
       return;
+    }
+
+    if (args.uiParams.autoResize && await fn.winnr(args.denops, "$") > 1) {
+      const winIds = await this.winIds({
+        denops: args.denops,
+        uiParams: args.uiParams,
+      });
+      const maxWidth = await Promise.all(
+        this.#items.map((c) => fn.strwidth(args.denops, c.display ?? c.word)
+        )).then(widths => Math.max(...widths));
+      await fn.win_execute(
+        args.denops,
+        winIds.length > 0 ? winIds[0] : -1,
+        `vertical resize ${maxWidth}`,
+      );
     }
 
     this.#viewItems = Array.from(this.#items);
@@ -1203,6 +1219,7 @@ export class Ui extends BaseUi<Params> {
   override params(): Params {
     return {
       autoAction: {},
+      autoResize: false,
       displayRoot: true,
       exprParams: [
         "previewCol",
@@ -1242,7 +1259,7 @@ export class Ui extends BaseUi<Params> {
       ],
       search: "",
       split: "horizontal",
-      splitDirection: "belowright",
+      splitDirection: "aboveleft",
       sort: "none",
       sortTreesFirst: false,
       startAutoAction: false,

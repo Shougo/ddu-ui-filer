@@ -75,6 +75,12 @@ autoAction	(dictionary)
 
 		Default: v:true
 
+                                               *ddu-ui-filer-param-autoResize*
+autoResize	(boolean)
+		Auto resize the window width automatically.
+
+		Default: v:false
+
                                               *ddu-ui-filer-action-checkItems*
 checkItems
 		Check the items are updated.
@@ -489,7 +495,7 @@ sortTreesFirst	(boolean)
 splitDirection	(string)
 		Specify split direction.
 
-		Default: "belowright"
+		Default: "aboveleft"
 
                                                *ddu-ui-filer-param-statusline*
 statusline	(boolean)
