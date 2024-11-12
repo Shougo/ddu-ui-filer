@@ -9,6 +9,9 @@ import {
   type Previewer,
   type TerminalPreviewer,
 } from "jsr:@shougo/ddu-vim@~6.2.0/types";
+import {
+  printError,
+} from "jsr:@shougo/ddu-vim@~6.2.0/utils";
 
 import type { Denops } from "jsr:@denops/std@~7.2.0";
 import { batch } from "jsr:@denops/std@~7.2.0/batch";
@@ -104,6 +107,15 @@ export class PreviewUi {
     ) => Promise<Previewer | undefined>,
   ): Promise<ActionFlags> {
     if (this.isAlreadyPreviewed(item) || !getPreviewer) {
+      return ActionFlags.None;
+    }
+
+    const fileSize = item.status?.size ?? -1;
+    if (fileSize > uiParams.previewMaxSize) {
+      await printError(
+        denops,
+        `[ddu-ui-filer] The file size ${fileSize} is than previewMaxSize.`,
+      );
       return ActionFlags.None;
     }
 

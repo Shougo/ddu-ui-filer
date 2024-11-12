@@ -116,6 +116,7 @@ export type Params = {
   previewFloatingTitlePos: "left" | "center" | "right";
   previewFloatingZindex: number;
   previewHeight: ExprNumber;
+  previewMaxSize: number;
   previewRow: ExprNumber;
   previewSplit: "horizontal" | "vertical" | "no";
   previewWidth: ExprNumber;
@@ -1247,6 +1248,7 @@ export class Ui extends BaseUi<Params> {
       previewFloatingTitlePos: "left",
       previewFloatingZindex: 100,
       previewHeight: 10,
+      previewMaxSize: 1000000,
       previewRow: 0,
       previewSplit: "horizontal",
       previewWidth: 80,
