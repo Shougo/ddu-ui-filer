@@ -740,7 +740,6 @@ export class Ui extends BaseUi<Params> {
         sources: [
           {
             name: "action",
-            options: {},
             params: {
               actions: actions,
               name: args.options.name,
