@@ -9,13 +9,9 @@ function ddu#ui#filer#_update_buffer(params, bufnr, lines, refreshed) abort
   if a:lines->empty()
     " Clear buffer
     if current_lines > 1
-      if '%'->bufnr() ==# a:bufnr
-        silent % delete _
-      else
-        silent call deletebufline(a:bufnr, 1, '$')
-      endif
+      silent call deletebufline(a:bufnr, 1, '$')
     else
-      call setbufline(a:bufnr, 1, [''])
+      silent call setbufline(a:bufnr, 1, [''])
     endif
   else
     call setbufline(a:bufnr, 1, a:lines)
