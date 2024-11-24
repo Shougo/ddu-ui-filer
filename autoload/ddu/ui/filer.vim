@@ -11,7 +11,7 @@ function ddu#ui#filer#_update_buffer(params, bufnr, lines, refreshed) abort
     if current_lines > 1
       silent call deletebufline(a:bufnr, 1, '$')
     else
-      silent call setbufline(a:bufnr, 1, [''])
+      call setbufline(a:bufnr, 1, [''])
     endif
   else
     call setbufline(a:bufnr, 1, a:lines)
