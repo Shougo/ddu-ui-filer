@@ -416,11 +416,6 @@ export class Ui extends BaseUi<Params> {
         "title": args.uiParams.floatingTitle,
         "title_pos": args.uiParams.floatingTitlePos,
       };
-      if (!await fn.has(args.denops, "nvim-0.9.0")) {
-        // NOTE: "title" and "title_pos" needs neovim 0.9.0+
-        delete winOpts.title;
-        delete winOpts.title_pos;
-      }
       if (winid >= 0 && await fn.bufwinid(args.denops, bufnr) === winid) {
         await args.denops.call(
           "nvim_win_set_config",
