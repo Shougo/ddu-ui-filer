@@ -560,7 +560,7 @@ expression context:
 	winId		(number)
 
 An example of floating the UI window on the left side and the preview window
-on the right side of the screen: >
+on the right side of the screen: >vim
 
 	call ddu#custom#patch_global(#{
 	    \   ui: 'filer',
@@ -583,7 +583,7 @@ on the right side of the screen: >
 
 ==============================================================================
 EXAMPLES                                               *ddu-ui-filer-examples*
->
+>vim
 	call ddu#custom#patch_global(#{
 	    \   ui: 'filer',
 	    \   actionOptions: #{
@@ -643,7 +643,7 @@ FAQ 11:                                                  |ddu-ui-filer-faq-11|
                                                           *ddu-ui-filer-faq-1*
 Q: I want to toggle hidden files by mappings.
 
-A: >
+A: >vim
 	nnoremap <buffer> >
 	\ <Cmd>call ddu#ui#do_action('updateOptions', #{
 	\   sourceOptions: #{
@@ -666,7 +666,7 @@ A: >
                                                           *ddu-ui-filer-faq-2*
 Q: I want to check updated items automatically.
 
-A: >
+A: >vim
 	autocmd TabEnter,WinEnter,CursorHold,FocusGained *
 	\ call ddu#ui#do_action('checkItems')
 
@@ -682,7 +682,7 @@ https://github.com/ryota2357/ddu-column-icon_filename
                                                           *ddu-ui-filer-faq-4*
 Q: Flickering when moving directories using narrow action.
 
-A: You need to set |ddu-action-option-quit| for narrow action. >
+A: You need to set |ddu-action-option-quit| for narrow action. >vim
 	
 	call ddu#custom#patch_global(#{
 	    \   ui: 'filer',
@@ -702,7 +702,7 @@ A: Please use "no" in |ddu-ui-filer-param-previewSplit|.
                                                           *ddu-ui-filer-faq-6*
 Q: I want to check the current item is tree.
 
-A: >
+A: >vim
 	nnoremap <buffer><expr> <CR>
 	\ ddu#ui#get_item()->get('isTree', v:false) ?
 	\ "<Cmd>call ddu#ui#do_action('itemAction',
@@ -718,7 +718,7 @@ A: I don't provide the solution.  Because it cannot be implmented properly.
                                                           *ddu-ui-filer-faq-8*
 Q: I want to open the item by |:drop| command.
 
-A: >
+A: >vim
 	nnoremap <buffer> <CR>
 	\ <Cmd>call ddu#ui#do_action('itemAction',
 	\ #{ name: 'open', params: #{ command: 'drop' } })<CR>
@@ -728,7 +728,7 @@ A: >
 Q: I want to open the item by previous window and I don't want to close UI
 window.
 
-A: >
+A: >vim
 	call ddu#custom#patch_global(#{
 	    \   ui: 'filer',
 	    \   actionOptions: #{
@@ -744,7 +744,7 @@ A: >
                                                          *ddu-ui-filer-faq-10*
 Q: I want to preview selected item automatically.
 
-A: You need to set |ddu-ui-filer-param-autoAction| like this. >
+A: You need to set |ddu-ui-filer-param-autoAction| like this. >vim
 	call ddu#custom#patch_global(#{
 	      \   ui: 'filer',
 	      \   uiParams: #{
@@ -760,7 +760,7 @@ A: You need to set |ddu-ui-filer-param-autoAction| like this. >
                                                          *ddu-ui-filer-faq-11*
 Q: I want to filter files by regex string.
 
-A: >
+A: >vim
 	nnoremap <buffer> M
 	      \ <Cmd>call ddu#ui#multi_actions([
 	      \   [
