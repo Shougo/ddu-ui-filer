@@ -9,9 +9,7 @@ import {
   type Previewer,
   type TerminalPreviewer,
 } from "jsr:@shougo/ddu-vim@~9.1.0/types";
-import {
-  printError,
-} from "jsr:@shougo/ddu-vim@~9.1.0/utils";
+import { printError } from "jsr:@shougo/ddu-vim@~9.1.0/utils";
 
 import type { Denops } from "jsr:@denops/std@~7.4.0";
 import { batch } from "jsr:@denops/std@~7.4.0/batch";

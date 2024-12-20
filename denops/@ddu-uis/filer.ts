@@ -531,8 +531,8 @@ export class Ui extends BaseUi<Params> {
         uiParams: args.uiParams,
       });
       const maxWidth = await Promise.all(
-        this.#items.map((c) => fn.strwidth(args.denops, c.display ?? c.word)
-        )).then(widths => Math.max(...widths));
+        this.#items.map((c) => fn.strwidth(args.denops, c.display ?? c.word)),
+      ).then((widths) => Math.max(...widths));
       await fn.win_execute(
         args.denops,
         winIds.length > 0 ? winIds[0] : -1,
