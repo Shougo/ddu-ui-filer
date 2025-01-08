@@ -8,8 +8,8 @@ import {
   type PreviewContext,
   type Previewer,
   type TerminalPreviewer,
-} from "jsr:@shougo/ddu-vim@~9.1.0/types";
-import { printError } from "jsr:@shougo/ddu-vim@~9.1.0/utils";
+} from "jsr:@shougo/ddu-vim@~9.4.0/types";
+import { printError } from "jsr:@shougo/ddu-vim@~9.4.0/utils";
 
 import type { Denops } from "jsr:@denops/std@~7.4.0";
 import { batch } from "jsr:@denops/std@~7.4.0/batch";
@@ -176,7 +176,7 @@ export class PreviewUi {
       );
     }
 
-    await this.#jump(denops, previewer);
+    await jump(denops, previewer);
 
     if (uiParams.onPreview) {
       if (typeof uiParams.onPreview === "string") {
@@ -429,24 +429,6 @@ export class PreviewUi {
       return [true, contents];
     }
   }
-
-  async #jump(denops: Denops, previewer: Previewer) {
-    await batch(denops, async (denops: Denops) => {
-      const hasPattern = "pattern" in previewer && previewer.pattern;
-      const hasLineNr = "lineNr" in previewer && previewer.lineNr;
-
-      if (hasPattern) {
-        await fn.search(denops, previewer.pattern, "w");
-      }
-      if (hasLineNr && previewer.lineNr) {
-        await fn.cursor(denops, [previewer.lineNr, 0]);
-      }
-      if (hasPattern || hasLineNr) {
-        await denops.cmd("normal! zv");
-        await denops.cmd("normal! zz");
-      }
-    });
-  }
 }
 
 const safeStat = async (
@@ -465,3 +447,21 @@ const safeStat = async (
   }
   return null;
 };
+
+async function jump(denops: Denops, previewer: Previewer) {
+  await batch(denops, async (denops: Denops) => {
+    const hasPattern = "pattern" in previewer && previewer.pattern;
+    const hasLineNr = "lineNr" in previewer && previewer.lineNr;
+
+    if (hasPattern) {
+      await fn.search(denops, previewer.pattern, "w");
+    }
+    if (hasLineNr && previewer.lineNr) {
+      await fn.cursor(denops, [previewer.lineNr, 0]);
+    }
+    if (hasPattern || hasLineNr) {
+      await denops.cmd("normal! zv");
+      await denops.cmd("normal! zz");
+    }
+  });
+}

@@ -8,12 +8,12 @@ import {
   type Previewer,
   type SourceInfo,
   type UiOptions,
-} from "jsr:@shougo/ddu-vim@~9.1.0/types";
-import { BaseUi, type UiActions } from "jsr:@shougo/ddu-vim@~9.1.0/ui";
+} from "jsr:@shougo/ddu-vim@~9.4.0/types";
+import { BaseUi, type UiActions } from "jsr:@shougo/ddu-vim@~9.4.0/ui";
 import {
   printError,
   treePath2Filename,
-} from "jsr:@shougo/ddu-vim@~9.1.0/utils";
+} from "jsr:@shougo/ddu-vim@~9.4.0/utils";
 
 import type { Denops } from "jsr:@denops/std@~7.4.0";
 import { batch } from "jsr:@denops/std@~7.4.0/batch";
@@ -213,7 +213,7 @@ export class Ui extends BaseUi<Params> {
     sources: SourceInfo[];
     items: DduItem[];
   }): Promise<void> {
-    this.#items = await this.#getSortedItems(
+    this.#items = await getSortedItems(
       args.denops,
       args.context,
       args.sources,
@@ -238,7 +238,7 @@ export class Ui extends BaseUi<Params> {
         item.__sourceIndex === args.parent.__sourceIndex,
     );
 
-    const insertItems = this.#sortItems(args.uiParams, args.children);
+    const insertItems = sortItems(args.uiParams, args.children);
 
     const prevLength = this.#items.length;
     if (index >= 0) {
@@ -346,7 +346,7 @@ export class Ui extends BaseUi<Params> {
     const initialized = await fn.bufexists(args.denops, this.#bufferName) &&
       await fn.bufnr(args.denops, this.#bufferName);
     const bufnr = initialized ||
-      await this.#initBuffer(args.denops, this.#bufferName);
+      await initBuffer(args.denops, this.#bufferName);
 
     args.uiParams = await this.#resolveParams(
       args.denops,
@@ -364,7 +364,7 @@ export class Ui extends BaseUi<Params> {
     if (winid < 0) {
       // The layout must be saved.
       this.#restcmd = await fn.winrestcmd(args.denops);
-      this.#prevWinInfo = await this.#getWinInfo(args.denops);
+      this.#prevWinInfo = await getWinInfo(args.denops);
     }
 
     const direction = args.uiParams.splitDirection;
@@ -477,7 +477,7 @@ export class Ui extends BaseUi<Params> {
     await args.denops.cmd(`augroup ${augroupName}`);
     await args.denops.cmd(`autocmd! ${augroupName}`);
 
-    await this.#setStatusline(
+    await setStatusline(
       args.denops,
       args.context,
       args.options,
@@ -641,7 +641,7 @@ export class Ui extends BaseUi<Params> {
   }): Promise<void> {
     await this.#previewUi.close(args.denops, args.context, args.uiParams);
     await this.#previewUi.removePreviewedBuffers(args.denops);
-    await this.#resetAutoAction(args.denops);
+    await args.denops.call("ddu#ui#filer#_reset_auto_action");
 
     // Move to the UI window.
     const bufnr = await this.#getBufnr(args.denops);
@@ -694,7 +694,7 @@ export class Ui extends BaseUi<Params> {
 
     if (
       this.#restcmd !== "" &&
-      equal(this.#prevWinInfo, await this.#getWinInfo(args.denops))
+      equal(this.#prevWinInfo, await getWinInfo(args.denops))
     ) {
       // Restore the layout.
       await args.denops.cmd(this.#restcmd);
@@ -1349,16 +1349,6 @@ export class Ui extends BaseUi<Params> {
     return ActionFlags.None;
   }
 
-  async #initBuffer(
-    denops: Denops,
-    bufferName: string,
-  ): Promise<number> {
-    const bufnr = await fn.bufadd(denops, bufferName);
-    await fn.setbufvar(denops, bufnr, "&modifiable", false);
-    await fn.bufload(denops, bufnr);
-    return bufnr;
-  }
-
   async #initOptions(
     denops: Denops,
     options: DduOptions,
@@ -1424,7 +1414,7 @@ export class Ui extends BaseUi<Params> {
     const params = Object.assign(uiParams);
     for (const name of uiParams.exprParams) {
       if (name in uiParams) {
-        params[name] = await this.#evalExprParam(
+        params[name] = await evalExprParam(
           denops,
           name,
           params[name],
@@ -1442,210 +1432,12 @@ export class Ui extends BaseUi<Params> {
     return params;
   }
 
-  async #evalExprParam(
-    denops: Denops,
-    name: string,
-    expr: string | unknown,
-    defaultExpr: string | unknown,
-    context: Record<string, unknown>,
-  ): Promise<unknown> {
-    if (!is.String(expr)) {
-      return expr;
-    }
-
-    try {
-      return await denops.eval(expr, context);
-    } catch (e) {
-      await printError(
-        denops,
-        e,
-        `[ddu-ui-filer] invalid expression in option: ${name}`,
-      );
-
-      // Fallback to default param.
-      return is.String(defaultExpr)
-        ? await denops.eval(defaultExpr, context)
-        : defaultExpr;
-    }
-  }
-
   async #getBufnr(
     denops: Denops,
   ): Promise<number> {
     return this.#bufferName.length === 0
       ? -1
       : await fn.bufnr(denops, this.#bufferName);
-  }
-
-  async #getSortedItems(
-    denops: Denops,
-    context: Context,
-    sources: SourceInfo[],
-    uiParams: Params,
-    items: DduItem[],
-  ): Promise<DduItem[]> {
-    const sourceItems: Record<number, DduItem[]> = {};
-    for (const item of items) {
-      if (!sourceItems[item.__sourceIndex]) {
-        sourceItems[item.__sourceIndex] = [];
-      }
-      sourceItems[item.__sourceIndex].push(item);
-    }
-
-    const createRoot = async (source: SourceInfo) => {
-      // Replace the home directory.
-      const rootPath = treePath2Filename(
-        source.path.length === 0 ? context.path : source.path,
-      );
-      let display = rootPath;
-      const home = Deno.env.get("HOME");
-      if (home && home !== "") {
-        display = display.replace(home, "~");
-      }
-
-      return {
-        word: rootPath,
-        display: `${source.name}:${display}`,
-        action: {
-          isDirectory: true,
-          path: rootPath,
-        },
-        highlights: [
-          {
-            name: "root-source-name",
-            hl_group: uiParams.highlights.sourceName ?? "Type",
-            col: 1,
-            width: await fn.strwidth(denops, source.name) as number,
-          },
-          {
-            name: "root-source-path",
-            hl_group: uiParams.highlights.sourcePath ?? "String",
-            col: source.name.length + 2,
-            width: await fn.strwidth(denops, display) as number,
-          },
-        ],
-        kind: source.kind,
-        isTree: false,
-        treePath: rootPath,
-        matcherKey: "word",
-        __groupedPath: "",
-        __sourceIndex: source.index,
-        __sourceName: source.name,
-        __level: -1,
-        __expanded: true,
-        __columnTexts: [],
-      };
-    };
-
-    let ret: DduItem[] = [];
-    for (const source of sources) {
-      if (uiParams.displayRoot) {
-        // Create root item from source directory
-        ret.push(await createRoot(source));
-      }
-
-      if (!sourceItems[source.index]) {
-        continue;
-      }
-
-      ret = ret.concat(this.#sortItems(uiParams, sourceItems[source.index]));
-    }
-    return ret;
-  }
-
-  #sortItems(
-    uiParams: Params,
-    items: DduItem[],
-  ): DduItem[] {
-    const sortMethod = uiParams.sort.toLowerCase();
-    const sortFunc = sortMethod === "extension"
-      ? sortByExtension
-      : sortMethod === "size"
-      ? sortBySize
-      : sortMethod === "time"
-      ? sortByTime
-      : sortMethod === "filename"
-      ? sortByFilename
-      : sortByNone;
-    const reversed = uiParams.sort.toLowerCase() !== uiParams.sort;
-
-    if (uiParams.fileFilter !== "") {
-      const fileFilter = new RegExp(uiParams.fileFilter);
-      items = items.filter((item) => item.isTree || fileFilter.test(item.word));
-    }
-
-    const sortedItems = reversed
-      ? items.sort(sortFunc).reverse()
-      : items.sort(sortFunc);
-
-    if (uiParams.sortTreesFirst) {
-      const dirs = sortedItems.filter((item) => item.isTree);
-      const files = sortedItems.filter((item) => !item.isTree);
-      return dirs.concat(files);
-    } else {
-      return sortedItems;
-    }
-  }
-
-  async #setStatusline(
-    denops: Denops,
-    context: Context,
-    options: DduOptions,
-    uiParams: Params,
-    bufnr: number,
-    floating: boolean,
-    augroupName: string,
-  ): Promise<void> {
-    const header = `[ddu-${options.name}]`;
-    const linenr =
-      "printf('%'.('$'->line())->len().'d/%d','.'->line(),'$'->line())";
-    const laststatus = await op.laststatus.get(denops);
-    const hasNvim = denops.meta.host === "nvim";
-    const filter = uiParams.fileFilter === ""
-      ? ""
-      : ` [${uiParams.fileFilter}]`;
-    const async = `${context.done ? "" : " [async]"}`;
-
-    if (hasNvim && (floating || laststatus === 0)) {
-      if (
-        (await vars.g.get(denops, "ddu#ui#filer#_save_title", "")) === ""
-      ) {
-        const saveTitle = await denops.call(
-          "nvim_get_option",
-          "titlestring",
-        ) as string;
-        await vars.g.set(denops, "ddu#ui#filer#_save_title", saveTitle);
-      }
-
-      if (await fn.exists(denops, "##WinClosed")) {
-        await denops.cmd(
-          `autocmd ${augroupName} WinClosed,BufLeave <buffer>` +
-            " let &titlestring=g:ddu#ui#filer#_save_title",
-        );
-      }
-
-      const titleString = `${header} %{${linenr}}%*${filter}${async}`;
-      await vars.b.set(denops, "ddu_ui_filer_title", titleString);
-
-      await denops.call(
-        "nvim_set_option",
-        "titlestring",
-        titleString,
-      );
-      await denops.cmd(
-        `autocmd ${augroupName} WinEnter,BufEnter <buffer>` +
-          " let &titlestring=b:ddu_ui_filer_title",
-      );
-    } else if (uiParams.statusline) {
-      await fn.setwinvar(
-        denops,
-        await fn.bufwinnr(denops, bufnr),
-        "&statusline",
-        `${
-          header.replaceAll("%", "%%")
-        } %#LineNR#%{${linenr}}%*${filter}${async}`,
-      );
-    }
   }
 
   async #doAutoAction(denops: Denops) {
@@ -1659,7 +1451,7 @@ export class Ui extends BaseUi<Params> {
       this.#enabledAutoAction;
 
     await batch(denops, async (denops: Denops) => {
-      await this.#resetAutoAction(denops);
+      await denops.call("ddu#ui#filer#_reset_auto_action");
       if (hasAutoAction) {
         const autoAction = Object.assign(
           { delay: 100, params: {}, sync: true },
@@ -1672,10 +1464,6 @@ export class Ui extends BaseUi<Params> {
         );
       }
     });
-  }
-
-  async #resetAutoAction(denops: Denops) {
-    await denops.call("ddu#ui#filer#_reset_auto_action");
   }
 
   async #cursor(
@@ -1694,17 +1482,6 @@ export class Ui extends BaseUi<Params> {
     }
 
     await this.updateCursor({ denops });
-  }
-
-  async #getWinInfo(
-    denops: Denops,
-  ): Promise<WinInfo> {
-    return {
-      columns: await op.columns.getGlobal(denops),
-      lines: await op.lines.getGlobal(denops),
-      winid: await fn.win_getid(denops),
-      tabpagebuflist: await fn.tabpagebuflist(denops) as number[],
-    };
   }
 
   async #clearSelectedItems(
@@ -1743,3 +1520,220 @@ const sortByTime = (a: DduItem, b: DduItem) => {
 const sortByNone = (_a: DduItem, _b: DduItem) => {
   return 0;
 };
+
+async function initBuffer(
+  denops: Denops,
+  bufferName: string,
+): Promise<number> {
+  const bufnr = await fn.bufadd(denops, bufferName);
+  await fn.setbufvar(denops, bufnr, "&modifiable", false);
+  await fn.bufload(denops, bufnr);
+  return bufnr;
+}
+
+async function evalExprParam(
+  denops: Denops,
+  name: string,
+  expr: string | unknown,
+  defaultExpr: string | unknown,
+  context: Record<string, unknown>,
+): Promise<unknown> {
+  if (!is.String(expr)) {
+    return expr;
+  }
+
+  try {
+    return await denops.eval(expr, context);
+  } catch (e) {
+    await printError(
+      denops,
+      e,
+      `[ddu-ui-filer] invalid expression in option: ${name}`,
+    );
+
+    // Fallback to default param.
+    return is.String(defaultExpr)
+      ? await denops.eval(defaultExpr, context)
+      : defaultExpr;
+  }
+}
+
+async function getSortedItems(
+  denops: Denops,
+  context: Context,
+  sources: SourceInfo[],
+  uiParams: Params,
+  items: DduItem[],
+): Promise<DduItem[]> {
+  const sourceItems: Record<number, DduItem[]> = {};
+  for (const item of items) {
+    if (!sourceItems[item.__sourceIndex]) {
+      sourceItems[item.__sourceIndex] = [];
+    }
+    sourceItems[item.__sourceIndex].push(item);
+  }
+
+  const createRoot = async (source: SourceInfo) => {
+    // Replace the home directory.
+    const rootPath = treePath2Filename(
+      source.path.length === 0 ? context.path : source.path,
+    );
+    let display = rootPath;
+    const home = Deno.env.get("HOME");
+    if (home && home !== "") {
+      display = display.replace(home, "~");
+    }
+
+    return {
+      word: rootPath,
+      display: `${source.name}:${display}`,
+      action: {
+        isDirectory: true,
+        path: rootPath,
+      },
+      highlights: [
+        {
+          name: "root-source-name",
+          hl_group: uiParams.highlights.sourceName ?? "Type",
+          col: 1,
+          width: await fn.strwidth(denops, source.name) as number,
+        },
+        {
+          name: "root-source-path",
+          hl_group: uiParams.highlights.sourcePath ?? "String",
+          col: source.name.length + 2,
+          width: await fn.strwidth(denops, display) as number,
+        },
+      ],
+      kind: source.kind,
+      isTree: false,
+      treePath: rootPath,
+      matcherKey: "word",
+      __groupedPath: "",
+      __sourceIndex: source.index,
+      __sourceName: source.name,
+      __level: -1,
+      __expanded: true,
+      __columnTexts: [],
+    };
+  };
+
+  let ret: DduItem[] = [];
+  for (const source of sources) {
+    if (uiParams.displayRoot) {
+      // Create root item from source directory
+      ret.push(await createRoot(source));
+    }
+
+    if (!sourceItems[source.index]) {
+      continue;
+    }
+
+    ret = ret.concat(sortItems(uiParams, sourceItems[source.index]));
+  }
+  return ret;
+}
+
+function sortItems(
+  uiParams: Params,
+  items: DduItem[],
+): DduItem[] {
+  const sortMethod = uiParams.sort.toLowerCase();
+  const sortFunc = sortMethod === "extension"
+    ? sortByExtension
+    : sortMethod === "size"
+    ? sortBySize
+    : sortMethod === "time"
+    ? sortByTime
+    : sortMethod === "filename"
+    ? sortByFilename
+    : sortByNone;
+  const reversed = uiParams.sort.toLowerCase() !== uiParams.sort;
+
+  if (uiParams.fileFilter !== "") {
+    const fileFilter = new RegExp(uiParams.fileFilter);
+    items = items.filter((item) => item.isTree || fileFilter.test(item.word));
+  }
+
+  const sortedItems = reversed
+    ? items.sort(sortFunc).reverse()
+    : items.sort(sortFunc);
+
+  if (uiParams.sortTreesFirst) {
+    const dirs = sortedItems.filter((item) => item.isTree);
+    const files = sortedItems.filter((item) => !item.isTree);
+    return dirs.concat(files);
+  } else {
+    return sortedItems;
+  }
+}
+
+async function setStatusline(
+  denops: Denops,
+  context: Context,
+  options: DduOptions,
+  uiParams: Params,
+  bufnr: number,
+  floating: boolean,
+  augroupName: string,
+): Promise<void> {
+  const header = `[ddu-${options.name}]`;
+  const linenr =
+    "printf('%'.('$'->line())->len().'d/%d','.'->line(),'$'->line())";
+  const laststatus = await op.laststatus.get(denops);
+  const hasNvim = denops.meta.host === "nvim";
+  const filter = uiParams.fileFilter === "" ? "" : ` [${uiParams.fileFilter}]`;
+  const async = `${context.done ? "" : " [async]"}`;
+
+  if (hasNvim && (floating || laststatus === 0)) {
+    if (
+      (await vars.g.get(denops, "ddu#ui#filer#_save_title", "")) === ""
+    ) {
+      const saveTitle = await denops.call(
+        "nvim_get_option",
+        "titlestring",
+      ) as string;
+      await vars.g.set(denops, "ddu#ui#filer#_save_title", saveTitle);
+    }
+
+    if (await fn.exists(denops, "##WinClosed")) {
+      await denops.cmd(
+        `autocmd ${augroupName} WinClosed,BufLeave <buffer>` +
+          " let &titlestring=g:ddu#ui#filer#_save_title",
+      );
+    }
+
+    const titleString = `${header} %{${linenr}}%*${filter}${async}`;
+    await vars.b.set(denops, "ddu_ui_filer_title", titleString);
+
+    await denops.call(
+      "nvim_set_option",
+      "titlestring",
+      titleString,
+    );
+    await denops.cmd(
+      `autocmd ${augroupName} WinEnter,BufEnter <buffer>` +
+        " let &titlestring=b:ddu_ui_filer_title",
+    );
+  } else if (uiParams.statusline) {
+    await fn.setwinvar(
+      denops,
+      await fn.bufwinnr(denops, bufnr),
+      "&statusline",
+      `${
+        header.replaceAll("%", "%%")
+      } %#LineNR#%{${linenr}}%*${filter}${async}`,
+    );
+  }
+}
+
+async function getWinInfo(
+  denops: Denops,
+): Promise<WinInfo> {
+  return {
+    columns: await op.columns.getGlobal(denops),
+    lines: await op.lines.getGlobal(denops),
+    winid: await fn.win_getid(denops),
+    tabpagebuflist: await fn.tabpagebuflist(denops) as number[],
+  };
+}
