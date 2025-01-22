@@ -1714,7 +1714,7 @@ async function setStatusline(
     );
     await denops.cmd(
       `autocmd ${augroupName} WinEnter,BufEnter <buffer>` +
-        " let &titlestring=b:ddu_ui_filer_title",
+        " let &titlestring=b:->get('ddu_ui_filer_title', '')",
     );
   } else if (uiParams.statusline) {
     await fn.setwinvar(
