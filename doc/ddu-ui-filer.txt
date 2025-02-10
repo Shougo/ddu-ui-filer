@@ -507,6 +507,8 @@ splitDirection	(string)
 statusline	(boolean)
 		If it is true, the original 'statusline' value is set on the
 		buffer.
+		NOTE: You can get the status line information by
+		"w:ddu_ui_filer_status" variable.
 
 		Default: v:true
 

@@ -1678,6 +1678,24 @@ async function setStatusline(
   floating: boolean,
   augroupName: string,
 ): Promise<void> {
+  const statusState = {
+    done: context.done,
+    filter: uiParams.fileFilter,
+    name: options.name,
+    maxItems: context.maxItems,
+  };
+
+  await fn.setwinvar(
+    denops,
+    await fn.win_getid(denops),
+    "ddu_ui_filer_status",
+    statusState,
+  );
+
+  if (!uiParams.statusline) {
+    return;
+  }
+
   const header = `[ddu-${options.name}]`;
   const linenr =
     "printf('%'.('$'->line())->len().'d/%d','.'->line(),'$'->line())";
@@ -1716,7 +1734,7 @@ async function setStatusline(
       `autocmd ${augroupName} WinEnter,BufEnter <buffer>` +
         " let &titlestring=b:->get('ddu_ui_filer_title', '')",
     );
-  } else if (uiParams.statusline) {
+  } else {
     await fn.setwinvar(
       denops,
       await fn.bufwinnr(denops, bufnr),
