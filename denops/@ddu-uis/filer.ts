@@ -8,12 +8,12 @@ import {
   type Previewer,
   type SourceInfo,
   type UiOptions,
-} from "jsr:@shougo/ddu-vim@~9.4.0/types";
-import { BaseUi, type UiActions } from "jsr:@shougo/ddu-vim@~9.4.0/ui";
+} from "jsr:@shougo/ddu-vim@~9.5.0/types";
+import { BaseUi, type UiActions } from "jsr:@shougo/ddu-vim@~9.5.0/ui";
 import {
   printError,
   treePath2Filename,
-} from "jsr:@shougo/ddu-vim@~9.4.0/utils";
+} from "jsr:@shougo/ddu-vim@~9.5.0/utils";
 
 import type { Denops } from "jsr:@denops/std@~7.4.0";
 import { batch } from "jsr:@denops/std@~7.4.0/batch";
@@ -88,6 +88,10 @@ type OnPreviewArguments = {
   item: DduItem;
   previewContext: PreviewContext;
   previewWinId: number;
+};
+
+type OpenFilterWindowParams = {
+  input?: string;
 };
 
 type PreviewExecuteParams = {
@@ -989,6 +993,64 @@ export class Ui extends BaseUi<Params> {
         items,
         params.params ?? {},
       );
+
+      return ActionFlags.None;
+    },
+    openFilterWindow: async (args: {
+      denops: Denops;
+      context: Context;
+      options: DduOptions;
+      uiOptions: UiOptions;
+      uiParams: Params;
+      actionParams: BaseParams;
+      getPreviewer?: (
+        denops: Denops,
+        item: DduItem,
+        actionParams: BaseParams,
+        previewContext: PreviewContext,
+      ) => Promise<Previewer | undefined>;
+      inputHistory: string[];
+    }) => {
+      const uiParams = await this.#resolveParams(
+        args.denops,
+        args.options,
+        args.uiParams,
+        args.context,
+      );
+      const reopenPreview = this.#previewUi.visible() &&
+        uiParams.split === "horizontal" && uiParams.previewSplit === "vertical";
+
+      if (reopenPreview) {
+        await this.#previewUi.close(args.denops, args.context, uiParams);
+      }
+
+      const actionParams = args.actionParams as OpenFilterWindowParams;
+
+      args.context.input = await args.denops.call(
+        "ddu#ui#_open_filter_window",
+        args.uiOptions,
+        actionParams.input ?? args.context.input,
+        args.options.name,
+        this.#items.length,
+        args.inputHistory,
+      ) as string;
+
+      if (reopenPreview) {
+        const item = await this.#getItem(args.denops);
+        if (!item || !args.getPreviewer) {
+          return ActionFlags.None;
+        }
+
+        return this.#previewUi.previewContents(
+          args.denops,
+          args.context,
+          uiParams,
+          args.actionParams,
+          await this.#getBufnr(args.denops),
+          item,
+          args.getPreviewer,
+        );
+      }
 
       return ActionFlags.None;
     },
