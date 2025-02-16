@@ -179,6 +179,13 @@ itemAction
 
 		NOTE: You cannot mix multiple kinds/sources.
 
+                                        *ddu-ui-filer-action-openFilterWindow*
+openFilterWindow
+		Open the filter window in command line.
+
+		params:
+			{input}: Overwrite current input
+
                                                  *ddu-ui-filer-action-preview*
 preview
 		params:

@@ -8,12 +8,12 @@ import {
   type Previewer,
   type SourceInfo,
   type UiOptions,
-} from "jsr:@shougo/ddu-vim@~9.4.0/types";
-import { BaseUi, type UiActions } from "jsr:@shougo/ddu-vim@~9.4.0/ui";
+} from "jsr:@shougo/ddu-vim@~9.5.0/types";
+import { BaseUi, type UiActions } from "jsr:@shougo/ddu-vim@~9.5.0/ui";
 import {
   printError,
   treePath2Filename,
-} from "jsr:@shougo/ddu-vim@~9.4.0/utils";
+} from "jsr:@shougo/ddu-vim@~9.5.0/utils";
 
 import type { Denops } from "jsr:@denops/std@~7.4.0";
 import { batch } from "jsr:@denops/std@~7.4.0/batch";
@@ -88,6 +88,10 @@ type OnPreviewArguments = {
   item: DduItem;
   previewContext: PreviewContext;
   previewWinId: number;
+};
+
+type OpenFilterWindowParams = {
+  input?: string;
 };
 
 type PreviewExecuteParams = {
@@ -485,6 +489,7 @@ export class Ui extends BaseUi<Params> {
       bufnr,
       floating,
       augroupName,
+      this.#items,
     );
 
     // Update main buffer
@@ -989,6 +994,64 @@ export class Ui extends BaseUi<Params> {
         items,
         params.params ?? {},
       );
+
+      return ActionFlags.None;
+    },
+    openFilterWindow: async (args: {
+      denops: Denops;
+      context: Context;
+      options: DduOptions;
+      uiOptions: UiOptions;
+      uiParams: Params;
+      actionParams: BaseParams;
+      getPreviewer?: (
+        denops: Denops,
+        item: DduItem,
+        actionParams: BaseParams,
+        previewContext: PreviewContext,
+      ) => Promise<Previewer | undefined>;
+      inputHistory: string[];
+    }) => {
+      const uiParams = await this.#resolveParams(
+        args.denops,
+        args.options,
+        args.uiParams,
+        args.context,
+      );
+      const reopenPreview = this.#previewUi.visible() &&
+        uiParams.split === "horizontal" && uiParams.previewSplit === "vertical";
+
+      if (reopenPreview) {
+        await this.#previewUi.close(args.denops, args.context, uiParams);
+      }
+
+      const actionParams = args.actionParams as OpenFilterWindowParams;
+
+      args.context.input = await args.denops.call(
+        "ddu#ui#_open_filter_window",
+        args.uiOptions,
+        actionParams.input ?? args.context.input,
+        args.options.name,
+        this.#items.length,
+        args.inputHistory,
+      ) as string;
+
+      if (reopenPreview) {
+        const item = await this.#getItem(args.denops);
+        if (!item || !args.getPreviewer) {
+          return ActionFlags.None;
+        }
+
+        return this.#previewUi.previewContents(
+          args.denops,
+          args.context,
+          uiParams,
+          args.actionParams,
+          await this.#getBufnr(args.denops),
+          item,
+          args.getPreviewer,
+        );
+      }
 
       return ActionFlags.None;
     },
@@ -1677,6 +1740,7 @@ async function setStatusline(
   bufnr: number,
   floating: boolean,
   augroupName: string,
+  items: DduItem[],
 ): Promise<void> {
   const statusState = {
     done: context.done,
@@ -1696,40 +1760,36 @@ async function setStatusline(
     return;
   }
 
-  const header = `[ddu-${options.name}]`;
+  const header = `[ddu-${options.name}]` +
+    (items.length !== context.maxItems
+      ? ` ${items.length}/${context.maxItems}`
+      : "");
   const linenr =
     "printf('%'.('$'->line())->len().'d/%d','.'->line(),'$'->line())";
   const laststatus = await op.laststatus.get(denops);
-  const hasNvim = denops.meta.host === "nvim";
-  const filter = uiParams.fileFilter === "" ? "" : ` [${uiParams.fileFilter}]`;
+  const input = `${context.input.length > 0 ? " " + context.input : ""}`;
   const async = `${context.done ? "" : " [async]"}`;
+  const filter = uiParams.fileFilter === "" ? "" : ` [${uiParams.fileFilter}]`;
+  const footer = `${input}${filter}${async}`;
 
-  if (hasNvim && (floating || laststatus === 0)) {
-    if (
-      (await vars.g.get(denops, "ddu#ui#filer#_save_title", "")) === ""
-    ) {
-      const saveTitle = await denops.call(
-        "nvim_get_option",
-        "titlestring",
-      ) as string;
-      await vars.g.set(denops, "ddu#ui#filer#_save_title", saveTitle);
-    }
-
-    if (await fn.exists(denops, "##WinClosed")) {
-      await denops.cmd(
-        `autocmd ${augroupName} WinClosed,BufLeave <buffer>` +
-          " let &titlestring=g:ddu#ui#filer#_save_title",
+  if (floating || laststatus === 0) {
+    if (await vars.g.get(denops, "ddu#ui#filer#_save_title", "") === "") {
+      await vars.g.set(
+        denops,
+        "ddu#ui#filer#_save_title",
+        await op.titlestring.get(denops),
       );
     }
 
-    const titleString = `${header} %{${linenr}}%*${filter}${async}`;
-    await vars.b.set(denops, "ddu_ui_filer_title", titleString);
-
-    await denops.call(
-      "nvim_set_option",
-      "titlestring",
-      titleString,
+    await denops.cmd(
+      `autocmd ${augroupName} WinClosed,BufLeave <buffer>` +
+        " let &titlestring=g:ddu#ui#filer#_save_title",
     );
+
+    const titleString = `${header} %{${linenr}}%*${footer}`;
+    await vars.b.set(denops, "ddu_ui_filer_title", titleString);
+    await op.titlestring.set(denops, titleString);
+
     await denops.cmd(
       `autocmd ${augroupName} WinEnter,BufEnter <buffer>` +
         " let &titlestring=b:->get('ddu_ui_filer_title', '')",
@@ -1739,9 +1799,7 @@ async function setStatusline(
       denops,
       await fn.bufwinnr(denops, bufnr),
       "&statusline",
-      `${
-        header.replaceAll("%", "%%")
-      } %#LineNR#%{${linenr}}%*${filter}${async}`,
+      `${header.replaceAll("%", "%%")} %#LineNR#%{${linenr}}%*${footer}`,
     );
   }
 }
