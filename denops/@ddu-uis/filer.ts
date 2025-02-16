@@ -489,6 +489,7 @@ export class Ui extends BaseUi<Params> {
       bufnr,
       floating,
       augroupName,
+      this.#items,
     );
 
     // Update main buffer
@@ -1739,6 +1740,7 @@ async function setStatusline(
   bufnr: number,
   floating: boolean,
   augroupName: string,
+  items: DduItem[],
 ): Promise<void> {
   const statusState = {
     done: context.done,
@@ -1758,13 +1760,18 @@ async function setStatusline(
     return;
   }
 
-  const header = `[ddu-${options.name}]`;
+  const header = `[ddu-${options.name}]` +
+    (items.length !== context.maxItems
+      ? ` ${items.length}/${context.maxItems}`
+      : "");
   const linenr =
     "printf('%'.('$'->line())->len().'d/%d','.'->line(),'$'->line())";
   const laststatus = await op.laststatus.get(denops);
   const hasNvim = denops.meta.host === "nvim";
-  const filter = uiParams.fileFilter === "" ? "" : ` [${uiParams.fileFilter}]`;
+  const input = `${context.input.length > 0 ? " " + context.input : ""}`;
   const async = `${context.done ? "" : " [async]"}`;
+  const filter = uiParams.fileFilter === "" ? "" : ` [${uiParams.fileFilter}]`;
+  const footer = `${input}${filter}${async}`;
 
   if (hasNvim && (floating || laststatus === 0)) {
     if (
@@ -1784,7 +1791,7 @@ async function setStatusline(
       );
     }
 
-    const titleString = `${header} %{${linenr}}%*${filter}${async}`;
+    const titleString = `${header} %{${linenr}}%*${footer}`;
     await vars.b.set(denops, "ddu_ui_filer_title", titleString);
 
     await denops.call(
@@ -1801,9 +1808,7 @@ async function setStatusline(
       denops,
       await fn.bufwinnr(denops, bufnr),
       "&statusline",
-      `${
-        header.replaceAll("%", "%%")
-      } %#LineNR#%{${linenr}}%*${filter}${async}`,
+      `${header.replaceAll("%", "%%")} %#LineNR#%{${linenr}}%*${footer}`,
     );
   }
 }
