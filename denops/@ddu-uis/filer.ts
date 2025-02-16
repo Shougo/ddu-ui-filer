@@ -1767,21 +1767,18 @@ async function setStatusline(
   const linenr =
     "printf('%'.('$'->line())->len().'d/%d','.'->line(),'$'->line())";
   const laststatus = await op.laststatus.get(denops);
-  const hasNvim = denops.meta.host === "nvim";
   const input = `${context.input.length > 0 ? " " + context.input : ""}`;
   const async = `${context.done ? "" : " [async]"}`;
   const filter = uiParams.fileFilter === "" ? "" : ` [${uiParams.fileFilter}]`;
   const footer = `${input}${filter}${async}`;
 
-  if (hasNvim && (floating || laststatus === 0)) {
-    if (
-      (await vars.g.get(denops, "ddu#ui#filer#_save_title", "")) === ""
-    ) {
-      const saveTitle = await denops.call(
-        "nvim_get_option",
-        "titlestring",
-      ) as string;
-      await vars.g.set(denops, "ddu#ui#filer#_save_title", saveTitle);
+  if (floating || laststatus === 0) {
+    if (await vars.g.get(denops, "ddu#ui#filer#_save_title", "") === "") {
+      await vars.g.set(
+        denops,
+        "ddu#ui#filer#_save_title",
+        await op.titlestring.get(denops),
+      );
     }
 
     await denops.cmd(
@@ -1791,12 +1788,8 @@ async function setStatusline(
 
     const titleString = `${header} %{${linenr}}%*${footer}`;
     await vars.b.set(denops, "ddu_ui_filer_title", titleString);
+    await op.titlestring.set(denops, titleString);
 
-    await denops.call(
-      "nvim_set_option",
-      "titlestring",
-      titleString,
-    );
     await denops.cmd(
       `autocmd ${augroupName} WinEnter,BufEnter <buffer>` +
         " let &titlestring=b:->get('ddu_ui_filer_title', '')",
