@@ -233,6 +233,7 @@ startAutoAction	(boolean)
                                           *ddu-ui-filer-action-toggleAllItems*
 toggleAllItems
 		Toggle selected state for the all items.
+		NOTE: It does not work when async mode.
 
                                         *ddu-ui-filer-action-toggleAutoAction*
 toggleAutoAction
@@ -245,6 +246,7 @@ togglePreview
                                         *ddu-ui-filer-action-toggleSelectItem*
 toggleSelectItem
 		Toggle selected item.
+		NOTE: It does not work when async mode.
 
                                            *ddu-ui-filer-action-updateOptions*
 updateOptions
