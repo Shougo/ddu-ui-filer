@@ -225,6 +225,7 @@ export class Ui extends BaseUi<Params> {
       args.items,
     );
     await this.#updateSelectedItems(args.denops);
+
     this.#refreshed = true;
   }
 
@@ -1158,8 +1159,7 @@ export class Ui extends BaseUi<Params> {
       denops: Denops;
       context: Context;
     }) => {
-      // It must not async.
-      if (!args.context.done || this.#items.length === 0) {
+      if (this.#items.length === 0) {
         return Promise.resolve(ActionFlags.None);
       }
 
