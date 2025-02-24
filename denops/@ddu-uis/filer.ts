@@ -8,18 +8,18 @@ import {
   type Previewer,
   type SourceInfo,
   type UiOptions,
-} from "jsr:@shougo/ddu-vim@~9.5.0/types";
-import { BaseUi, type UiActions } from "jsr:@shougo/ddu-vim@~9.5.0/ui";
+} from "jsr:@shougo/ddu-vim@~10.0.0/types";
+import { BaseUi, type UiActions } from "jsr:@shougo/ddu-vim@~10.0.0/ui";
 import {
   printError,
   treePath2Filename,
-} from "jsr:@shougo/ddu-vim@~9.5.0/utils";
+} from "jsr:@shougo/ddu-vim@~10.0.0/utils";
 
-import type { Denops } from "jsr:@denops/std@~7.4.0";
-import { batch } from "jsr:@denops/std@~7.4.0/batch";
-import * as op from "jsr:@denops/std@~7.4.0/option";
-import * as fn from "jsr:@denops/std@~7.4.0/function";
-import * as vars from "jsr:@denops/std@~7.4.0/variable";
+import type { Denops } from "jsr:@denops/std@~7.5.0";
+import { batch } from "jsr:@denops/std@~7.5.0/batch";
+import * as op from "jsr:@denops/std@~7.5.0/option";
+import * as fn from "jsr:@denops/std@~7.5.0/function";
+import * as vars from "jsr:@denops/std@~7.5.0/variable";
 
 import { equal } from "jsr:@std/assert@~1.0.0/equal";
 import { is } from "jsr:@core/unknownutil@~4.3.0/is";
@@ -1116,6 +1116,8 @@ export class Ui extends BaseUi<Params> {
         options: args.options,
         uiParams: args.uiParams,
       });
+
+      await args.denops.cmd("doautocmd <nomodeline> User Ddu:uiQuit");
 
       await args.denops.dispatcher.pop(args.options.name);
 

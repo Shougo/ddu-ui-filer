@@ -8,15 +8,15 @@ import {
   type PreviewContext,
   type Previewer,
   type TerminalPreviewer,
-} from "jsr:@shougo/ddu-vim@~9.5.0/types";
-import { printError } from "jsr:@shougo/ddu-vim@~9.5.0/utils";
+} from "jsr:@shougo/ddu-vim@~10.0.0/types";
+import { printError } from "jsr:@shougo/ddu-vim@~10.0.0/utils";
 
-import type { Denops } from "jsr:@denops/std@~7.4.0";
-import { batch } from "jsr:@denops/std@~7.4.0/batch";
-import * as fn from "jsr:@denops/std@~7.4.0/function";
+import type { Denops } from "jsr:@denops/std@~7.5.0";
+import { batch } from "jsr:@denops/std@~7.5.0/batch";
+import * as fn from "jsr:@denops/std@~7.5.0/function";
 
 import { equal } from "jsr:@std/assert@~1.0.0/equal";
-import { replace } from "jsr:@denops/std@~7.4.0/buffer";
+import { replace } from "jsr:@denops/std@~7.5.0/buffer";
 import { ensure } from "jsr:@core/unknownutil@~4.3.0/ensure";
 import { is } from "jsr:@core/unknownutil@~4.3.0/is";
 
