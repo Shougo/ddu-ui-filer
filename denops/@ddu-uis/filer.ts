@@ -409,7 +409,7 @@ export class Ui extends BaseUi<Params> {
       }
     } else if (floating) {
       // statusline must be set for floating window
-      const currentStatusline = await op.statusline.get(args.denops);
+      const currentStatusline = await op.statusline.getLocal(args.denops);
 
       const winOpts: FloatingOpts = {
         "relative": "editor",
@@ -690,19 +690,6 @@ export class Ui extends BaseUi<Params> {
     }
 
     // Restore options
-    const saveTitle = await vars.g.get(
-      args.denops,
-      "ddu#ui#filer#_save_title",
-      "",
-    );
-    if (saveTitle !== "") {
-      args.denops.call(
-        "nvim_set_option",
-        "titlestring",
-        saveTitle,
-      );
-    }
-
     if (
       this.#restcmd !== "" &&
       equal(this.#prevWinInfo, await getWinInfo(args.denops))
@@ -1341,7 +1328,7 @@ export class Ui extends BaseUi<Params> {
 
     const viewItem = this.#viewItems[cursorPos[1] - 1];
     return this.#items.findIndex(
-      (item: DduItem) => item === viewItem,
+      (item: DduItem) => equal(item, viewItem),
     );
   }
 
@@ -1785,7 +1772,7 @@ async function setStatusline(
       : "");
   const linenr =
     "printf('%'.('$'->line())->len().'d/%d','.'->line(),'$'->line())";
-  const laststatus = await op.laststatus.get(denops);
+  const laststatus = await op.laststatus.getGlobal(denops);
   const input = `${context.input.length > 0 ? " " + context.input : ""}`;
   const async = `${context.done ? "" : " [async]"}`;
   const filter = uiParams.fileFilter === "" ? "" : ` [${uiParams.fileFilter}]`;
@@ -1796,7 +1783,7 @@ async function setStatusline(
       await vars.g.set(
         denops,
         "ddu#ui#filer#_save_title",
-        await op.titlestring.get(denops),
+        await op.titlestring.getGlobal(denops),
       );
     }
 
@@ -1807,7 +1794,7 @@ async function setStatusline(
 
     const titleString = `${header} %{${linenr}}%*${footer}`;
     await vars.b.set(denops, "ddu_ui_filer_title", titleString);
-    await op.titlestring.set(denops, titleString);
+    await op.titlestring.setGlobal(denops, titleString);
 
     await denops.cmd(
       `autocmd ${augroupName} WinEnter,BufEnter <buffer>` +
@@ -1839,7 +1826,7 @@ class ObjectSet<T extends object> {
 
   constructor(initialItems?: T[]) {
     if (initialItems) {
-      initialItems.forEach((item) => this.add(item));
+      this.#items = [...initialItems];
     }
   }
 
