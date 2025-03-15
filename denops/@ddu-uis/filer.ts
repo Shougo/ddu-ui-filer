@@ -8,12 +8,12 @@ import {
   type Previewer,
   type SourceInfo,
   type UiOptions,
-} from "jsr:@shougo/ddu-vim@~10.0.0/types";
-import { BaseUi, type UiActions } from "jsr:@shougo/ddu-vim@~10.0.0/ui";
+} from "jsr:@shougo/ddu-vim@~10.1.0/types";
+import { BaseUi, type UiActions } from "jsr:@shougo/ddu-vim@~10.1.0/ui";
 import {
   printError,
   treePath2Filename,
-} from "jsr:@shougo/ddu-vim@~10.0.0/utils";
+} from "jsr:@shougo/ddu-vim@~10.1.0/utils";
 
 import type { Denops } from "jsr:@denops/std@~7.5.0";
 import { batch } from "jsr:@denops/std@~7.5.0/batch";
@@ -120,6 +120,7 @@ export type Params = {
   previewFloatingTitle: FloatingTitle;
   previewFloatingTitlePos: "left" | "center" | "right";
   previewFloatingZindex: number;
+  previewFocusable: boolean;
   previewHeight: ExprNumber;
   previewMaxSize: number;
   previewRow: ExprNumber;
@@ -1285,6 +1286,7 @@ export class Ui extends BaseUi<Params> {
       previewFloatingTitle: "",
       previewFloatingTitlePos: "left",
       previewFloatingZindex: 100,
+      previewFocusable: true,
       previewHeight: 10,
       previewMaxSize: 1000000,
       previewRow: 0,
