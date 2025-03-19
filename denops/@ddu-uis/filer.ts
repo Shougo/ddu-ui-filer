@@ -8,12 +8,13 @@ import {
   type Previewer,
   type SourceInfo,
   type UiOptions,
-} from "jsr:@shougo/ddu-vim@~10.1.0/types";
-import { BaseUi, type UiActions } from "jsr:@shougo/ddu-vim@~10.1.0/ui";
+} from "jsr:@shougo/ddu-vim@~10.3.0/types";
+import { BaseUi, type UiActions } from "jsr:@shougo/ddu-vim@~10.3.0/ui";
 import {
+  convertTreePath,
   printError,
   treePath2Filename,
-} from "jsr:@shougo/ddu-vim@~10.1.0/utils";
+} from "jsr:@shougo/ddu-vim@~10.3.0/utils";
 
 import type { Denops } from "jsr:@denops/std@~7.5.0";
 import { batch } from "jsr:@denops/std@~7.5.0/batch";
@@ -310,8 +311,10 @@ export class Ui extends BaseUi<Params> {
       return;
     }
 
+    const itemTreePath = convertTreePath(args.item.treePath ?? args.item.word);
     const cursorPos = this.#items.findIndex(
-      (item) => equal(item, args.item),
+      (item) =>
+        equal(convertTreePath(item.treePath ?? item.word), itemTreePath),
     ) + 1;
 
     if (cursorPos < 1) {
