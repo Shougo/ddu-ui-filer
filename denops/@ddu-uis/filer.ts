@@ -311,6 +311,7 @@ export class Ui extends BaseUi<Params> {
       return;
     }
 
+    // NOTE: Use treePath to search item.  Because item state may be changed.
     const itemTreePath = convertTreePath(args.item.treePath ?? args.item.word);
     const cursorPos = this.#items.findIndex(
       (item) =>
