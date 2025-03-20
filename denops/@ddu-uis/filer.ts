@@ -333,6 +333,14 @@ export class Ui extends BaseUi<Params> {
       // Adjust cursor position when cursor is near top.
       await args.denops.cmd("normal! zb");
     }
+
+    const path = await fn.getbufvar(
+      args.denops,
+      bufnr,
+      "ddu_ui_filer_path",
+      "",
+    );
+    await args.denops.call("ddu#ui#filer#_update_cursor", path);
   }
 
   override async redraw(args: {
@@ -639,14 +647,6 @@ export class Ui extends BaseUi<Params> {
     const item = await this.#getItem(args.denops);
     const bufnr = await this.#getBufnr(args.denops);
     await fn.setbufvar(args.denops, bufnr, "ddu_ui_item", item ?? {});
-
-    const path = await fn.getbufvar(
-      args.denops,
-      bufnr,
-      "ddu_ui_filer_path",
-      "",
-    );
-    await args.denops.call("ddu#ui#filer#_update_cursor", path);
   }
 
   override async clearSelectedItems(args: {
