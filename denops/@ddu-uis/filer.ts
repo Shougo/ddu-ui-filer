@@ -333,6 +333,9 @@ export class Ui extends BaseUi<Params> {
       // Adjust cursor position when cursor is near top.
       await args.denops.cmd("normal! zb");
     }
+
+    const path = await vars.b.get(args.denops, "ddu_ui_filer_path", "");
+    await args.denops.call("ddu#ui#filer#_update_cursor", path);
   }
 
   override async redraw(args: {
