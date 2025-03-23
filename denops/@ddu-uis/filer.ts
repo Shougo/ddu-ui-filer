@@ -311,16 +311,21 @@ export class Ui extends BaseUi<Params> {
       return;
     }
 
-    // NOTE: Use treePath to search item.  Because item state may be changed.
-    const itemTreePath = convertTreePath(args.item.treePath ?? args.item.word);
-    const cursorPos = this.#items.findIndex(
-      (item) =>
-        equal(convertTreePath(item.treePath ?? item.word), itemTreePath),
-    ) + 1;
-
-    if (cursorPos < 1) {
-      return;
+    let index = this.#items.findIndex(
+      (item) => equal(item, args.item),
+    );
+    if (index <= 0) {
+      // NOTE: Use treePath to search item.  Because item state may be changed.
+      const itemTreePath = convertTreePath(
+        args.item.treePath ?? args.item.word,
+      );
+      index = this.#items.findIndex(
+        (item) =>
+          equal(convertTreePath(item.treePath ?? item.word), itemTreePath),
+      );
     }
+
+    const cursorPos = index + 1;
 
     const winHeight = await fn.winheight(args.denops, 0);
     const maxLine = await fn.line(args.denops, "$");
