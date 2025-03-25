@@ -314,7 +314,7 @@ export class Ui extends BaseUi<Params> {
     let index = this.#items.findIndex(
       (item) => equal(item, args.item),
     );
-    if (index <= 0) {
+    if (index < 0) {
       // NOTE: Use treePath to search item.  Because item state may be changed.
       const itemTreePath = convertTreePath(
         args.item.treePath ?? args.item.word,
@@ -323,6 +323,10 @@ export class Ui extends BaseUi<Params> {
         (item) =>
           equal(convertTreePath(item.treePath ?? item.word), itemTreePath),
       );
+    }
+
+    if (index < 0) {
+      return;
     }
 
     const cursorPos = index + 1;
