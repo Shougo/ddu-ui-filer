@@ -479,7 +479,11 @@ export class Ui extends BaseUi<Params> {
       if (winid >= 0) {
         await fn.win_gotoid(args.denops, winid);
       } else {
-        await args.denops.cmd(`tabnew | silent keepalt buffer ${bufnr}`);
+        // NOTE: ":tabnew" creates new empty buffer.
+        await args.denops.cmd("tabnew");
+        const emptyBufnr = await fn.bufnr(args.denops);
+        await args.denops.cmd(`silent keepalt buffer ${bufnr}`);
+        await args.denops.cmd(`bwipeout ${emptyBufnr}`);
       }
     } else if (args.uiParams.split === "no") {
       if (winid < 0) {
