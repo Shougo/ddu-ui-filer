@@ -26,6 +26,7 @@ import { equal } from "jsr:@std/assert@~1.0.0/equal";
 import { is } from "jsr:@core/unknownutil@~4.3.0/is";
 import { SEPARATOR as pathsep } from "jsr:@std/path@~1.0.1/constants";
 import { extname } from "jsr:@std/path@~1.0.0/extname";
+import { ensure } from "jsr:@denops/std@~7.5.0/buffer";
 
 import { PreviewUi } from "./filer/preview.ts";
 
@@ -520,33 +521,36 @@ export class Ui extends BaseUi<Params> {
     try {
       // NOTE: Use batch for screen flicker when highlight items.
       await batch(args.denops, async (denops: Denops) => {
-        await denops.call(
-          "ddu#ui#filer#_update_buffer",
-          args.uiParams,
-          bufnr,
-          this.#items.map((c) => (c.display ?? c.word)),
-          false,
-        );
+        await ensure(args.denops, bufnr, async () => {
+          await denops.call(
+            "ddu#ui#filer#_update_buffer",
+            args.uiParams,
+            bufnr,
+            this.#items.map((c) => (c.display ?? c.word)),
+            false,
+          );
 
-        await denops.call(
-          "ddu#ui#filer#_highlight_items",
-          args.uiParams,
-          bufnr,
-          this.#items.length,
-          this.#items.map((item, index) => {
-            return {
-              item: item,
-              highlights: item.highlights ?? [],
-              row: index + 1,
-              prefix: "",
-            };
-          }).filter((highlight_item) =>
-            highlight_item.highlights.length > 0 &&
-            !this.#selectedItems.has(highlight_item.item)
-          ),
-          this.#selectedItems.values().map((item) => this.#getItemIndex(item))
-            .filter((index) => index >= 0),
-        );
+          await denops.call(
+            "ddu#ui#filer#_highlight_items",
+            args.uiParams,
+            bufnr,
+            this.#items.length,
+            this.#items.map((item, index) => {
+              return {
+                item: item,
+                highlights: item.highlights ?? [],
+                row: index + 1,
+                prefix: "",
+              };
+            }).filter((highlight_item) =>
+              highlight_item.highlights.length > 0 &&
+              !this.#selectedItems.has(highlight_item.item)
+            ),
+            this.#selectedItems.values()
+              .map((item) => this.#getItemIndex(item))
+              .filter((index) => index >= 0),
+          );
+        });
       });
     } catch (e) {
       await printError(
