@@ -700,7 +700,7 @@ export class Ui extends BaseUi<Params> {
 
       if (
         args.uiParams.split === "no" ||
-        await fn.win_id2win(args.denops, args.context.winId) > 0
+        await fn.win_id2win(args.denops, args.context.winId) <= 0
       ) {
         await fn.win_gotoid(args.denops, winid);
 
