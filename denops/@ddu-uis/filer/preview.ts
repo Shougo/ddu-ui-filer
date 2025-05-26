@@ -33,7 +33,10 @@ export class PreviewUi {
   #previewedBufnrs: Set<number> = new Set();
 
   async close(denops: Denops, context: Context, uiParams: Params) {
-    if (this.visible() && (await fn.winnr(denops, "$")) !== 1) {
+    const prevWinnr = await fn.winnr(denops, "#");
+    if (
+      this.visible() && prevWinnr > 0 && prevWinnr !== await fn.winnr(denops)
+    ) {
       if (uiParams.previewFloating && denops.meta.host !== "nvim") {
         await denops.call("popup_close", this.#previewWinId);
       } else {
