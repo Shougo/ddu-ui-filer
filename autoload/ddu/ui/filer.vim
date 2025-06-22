@@ -78,12 +78,13 @@ function ddu#ui#filer#_highlight(
     return
   endif
 
-  if a:row <= 0 || a:col <= 0 || a:row > line('$')
+  const max_col = getline(a:row)->len()
+
+  if a:row <= 0 || a:col <= 0 || a:row > line('$') || a:col > max_col
     " Invalid range
     return
   endif
 
-  const max_col = getline(a:row)->len()
   const length =
         \   a:length <= 0 || a:col + a:length > max_col
         \ ? max_col - a:col + 1
