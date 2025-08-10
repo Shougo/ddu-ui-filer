@@ -93,6 +93,13 @@ chooseAction
 		NOTE: "ddu-source-action" is required.
 		https://github.com/Shougo/ddu-source-action
 
+                                             *ddu-ui-filer-action-chooseInput*
+chooseInput
+		Choose |ddu-option-input| by ddu UI.
+
+		NOTE: "ddu-source-input_history" is required.
+		https://github.com/Shougo/ddu-source-input_history
+
                                      *ddu-ui-filer-action-clearSelectAllItems*
 clearSelectAllItems
 		Clear all selected items.
