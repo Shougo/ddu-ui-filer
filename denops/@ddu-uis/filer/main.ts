@@ -445,11 +445,15 @@ export class Ui extends BaseUi<Params> {
         "title_pos": args.uiParams.floatingTitlePos,
       };
       if (winid >= 0 && await fn.bufwinid(args.denops, bufnr) === winid) {
-        await args.denops.call(
-          "nvim_win_set_config",
-          winid,
-          winOpts,
-        );
+        try {
+          await args.denops.call(
+            "nvim_win_set_config",
+            winid,
+            winOpts,
+          );
+        } catch (_) {
+          // The window may be closed.
+        }
       } else {
         await args.denops.call(
           "nvim_open_win",
