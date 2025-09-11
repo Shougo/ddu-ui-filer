@@ -254,14 +254,15 @@ export class Ui extends BaseUi<Params> {
         // Replace parent
         this.#items[index] = insertItems[0];
       } else {
-        this.#items = this.#items.slice(0, index + 1).concat(insertItems)
-          .concat(
-            this.#items.slice(index + 1),
-          );
+        this.#items = [
+          ...this.#items.slice(0, index + 1),
+          ...insertItems,
+          ...this.#items.slice(index + 1),
+        ];
         this.#items[index] = args.parent;
       }
     } else {
-      this.#items = this.#items.concat(insertItems);
+      this.#items = [...this.#items, ...insertItems];
     }
 
     await this.#updateSelectedItems(args.denops);
@@ -291,9 +292,10 @@ export class Ui extends BaseUi<Params> {
     if (endIndex < 0) {
       this.#items = this.#items.slice(0, startIndex + 1);
     } else {
-      this.#items = this.#items.slice(0, startIndex + 1).concat(
-        this.#items.slice(startIndex + endIndex + 1),
-      );
+      this.#items = [
+        ...this.#items.slice(0, startIndex + 1),
+        ...this.#items.slice(startIndex + endIndex + 1),
+      ];
     }
 
     this.#items[startIndex] = args.item;
@@ -1764,7 +1766,7 @@ async function getSortedItems(
       continue;
     }
 
-    ret = ret.concat(sortItems(uiParams, sourceItems[source.index]));
+    ret = [...ret, ...sortItems(uiParams, sourceItems[source.index])];
   }
   return ret;
 }
@@ -1797,7 +1799,7 @@ function sortItems(
   if (uiParams.sortTreesFirst) {
     const dirs = sortedItems.filter((item) => item.isTree);
     const files = sortedItems.filter((item) => !item.isTree);
-    return dirs.concat(files);
+    return [...dirs, ...files];
   } else {
     return sortedItems;
   }
