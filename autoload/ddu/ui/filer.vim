@@ -46,23 +46,39 @@ function ddu#ui#filer#_highlight_items(
     call prop_clear(1, a:max_lines + 1, { 'bufnr': a:bufnr })
   endif
 
+  const max_row = ddu#ui#ff#_max_row(a:bufnr)
+
   " Highlights items
   for item in a:highlight_items
     for hl in item.highlights
+      let max_col = ddu#ui#filer#_max_col(a:bufnr, item.row)
       call ddu#ui#filer#_highlight(
-            \ hl.hl_group, hl.name, 1,
-            \ s:namespace, a:bufnr,
-            \ item.row,
-            \ hl.col + item.prefix->strlen(), hl.width)
+            \   hl.hl_group, hl.name, 1,
+            \   s:namespace, a:bufnr,
+            \   item.row,
+            \   max_row,
+            \   hl.col + item.prefix->strlen(),
+            \   max_col,
+            \   hl.width
+            \ )
     endfor
   endfor
 
   " Selected items highlights
   const selected_highlight = get(a:params.highlights, 'selected', 'Statement')
   for item_nr in a:selected_items
+    let row = item_nr + 1
+    let max_col = ddu#ui#filer#_max_col(a:bufnr, row)
+
     call ddu#ui#filer#_highlight(
-          \ selected_highlight, 'ddu-ui-selected', 10000,
-          \ s:namespace, a:bufnr, item_nr + 1, 1, 0)
+          \   selected_highlight, 'ddu-ui-selected', 10000,
+          \   s:namespace, a:bufnr,
+          \   row,
+          \   max_row,
+          \   1,
+          \   max_col,
+          \   0
+          \ )
   endfor
 
   if !has('nvim')
@@ -70,24 +86,34 @@ function ddu#ui#filer#_highlight_items(
     redraw
   endif
 endfunction
+
+function ddu#ui#filer#_max_row(bufnr)
+  return a:bufnr->getbufinfo()
+        \ ->get(0, #{ linecount: 0 })->get('linecount', 0)
+endfunction
+
+function ddu#ui#filer#_max_col(bufnr, row)
+  return a:bufnr->getbufoneline(a:row)->len()
+endfunction
+
 function ddu#ui#filer#_highlight(
-      \ highlight, prop_type, priority, id, bufnr, row, col, length) abort
+      \ highlight, prop_type, priority, id, bufnr,
+      \ row, max_row, col, max_col, length) abort
+
   if !a:highlight->hlexists()
     call ddu#util#print_error(
           \ printf('highlight "%s" does not exist', a:highlight))
     return
   endif
 
-  const max_col = getline(a:row)->len()
-
-  if a:row <= 0 || a:col <= 0 || a:row > line('$') || a:col > max_col
+  if a:row <= 0 || a:col <= 0 || a:row > a:max_row || a:col > a:max_col
     " Invalid range
     return
   endif
 
   const length =
-        \   a:length <= 0 || a:col + a:length > max_col
-        \ ? max_col - a:col + 1
+        \   a:length <= 0 || a:col + a:length > a:max_col
+        \ ? a:max_col - a:col + 1
         \ : a:length
 
   if !has('nvim')
