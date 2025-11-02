@@ -46,7 +46,7 @@ function ddu#ui#filer#_highlight_items(
     call prop_clear(1, a:max_lines + 1, { 'bufnr': a:bufnr })
   endif
 
-  const max_row = ddu#ui#ff#_max_row(a:bufnr)
+  const max_row = ddu#ui#filer#_max_row(a:bufnr)
 
   " Highlights items
   for item in a:highlight_items
