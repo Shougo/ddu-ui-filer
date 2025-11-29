@@ -518,7 +518,6 @@ export class Ui extends BaseUi<Params> {
       args.options,
       args.uiParams,
       bufnr,
-      floating,
       augroupName,
       this.#items,
     );
@@ -1812,7 +1811,6 @@ async function setStatusline(
   options: DduOptions,
   uiParams: Params,
   bufnr: number,
-  floating: boolean,
   augroupName: string,
   items: DduItem[],
 ): Promise<void> {
@@ -1846,7 +1844,7 @@ async function setStatusline(
   const filter = uiParams.fileFilter === "" ? "" : ` [${uiParams.fileFilter}]`;
   const footer = `${input}${filter}${async}`;
 
-  if (floating || laststatus === 0) {
+  if (laststatus === 0) {
     if (await vars.g.get(denops, "ddu#ui#filer#_save_title", "") === "") {
       await vars.g.set(
         denops,
