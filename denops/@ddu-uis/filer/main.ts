@@ -1,6 +1,7 @@
 import {
   ActionFlags,
   type BaseParams,
+  type Callback,
   type Context,
   type DduItem,
   type DduOptions,
@@ -11,6 +12,7 @@ import {
 } from "@shougo/ddu-vim/types";
 import { BaseUi, type UiActions } from "@shougo/ddu-vim/ui";
 import {
+  callCallback,
   convertTreePath,
   printError,
   treePath2Filename,
@@ -131,15 +133,20 @@ export type Params = {
   previewWindowOptions: WindowOption[];
   search: string;
   sort:
+    | "custom"
     | "filename"
     | "extension"
+    | "natural"
     | "none"
     | "size"
     | "time"
+    | "Custom"
     | "Filename"
     | "Extension"
+    | "Natural"
     | "Size"
     | "Time";
+  sortCustom: Callback;
   sortTreesFirst: boolean;
   split: "horizontal" | "vertical" | "floating" | "tab" | "no";
   splitDirection: "belowright" | "aboveleft" | "topleft" | "botright";
@@ -246,7 +253,11 @@ export class Ui extends BaseUi<Params> {
         item.__sourceIndex === args.parent.__sourceIndex,
     );
 
-    const insertItems = sortItems(args.uiParams, args.children);
+    const insertItems = await sortItems(
+      args.denops,
+      args.uiParams,
+      args.children,
+    );
 
     const prevLength = this.#items.length;
     if (index >= 0) {
@@ -1366,6 +1377,7 @@ export class Ui extends BaseUi<Params> {
       split: "horizontal",
       splitDirection: "aboveleft",
       sort: "none",
+      sortCustom: "",
       sortTreesFirst: false,
       startAutoAction: false,
       statusline: true,
@@ -1636,6 +1648,18 @@ const sortByFilename = (a: DduItem, b: DduItem) => {
   return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
 };
 
+const collator = new Intl.Collator(undefined, {
+  numeric: true,
+  sensitivity: "base",
+});
+const sortByNatural = (a: DduItem, b: DduItem) => {
+  // Natural sort should compare filenames (not full paths) so
+  // "file1,file2,...,file10" orders naturally
+  const nameA = treePath2Filename(a.treePath ?? a.word);
+  const nameB = treePath2Filename(b.treePath ?? b.word);
+  return collator.compare(nameA, nameB);
+};
+
 const sortByExtension = (a: DduItem, b: DduItem) => {
   const nameA = extname(treePath2Filename(a.treePath ?? a.word));
   const nameB = extname(treePath2Filename(b.treePath ?? b.word));
@@ -1766,15 +1790,19 @@ async function getSortedItems(
       continue;
     }
 
-    ret = [...ret, ...sortItems(uiParams, sourceItems[source.index])];
+    ret = [
+      ...ret,
+      ...await sortItems(denops, uiParams, sourceItems[source.index]),
+    ];
   }
   return ret;
 }
 
-function sortItems(
+async function sortItems(
+  denops: Denops,
   uiParams: Params,
   items: DduItem[],
-): DduItem[] {
+): Promise<DduItem[]> {
   const sortMethod = uiParams.sort.toLowerCase();
   const sortFunc = sortMethod === "extension"
     ? sortByExtension
@@ -1784,6 +1812,8 @@ function sortItems(
     ? sortByTime
     : sortMethod === "filename"
     ? sortByFilename
+    : sortMethod === "natural"
+    ? sortByNatural
     : sortByNone;
   const reversed = uiParams.sort.toLowerCase() !== uiParams.sort;
 
@@ -1792,9 +1822,23 @@ function sortItems(
     items = items.filter((item) => item.isTree || fileFilter.test(item.word));
   }
 
-  const sortedItems = reversed
-    ? items.sort(sortFunc).reverse()
-    : items.sort(sortFunc);
+  let sortedItems;
+  if (uiParams.sortCustom !== "" && sortMethod === "custom") {
+    sortedItems = await callCallback(
+      denops,
+      uiParams.sortCustom,
+      {
+        uiParams,
+        items,
+      },
+    ) as DduItem[];
+  } else {
+    sortedItems = items.sort(sortFunc);
+  }
+
+  if (reversed) {
+    sortedItems = sortedItems.reverse();
+  }
 
   if (uiParams.sortTreesFirst) {
     const dirs = sortedItems.filter((item) => item.isTree);

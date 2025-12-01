@@ -505,13 +505,23 @@ sort		(string)
 		NOTE: To sort items properly, the source must support
 		|ddu-item-attribute-status|.
 
+		"custom": custom function sort
 		"extension": file extension sort
 		"filename": file name sort
+		"natural": natural file name sort
 		"size": file size sort
 		"time": file modified time sort
 		"none": disabled
 
 		Default: "none"
+
+                                               *ddu-ui-filer-param-sortCustom*
+sortCustom
+		It is the function which sort items when
+		|ddu-ui-filer-param-sort| equals "custom".
+		The function returns sorted Ddu items.
+
+		Default: ""
 
                                            *ddu-ui-filer-param-sortTreesFirst*
 sortTreesFirst	(boolean)
