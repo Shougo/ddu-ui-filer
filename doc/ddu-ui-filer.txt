@@ -364,6 +364,26 @@ onPreview	(function)
 		|denops#callback#register()|.
 		NOTE: Current window may not be the preview window.
 
+                                      *ddu-ui-filer-param-overwriteStatusline*
+overwriteStatusline (boolean)
+		If it is true, the original 'statusline' value is set on the
+		buffer.
+		NOTE: You can get the status line information by
+		"w:ddu_ui_filer_status" variable.
+
+		Default: v:true
+
+                                           *ddu-ui-filer-param-overwriteTitle*
+overwriteTitle (boolean)
+		If it is true, the original 'titlestring' value is set on the
+		buffer.
+		NOTE: You can get the status line information by
+		"w:ddu_ui_filer_status" variable.
+
+		Default:
+			v:false
+			v:true (When 'laststatus' is 0)
+
                                                *ddu-ui-filer-param-previewCol*
 previewCol	(number)
 		Set the column position of the preview window if
@@ -534,15 +554,6 @@ splitDirection	(string)
 		Specify split direction.
 
 		Default: "aboveleft"
-
-                                               *ddu-ui-filer-param-statusline*
-statusline	(boolean)
-		If it is true, the original 'statusline' value is set on the
-		buffer.
-		NOTE: You can get the status line information by
-		"w:ddu_ui_filer_status" variable.
-
-		Default: v:true
 
                                                    *ddu-ui-filer-param-winCol*
 winCol		(number | string)
@@ -817,6 +828,9 @@ A: >vim
 
 ==============================================================================
 COMPATIBILITY                                     *ddu-ui-filer-compatibility*
+
+2025.12.02
+* Rename "statusline" param to "overwriteStatusline".
 
 2024.01.19
 * Rename "refreshItems" action to "redraw".

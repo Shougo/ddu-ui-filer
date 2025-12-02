@@ -118,6 +118,8 @@ export type Params = {
   focus: boolean;
   highlights: HighlightGroup;
   onPreview: string | ((args: OnPreviewArguments) => Promise<void>);
+  overwriteStatusline: boolean;
+  overwriteTitle: boolean;
   previewCol: ExprNumber;
   previewFloating: boolean;
   previewFloatingBorder: FloatingBorder;
@@ -151,7 +153,6 @@ export type Params = {
   split: "horizontal" | "vertical" | "floating" | "tab" | "no";
   splitDirection: "belowright" | "aboveleft" | "topleft" | "botright";
   startAutoAction: boolean;
-  statusline: boolean;
   winCol: ExprNumber;
   winHeight: ExprNumber;
   winRow: ExprNumber;
@@ -1354,6 +1355,8 @@ export class Ui extends BaseUi<Params> {
       onPreview: (_) => {
         return Promise.resolve();
       },
+      overwriteStatusline: true,
+      overwriteTitle: false,
       previewCol: 0,
       previewFloating: false,
       previewFloatingBorder: "none",
@@ -1380,7 +1383,6 @@ export class Ui extends BaseUi<Params> {
       sortCustom: "",
       sortTreesFirst: false,
       startAutoAction: false,
-      statusline: true,
       winCol: "(&columns - eval(uiParams.winWidth)) / 2",
       winHeight: 20,
       winRow: "&lines / 2 - 10",
@@ -1525,6 +1527,10 @@ export class Ui extends BaseUi<Params> {
         await fn.setwinvar(denops, winid, "&winfixheight", 1);
       } else if (uiParams.split === "vertical") {
         await fn.setwinvar(denops, winid, "&winfixwidth", 1);
+      }
+
+      if (uiParams.split === "floating") {
+        await fn.setwinvar(denops, winid, "&statusline", "");
       }
     });
   }
@@ -1872,10 +1878,6 @@ async function setStatusline(
     statusState,
   );
 
-  if (!uiParams.statusline) {
-    return;
-  }
-
   const header = `[ddu-${options.name}]` +
     (items.length !== context.maxItems
       ? ` ${items.length}/${context.maxItems}`
@@ -1888,7 +1890,7 @@ async function setStatusline(
   const filter = uiParams.fileFilter === "" ? "" : ` [${uiParams.fileFilter}]`;
   const footer = `${input}${filter}${async}`;
 
-  if (laststatus === 0) {
+  if (laststatus === 0 || uiParams.overwriteTitle) {
     if (await vars.g.get(denops, "ddu#ui#filer#_save_title", "") === "") {
       await vars.g.set(
         denops,
@@ -1910,7 +1912,7 @@ async function setStatusline(
       `autocmd ${augroupName} WinEnter,BufEnter <buffer>` +
         " let &titlestring=b:->get('ddu_ui_filer_title', '')",
     );
-  } else {
+  } else if (uiParams.overwriteStatusline) {
     await fn.setwinvar(
       denops,
       await fn.bufwinnr(denops, bufnr),
