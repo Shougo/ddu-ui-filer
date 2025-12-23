@@ -708,28 +708,26 @@ export class Ui extends BaseUi<Params> {
       return;
     }
 
-    for (
-      const winid of (await fn.win_findbuf(args.denops, bufnr) as number[])
-    ) {
-      if (winid <= 0) {
+    const winIds = await fn.win_findbuf(args.denops, bufnr) as number[];
+    const split = args.uiParams.split;
+    for (const winId of winIds) {
+      if (winId <= 0) {
         continue;
       }
 
       if (
-        (args.uiParams.split === "tab" &&
-          await fn.tabpagenr(args.denops, "$") > 1) ||
-        (args.uiParams.split !== "no" &&
-          await fn.winnr(args.denops, "$") > 1)
+        (split === "tab" && await fn.tabpagenr(args.denops, "$") > 1) ||
+        (split !== "no" && await fn.winnr(args.denops, "$") > 1)
       ) {
-        await fn.win_gotoid(args.denops, winid);
+        await fn.win_gotoid(args.denops, winId);
         await args.denops.cmd("close!");
 
         // Focus to the previous window
         await fn.win_gotoid(args.denops, args.context.winId);
       } else {
-        await fn.win_gotoid(args.denops, winid);
+        await fn.win_gotoid(args.denops, winId);
 
-        await fn.setwinvar(args.denops, winid, "&winfixbuf", false);
+        await fn.setwinvar(args.denops, winId, "&winfixbuf", false);
 
         const prevName = await fn.bufname(args.denops, args.context.bufNr);
         await args.denops.cmd(
