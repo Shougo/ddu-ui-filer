@@ -19,11 +19,13 @@ import { equal } from "@std/assert/equal";
 import { replace } from "@denops/std/buffer";
 import { ensure } from "@core/unknownutil/ensure";
 import { is } from "@core/unknownutil/is";
+import { extname } from "@std/path/extname";
 
 import type { Params } from "./main.ts";
 
 type PreviewParams = {
   syntaxLimitChars?: number;
+  imageExts?: string[];
 };
 
 export class PreviewUi {
@@ -303,6 +305,22 @@ export class PreviewUi {
       previousWinId,
       this.#previewWinId,
     ) as number;
+
+    const imageExts = actionParams.imageExts ?? [];
+    const action = item?.action as { path?: string };
+    if (action?.path) {
+      const fileExt = extname(action.path).toLowerCase();
+
+      if (imageExts.includes(fileExt)) {
+        // Try "sixel_view"
+        await denops.call(
+          "ddu#ui#filer#_sixel_view",
+          action.path,
+          this.#previewWinId,
+        );
+        return ActionFlags.None;
+      }
+    }
 
     const limit = actionParams.syntaxLimitChars ?? 400000;
     if (contents.join("\n").length < limit) {

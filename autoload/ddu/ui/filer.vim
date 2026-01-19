@@ -422,3 +422,15 @@ function s:stop_debounce_timer(timer_name) abort
     unlet {a:timer_name}
   endif
 endfunction
+
+function ddu#ui#filer#_sixel_view(path, winid) abort
+  const pos = win_screenpos(a:winid)
+  if pos[0] <= 0 || pos[1] <= 0
+    return
+  endif
+  try
+    call sixel_view#view(a:path, {}, pos[0], pos[1])
+  catch
+    " Ignore errors
+  endtry
+endfunction
