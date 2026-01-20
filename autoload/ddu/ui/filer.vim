@@ -176,7 +176,8 @@ function ddu#ui#filer#_open_preview_window(
   const use_winfixbuf =
         \ '+winfixbuf'->exists() && a:params.previewSplit !=# 'no'
 
-  if a:preview_winid >= 0 && (!a:params.previewFloating || has('nvim'))
+  if a:preview_winid >= 0 && win_id2win(a:preview_winid) > 0
+        \ && (!a:params.previewFloating || has('nvim'))
     call win_gotoid(a:preview_winid)
 
     if use_winfixbuf
@@ -421,4 +422,20 @@ function s:stop_debounce_timer(timer_name) abort
     silent! call timer_stop({a:timer_name})
     unlet {a:timer_name}
   endif
+endfunction
+
+function ddu#ui#filer#_sixel_view(path, winid) abort
+  const pos = win_screenpos(a:winid)
+  if pos[0] <= 0 || pos[1] <= 0
+    return
+  endif
+
+  try
+    call sixel_view#clear()
+
+    " NOTE: Redraw image later.
+    call timer_start(0, { -> sixel_view#view(a:path, {}, pos[0], pos[1]) })
+  catch
+    " Ignore errors
+  endtry
 endfunction

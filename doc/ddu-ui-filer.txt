@@ -196,10 +196,20 @@ openFilterWindow
                                                  *ddu-ui-filer-action-preview*
 preview
 		params:
-			{syntaxLimitChars}: 	Max number of chars to apply
-						'syntax' and 'filetype' to
-						previewed contents.
-						(Default: 400000)
+			{syntaxLimitChars}:
+				Max number of chars to apply 'syntax' and
+				'filetype' to previewed contents.
+				(Default: 400000)
+
+			{imageExts}:
+				Specifies a list of file extensions to treat
+				as image files for preview purposes.
+				NOTE: "denops-sixel-view.vim" is required.
+			https://github.com/gw31415/denops-sixel-view.vim
+
+				NOTE: Sixel support terminal is required.
+				(Example: [".png", ".jpg", ".gif", ... ])
+				(Default: [])
 
 			The remaining params are passed to |ddu-kinds|.
 			See also |ddu-kind-attribute-getPreviewer| and kinds
