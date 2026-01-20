@@ -318,7 +318,8 @@ export class PreviewUi {
           action.path,
           this.#previewWinId,
         );
-        return ActionFlags.None;
+
+        return ActionFlags.Persist;
       }
     }
 
