@@ -16,8 +16,8 @@ import { batch } from "@denops/std/batch";
 import * as fn from "@denops/std/function";
 
 import { equal } from "@std/assert/equal";
-import { replace } from "@denops/std/buffer";
-import { ensure } from "@core/unknownutil/ensure";
+import { ensure, replace } from "@denops/std/buffer";
+import { ensure as ensureUnknown } from "@core/unknownutil/ensure";
 import { is } from "@core/unknownutil/is";
 import { extname } from "@std/path/extname";
 
@@ -122,7 +122,10 @@ export class PreviewUi {
     }
 
     const prevId = await fn.win_getid(denops);
-    const previewParams = ensure(actionParams, is.Record) as PreviewParams;
+    const previewParams = ensureUnknown(
+      actionParams,
+      is.Record,
+    ) as PreviewParams;
 
     const previewContext: PreviewContext = {
       col: Number(uiParams.previewCol),
@@ -286,14 +289,18 @@ export class PreviewUi {
     if (err || !exists || previewer.kind === "nofile") {
       // Create new buffer
       previewBufnr = await fn.bufadd(denops, buffer.bufname);
-      await batch(denops, async (denops: Denops) => {
-        await fn.setbufvar(denops, previewBufnr, "&buftype", "nofile");
-        await fn.setbufvar(denops, previewBufnr, "&swapfile", 0);
-        await fn.setbufvar(denops, previewBufnr, "&bufhidden", "hide");
-        await fn.setbufvar(denops, previewBufnr, "&modeline", 1);
+      await fn.bufload(denops, previewBufnr);
+      await replace(denops, previewBufnr, []);
 
-        await fn.bufload(denops, previewBufnr);
-        await replace(denops, previewBufnr, contents);
+      await batch(denops, async (denops: Denops) => {
+        await ensure(denops, previewBufnr, async () => {
+          await fn.setbufvar(denops, previewBufnr, "&buftype", "nofile");
+          await fn.setbufvar(denops, previewBufnr, "&swapfile", 0);
+          await fn.setbufvar(denops, previewBufnr, "&bufhidden", "hide");
+          await fn.setbufvar(denops, previewBufnr, "&modeline", 1);
+
+          await replace(denops, previewBufnr, contents);
+        });
       });
     }
 
