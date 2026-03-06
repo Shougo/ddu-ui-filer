@@ -146,6 +146,35 @@ export class PreviewUi {
       return ActionFlags.None;
     }
 
+    if (uiParams.checkPreview) {
+      let checkPreview: boolean;
+
+      if (typeof uiParams.checkPreview === "string") {
+        checkPreview = await denops.call(
+          "denops#callback#call",
+          uiParams.checkPreview,
+          {
+            context,
+            item,
+            previewContext,
+            previewer,
+          },
+        ) as boolean;
+      } else {
+        checkPreview = await uiParams.checkPreview({
+          denops,
+          context,
+          item,
+          previewContext,
+          previewer,
+        });
+      }
+
+      if (checkPreview) {
+        return ActionFlags.None;
+      }
+    }
+
     let flag: ActionFlags;
     // Render the preview
     if (previewer.kind === "terminal") {

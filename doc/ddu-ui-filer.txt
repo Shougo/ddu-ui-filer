@@ -277,6 +277,13 @@ updateOptions
 ==============================================================================
 PARAMS                                                   *ddu-ui-filer-params*
 
+                                             *ddu-ui-filer-param-checkPreview*
+checkPreview	(function)
+		It is called before |ddu-ui-filer-action-preview| is fired.
+		If it returns |v:false|, preview action is skipped.
+		NOTE: The function must be registered by
+		|denops#callback#register()|.
+
                                               *ddu-ui-filer-param-displayRoot*
 displayRoot	(boolean)
 		Display source root item.

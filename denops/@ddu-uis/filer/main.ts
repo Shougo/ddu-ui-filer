@@ -86,6 +86,14 @@ type WinInfo = {
   tabpagebuflist: number[];
 };
 
+type CheckPreviewArguments = {
+  denops: Denops;
+  context: Context;
+  item: DduItem;
+  previewContext: PreviewContext;
+  previewer: Previewer;
+};
+
 type OnPreviewArguments = {
   denops: Denops;
   context: Context;
@@ -109,6 +117,7 @@ type RedrawParams = {
 export type Params = {
   autoAction: AutoAction;
   autoResize: boolean;
+  checkPreview: string | ((args: CheckPreviewArguments) => Promise<boolean>);
   displayRoot: boolean;
   exprParams: (keyof Params)[];
   fileFilter: string;
@@ -1333,6 +1342,9 @@ export class Ui extends BaseUi<Params> {
     return {
       autoAction: {},
       autoResize: false,
+      checkPreview: (_) => {
+        return Promise.resolve(false);
+      },
       displayRoot: true,
       exprParams: [
         "previewCol",
