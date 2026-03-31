@@ -318,6 +318,10 @@ export class PreviewUi {
     if (err || !exists || previewer.kind === "nofile") {
       // Create new buffer
       previewBufnr = await fn.bufadd(denops, buffer.bufname);
+
+      // NOTE: set "buftype" before bufload().
+      await fn.setbufvar(denops, previewBufnr, "&buftype", "nofile");
+
       await fn.bufload(denops, previewBufnr);
       await replace(denops, previewBufnr, []);
 
