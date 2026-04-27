@@ -204,10 +204,11 @@ preview
 			{imageExts}:
 				Specifies a list of file extensions to treat
 				as image files for preview purposes.
-				NOTE: "denops-sixel-view.vim" is required.
-			https://github.com/gw31415/denops-sixel-view.vim
 
-				NOTE: Sixel support terminal is required.
+				NOTE: Neovim 0.13+(|vim.ui.img|) is required.
+				NOTE: Kitty protocol support terminal is
+				required.
+
 				(Example: [".png", ".jpg", ".gif", ... ])
 				(Default: [])
 

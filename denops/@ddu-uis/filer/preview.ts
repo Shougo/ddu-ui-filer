@@ -55,6 +55,11 @@ export class PreviewUi {
         await fn.win_gotoid(denops, saveId);
       });
     }
+
+    await denops.call(
+      "ddu#ui#filer#_clear_image",
+    );
+
     this.#previewWinId = -1;
   }
 
@@ -352,11 +357,12 @@ export class PreviewUi {
       const fileExt = extname(action.path).toLowerCase();
 
       if (imageExts.includes(fileExt)) {
-        // Try "sixel_view"
         await denops.call(
-          "ddu#ui#filer#_sixel_view",
+          "ddu#ui#filer#_preview_image",
           action.path,
           this.#previewWinId,
+          uiParams.previewWidth,
+          uiParams.previewHeight,
         );
 
         return ActionFlags.Persist;

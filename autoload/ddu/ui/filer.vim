@@ -1,4 +1,5 @@
 let s:namespace = has('nvim') ? nvim_create_namespace('ddu-ui-filer') : 0
+let s:image_id = -1
 
 function ddu#ui#filer#_update_buffer(params, bufnr, lines, refreshed) abort
   const current_lines = '$'->line(a:bufnr->bufwinid())
@@ -424,18 +425,52 @@ function s:stop_debounce_timer(timer_name) abort
   endif
 endfunction
 
-function ddu#ui#filer#_sixel_view(path, winid) abort
+function ddu#ui#filer#_preview_image(path, winid, width, height) abort
   const pos = win_screenpos(a:winid)
   if pos[0] <= 0 || pos[1] <= 0
     return
   endif
 
-  try
-    call sixel_view#clear()
+  if has('nvim-0.13')
+    " Use new vim.ui.img API and save returned id into s:image_id.
+    try
+      call ddu#ui#filer#_clear_image()
 
-    " NOTE: Redraw image later.
-    call timer_start(0, { -> sixel_view#view(a:path, {}, pos[0], pos[1]) })
-  catch
-    " Ignore errors
-  endtry
+      const opts = #{
+            \   row: pos[0],
+            \   col: pos[1],
+            \   width: a:width,
+            \   height: a:height,
+            \   zindex: 50,
+            \ }
+
+      " Call Lua API and store returned id into s:image_id
+      let s:image_id = luaeval(
+            \   'vim.ui.img.set(vim.fn.readblob(_A[1]), _A[2])',
+            \   [a:path, l:opts]
+            \ )
+
+      " If display succeeded, return early (skip sixel fallback)
+      return
+    catch
+      " If any error occurs, fall back to sixel below
+    endtry
+  endif
+
+  "try
+  "  " Try sixel view.
+  "  call sixel_view#clear()
+
+  "  " NOTE: Redraw image later.
+  "  call timer_start(0, { -> sixel_view#view(a:path, {}, pos[0], pos[1]) })
+  "catch
+  "  " Ignore errors
+  "endtry
+endfunction
+
+function ddu#ui#filer#_clear_image() abort
+  if has('nvim-0.13') && s:image_id > 0
+    call v:lua.vim.ui.img.del(s:image_id)
+    let s:image_id = -1
+  endif
 endfunction
