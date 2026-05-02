@@ -534,6 +534,21 @@ export class Ui extends BaseUi<Params> {
       await this.#initOptions(args.denops, args.options, args.uiParams, bufnr);
     }
 
+    // NOTE: When the buffer is reused (hidden buffer reopened in a new
+    // window), setbufvar() does not fire FileType because the option value is
+    // unchanged. Explicitly trigger the FileType autocmd so that user-defined
+    // FileType handlers (e.g. buffer-local mappings) are applied on every
+    // window open.
+    if (initialized && winid < 0) {
+      await ensure(args.denops, bufnr, async () => {
+        await fn.win_execute(
+          args.denops,
+          winid,
+          "doautocmd <nomodeline> FileType ddu-ff",
+        );
+      });
+    }
+
     await this.#setAutoAction(args.denops, args.uiParams, winid);
 
     const augroupName = `${await op.filetype.getLocal(args.denops)}-${bufnr}`;
