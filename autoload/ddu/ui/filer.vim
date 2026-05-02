@@ -220,7 +220,7 @@ function ddu#ui#filer#_open_preview_window(
       endif
 
       if has('nvim')
-        let winopts = #{
+        const winopts = #{
               \   relative: 'editor',
               \   row: win_row,
               \   col: win_col,
@@ -234,7 +234,10 @@ function ddu#ui#filer#_open_preview_window(
         const winid = nvim_open_win(
               \ a:preview_bufnr, a:params.previewFocusable, winopts)
       else
-        const winopts = #{
+        if a:preview_winid >= 0
+          call popup_close(a:preview_winid)
+        endif
+        let winopts = #{
               \   pos: 'topleft',
               \   posinvert: v:false,
               \   line: win_row + 1,
@@ -252,9 +255,6 @@ function ddu#ui#filer#_open_preview_window(
               \   wrap: 0,
               \   zindex: a:params.previewFloatingZindex,
               \ }
-        if a:preview_winid >= 0
-          call popup_close(a:preview_winid)
-        endif
         const winid = a:preview_bufnr->popup_create(winopts)
       endif
     else
@@ -283,7 +283,7 @@ function ddu#ui#filer#_open_preview_window(
           const anchor = 'SW'
         endif
 
-        let winopts = #{
+        const winopts = #{
               \   relative: 'editor',
               \   anchor: anchor,
               \   row: win_row,
@@ -297,10 +297,13 @@ function ddu#ui#filer#_open_preview_window(
               \ }
         const winid = nvim_open_win(a:preview_bufnr, v:true, winopts)
       else
+        if a:preview_winid >= 0
+          call popup_close(a:preview_winid)
+        endif
         if a:params.previewRow <= 0
           let win_row -= preview_height + 2
         endif
-        const winopts = #{
+        let winopts = #{
               \   pos: 'topleft',
               \   posinvert: v:false,
               \   line: win_row + 1,
@@ -318,9 +321,6 @@ function ddu#ui#filer#_open_preview_window(
               \   wrap: 0,
               \   zindex: a:params.previewFloatingZindex,
               \ }
-        if a:preview_winid >= 0
-          call popup_close(a:preview_winid)
-        endif
         const winid = a:preview_bufnr->popup_create(winopts)
       endif
     else
@@ -349,6 +349,9 @@ function ddu#ui#filer#_open_preview_window(
   call setwinvar(winid, '&cursorline', v:false)
   if use_winfixbuf
     call setwinvar(winid, '&winfixbuf', v:true)
+  endif
+  if a:params.previewFloating && has('nvim')
+    call setwinvar(winid, '&winblend', a:params.floatingBlend)
   endif
 
   return winid

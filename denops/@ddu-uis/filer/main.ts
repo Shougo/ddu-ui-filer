@@ -121,6 +121,7 @@ export type Params = {
   displayRoot: boolean;
   exprParams: (keyof Params)[];
   fileFilter: string;
+  floatingBlend: number;
   floatingBorder: FloatingBorder;
   floatingTitle: FloatingTitle;
   floatingTitlePos: "left" | "center" | "right";
@@ -496,6 +497,12 @@ export class Ui extends BaseUi<Params> {
         winnr,
         "&winhighlight",
         `Normal:${highlight},FloatBorder:${floatingHighlight}`,
+      );
+      await fn.setwinvar(
+        args.denops,
+        winnr,
+        "&winblend",
+        args.uiParams.floatingBlend,
       );
       await fn.setwinvar(
         args.denops,
@@ -1357,6 +1364,7 @@ export class Ui extends BaseUi<Params> {
         "winWidth",
       ],
       fileFilter: "",
+      floatingBlend: 0,
       floatingBorder: "none",
       floatingTitle: "",
       floatingTitlePos: "left",
