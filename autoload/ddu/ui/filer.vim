@@ -434,11 +434,11 @@ function ddu#ui#filer#_preview_image(path, winid, width, height) abort
     return
   endif
 
+  call ddu#ui#filer#_clear_image()
+
   if has('nvim-0.13')
     " Use new vim.ui.img API and save returned id into s:image_id.
     try
-      call ddu#ui#filer#_clear_image()
-
       const opts = #{
             \   row: pos[0],
             \   col: pos[1],
@@ -458,22 +458,50 @@ function ddu#ui#filer#_preview_image(path, winid, width, height) abort
     catch
       " If any error occurs, fall back to sixel below
     endtry
+  elseif has('patch-9.2.0612') && has('image')
+        \ && 'convert'->executable() && 'identify'->executable()
+    const path = a:path->shellescape()
+
+    const output = ('identify -format "%w %h" ' .. path)->systemlist()
+    if v:shell_error != 0 || output->empty()
+      call ddu#util#print_error(output)
+      return
+    endif
+
+    const dim = output[0]->split()
+    if dim->len() < 2
+      return
+    endif
+
+    const [w, h] = [dim[0]->str2nr(), dim[1]->str2nr()]
+
+    const tempfile = tempname()
+    call system(printf('convert %s -depth 8 rgb:%s', path, tempfile))
+
+    let s:image_id = popup_create('', #{
+          \   image: #{
+          \     data: tempfile->readblob(),
+          \     width: w,
+          \     height: h,
+          \   },
+          \   line: pos[0],
+          \   col: pos[1],
+          \   border: [],
+          \   padding: [0, 0, 0, 0],
+          \ })
   endif
-
-  "try
-  "  " Try sixel view.
-  "  call sixel_view#clear()
-
-  "  " NOTE: Redraw image later.
-  "  call timer_start(0, { -> sixel_view#view(a:path, {}, pos[0], pos[1]) })
-  "catch
-  "  " Ignore errors
-  "endtry
 endfunction
 
 function ddu#ui#filer#_clear_image() abort
-  if has('nvim-0.13') && s:image_id > 0
-    call v:lua.vim.ui.img.del(s:image_id)
-    let s:image_id = -1
+  if s:image_id <= 0
+    return
   endif
+
+  if has('nvim-0.13')
+    call v:lua.vim.ui.img.del(s:image_id)
+  elseif has('patch-9.2.0612') && has('image')
+    call popup_close(s:image_id)
+  endif
+
+  let s:image_id = -1
 endfunction

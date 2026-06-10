@@ -205,9 +205,11 @@ preview
 				Specifies a list of file extensions to treat
 				as image files for preview purposes.
 
-				NOTE: Neovim 0.13+(|vim.ui.img|) is required.
+				NOTE: Neovim 0.13+(|vim.ui.img|) or Vim
+				9.2.0612 is required.
+				NOTE: ImageMagick is required for Vim.
 				NOTE: Kitty protocol support terminal is
-				required.
+				required in Neovim.
 
 				(Example: [".png", ".jpg", ".gif", ... ])
 				(Default: [])
