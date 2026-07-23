@@ -229,12 +229,9 @@ function ddu#ui#filer#_open_preview_window(
               \   title_pos: a:params.previewFloatingTitlePos,
               \   zindex: a:params.previewFloatingZindex,
               \ }
-        const winid = nvim_open_win(
-              \ a:preview_bufnr, a:params.previewFocusable, winopts)
+        const winid = s:open_floating_preview(
+              \ a:preview_bufnr, a:preview_winid, winopts)
       else
-        if a:preview_winid >= 0
-          call popup_close(a:preview_winid)
-        endif
         let winopts = #{
               \   pos: 'topleft',
               \   posinvert: v:false,
@@ -253,7 +250,8 @@ function ddu#ui#filer#_open_preview_window(
               \   wrap: 0,
               \   zindex: a:params.previewFloatingZindex,
               \ }
-        const winid = a:preview_bufnr->popup_create(winopts)
+        const winid = s:open_floating_preview(
+              \ a:preview_bufnr, a:preview_winid, winopts)
       endif
     else
       call win_gotoid(winnr)
@@ -354,6 +352,19 @@ function ddu#ui#filer#_open_preview_window(
 
   return winid
 endfunction
+
+function s:open_floating_preview(preview_bufnr, preview_winid, winopts) abort
+  if a:preview_winid >= 0
+    call popup_close(a:preview_winid)
+  endif
+
+  if has('nvim')
+    return nvim_open_win(a:preview_bufnr, v:true, a:winopts)
+  endif
+
+  return a:preview_bufnr->popup_create(a:winopts)
+endfunction
+
 
 let s:cursor_text = ''
 let s:auto_action = {}
