@@ -172,8 +172,12 @@ endfunction
 function ddu#ui#filer#_open_preview_window(
       \ params, bufnr, preview_bufnr, prev_winid, preview_winid) abort
 
+  const use_popup = a:params.previewFloating
+        \ && a:params.split !=# "floating" && has('nvim')
+        \ && exists('&previewpopup') && &previewpopup !=# ''
   const use_winfixbuf =
         \ '+winfixbuf'->exists() && a:params.previewSplit !=# 'no'
+        \ && !use_popup
 
   if a:preview_winid >= 0 && win_id2win(a:preview_winid) > 0
         \ && (!a:params.previewFloating || has('nvim'))
@@ -199,7 +203,11 @@ function ddu#ui#filer#_open_preview_window(
   const win_width = winnr->winwidth()
   const win_height = winnr->winheight()
 
-  if a:params.previewSplit ==# 'vertical'
+  if use_popup
+    execute 'pbuffer' a:preview_bufnr
+
+    const winid = bufwinid(a:preview_bufnr)
+  elseif a:params.previewSplit ==# 'vertical'
     if a:params.previewFloating
       let win_row = a:params.previewRow > 0 ?
               \ a:params.previewRow : pos[0] - 1
@@ -339,7 +347,7 @@ function ddu#ui#filer#_open_preview_window(
   endif
 
   " Set options
-  if a:params.previewSplit !=# 'no'
+  if a:params.previewSplit !=# 'no' && !getwinvar(winid, '&previewwindow')
     call setwinvar(winid, '&previewwindow', v:true)
   endif
   call setwinvar(winid, '&cursorline', v:false)

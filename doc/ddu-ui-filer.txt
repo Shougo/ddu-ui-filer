@@ -424,6 +424,8 @@ previewCol	(number)
                                           *ddu-ui-filer-param-previewFloating*
 previewFloating	(boolean)
 		Use floating window in |ddu-ui-filer-action-preview|.
+		If Neovim and 'previewpopup' option is available,
+		'previewpopup' is used. 
 
 		Default: v:false
 
