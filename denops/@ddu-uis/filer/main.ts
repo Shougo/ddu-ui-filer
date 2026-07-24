@@ -701,7 +701,7 @@ export class Ui extends BaseUi<Params> {
   }): Promise<number[]> {
     const bufnr = await this.#getBufnr(args.denops);
     const winIds = await fn.win_findbuf(args.denops, bufnr) as number[];
-    if (this.#previewUi.visible()) {
+    if (await this.#previewUi.visible(args.denops)) {
       winIds.push(this.#previewUi.previewWinId);
     }
     return winIds;
@@ -1116,7 +1116,7 @@ export class Ui extends BaseUi<Params> {
         args.uiParams,
         args.context,
       );
-      const reopenPreview = this.#previewUi.visible() &&
+      const reopenPreview = await this.#previewUi.visible(args.denops) &&
         uiParams.split === "horizontal" && uiParams.previewSplit === "vertical";
 
       if (reopenPreview) {
@@ -1222,7 +1222,7 @@ export class Ui extends BaseUi<Params> {
       actionParams: BaseParams;
       uiParams: Params;
     }) => {
-      if (this.#previewUi.visible()) {
+      if (await this.#previewUi.visible(args.denops)) {
         // Close preview window when redraw
         await this.#previewUi.close(args.denops, args.context, args.uiParams);
         await this.#previewUi.removePreviewedBuffers(args.denops);
@@ -1323,7 +1323,7 @@ export class Ui extends BaseUi<Params> {
       );
 
       // Close if the target is the same as the previous one
-      if (this.#previewUi.isAlreadyPreviewed(item)) {
+      if (await this.#previewUi.isAlreadyPreviewed(args.denops, item)) {
         await this.#previewUi.close(args.denops, args.context, args.uiParams);
         return ActionFlags.None;
       }

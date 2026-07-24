@@ -35,12 +35,18 @@ export class PreviewUi {
   #previewedBufnrs: Set<number> = new Set();
 
   async close(denops: Denops, context: Context, uiParams: Params) {
-    if (!this.visible()) {
+    const visible = await this.visible(denops);
+    if (!visible) {
+      this.#previewWinId = -1;
       return;
     }
 
-    if (uiParams.previewFloating && denops.meta.host !== "nvim") {
-      await denops.call("popup_close", this.#previewWinId);
+    if (uiParams.previewFloating) {
+      if (denops.meta.host === "nvim") {
+        await denops.call("nvim_win_close", this.#previewWinId, true);
+      } else {
+        await denops.call("popup_close", this.#previewWinId);
+      }
     } else {
       const saveId = await fn.win_getid(denops);
       await batch(denops, async (denops) => {
@@ -77,22 +83,39 @@ export class PreviewUi {
     denops: Denops,
     command: string,
   ) {
-    if (!this.visible()) {
+    const visible = await this.visible(denops);
+    if (!visible) {
       return;
     }
     await fn.win_execute(denops, this.#previewWinId, command);
   }
 
-  isAlreadyPreviewed(item: DduItem): boolean {
-    return this.visible() && equal(item, this.#previewedTarget);
+  async isAlreadyPreviewed(denops: Denops, item: DduItem): Promise<boolean> {
+    return await this.visible(denops) && equal(item, this.#previewedTarget);
   }
 
   isChangedUiParams(params: Params): boolean {
     return equal(params, this.#previewedUiParams);
   }
 
-  visible(): boolean {
-    return this.#previewWinId > 0;
+  async visible(denops: Denops): Promise<boolean> {
+    console.log(this.#previewWinId);
+    if (this.#previewWinId <= 0) {
+      return false;
+    }
+
+    if (denops.meta.host === "nvim") {
+      return await denops.call(
+        "nvim_win_is_valid",
+        this.#previewWinId,
+      ) as boolean;
+    } else if (await fn.win_id2win(denops, this.#previewWinId) > 0) {
+      // Check for normal window
+      return true;
+    } else {
+      // Check popup
+      return await denops.call("popup_visible", this.#previewWinId) as boolean;
+    }
   }
 
   get previewWinId(): number {
@@ -113,7 +136,8 @@ export class PreviewUi {
       previewContext: PreviewContext,
     ) => Promise<Previewer | undefined>,
   ): Promise<ActionFlags> {
-    if (this.isAlreadyPreviewed(item) || !getPreviewer) {
+    const previewed = await this.isAlreadyPreviewed(denops, item);
+    if (previewed || !getPreviewer) {
       return ActionFlags.None;
     }
 
@@ -257,7 +281,8 @@ export class PreviewUi {
     bufnr: number,
     previousWinId: number,
   ): Promise<ActionFlags> {
-    if (!this.visible()) {
+    const visible = await this.visible(denops);
+    if (!visible) {
       this.#previewWinId = await denops.call(
         "ddu#ui#filer#_open_preview_window",
         uiParams,
