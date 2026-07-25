@@ -94,7 +94,7 @@ export class PreviewUi {
     return await this.visible(denops) && equal(item, this.#previewedTarget);
   }
 
-  isChangedUiParams(params: Params): boolean {
+  isSameUiParams(params: Params): boolean {
     return equal(params, this.#previewedUiParams);
   }
 
