@@ -99,7 +99,6 @@ export class PreviewUi {
   }
 
   async visible(denops: Denops): Promise<boolean> {
-    console.log(this.#previewWinId);
     if (this.#previewWinId <= 0) {
       return false;
     }
