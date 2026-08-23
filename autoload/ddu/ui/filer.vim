@@ -522,3 +522,17 @@ function ddu#ui#filer#_clear_image() abort
 
   let s:image_id = -1
 endfunction
+
+function ddu#ui#filer#_check_popup(winid) abort
+  if a:winid < 0
+    return v:false
+  endif
+
+  if has('nvim')
+    return a:winid->nvim_win_is_valid()
+  elseif a:winid->win_id2win() > 0
+    return v:true
+  else
+    return a:winid->popup_getpos()->len() > 0
+  endif
+endfunction
