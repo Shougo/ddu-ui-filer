@@ -758,8 +758,6 @@ export class Ui extends BaseUi<Params> {
       } else {
         await fn.win_gotoid(args.denops, winId);
 
-        await fn.setwinvar(args.denops, winId, "&winfixbuf", false);
-
         const prevName = await fn.bufname(args.denops, args.context.bufNr);
         await args.denops.cmd(
           prevName !== args.context.bufName || args.context.bufNr == bufnr ||
@@ -1525,7 +1523,6 @@ export class Ui extends BaseUi<Params> {
     const winid = await fn.bufwinid(denops, bufnr);
     const tabNr = await fn.tabpagenr(denops);
     const existsStatusColumn = await fn.exists(denops, "+statuscolumn");
-    const existsWinFixBuf = await fn.exists(denops, "+winfixbuf");
 
     await batch(denops, async (denops: Denops) => {
       await fn.setbufvar(denops, bufnr, "ddu_ui_name", options.name);
@@ -1543,11 +1540,6 @@ export class Ui extends BaseUi<Params> {
       await fn.setwinvar(denops, winid, "&signcolumn", "no");
       if (existsStatusColumn) {
         await fn.setwinvar(denops, winid, "&statuscolumn", "");
-      }
-      if (
-        existsWinFixBuf && uiParams.split !== "no" && uiParams.split !== "tab"
-      ) {
-        await fn.setwinvar(denops, winid, "&winfixbuf", true);
       }
 
       await fn.setbufvar(denops, bufnr, "&bufhidden", "hide");
