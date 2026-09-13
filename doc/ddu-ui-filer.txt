@@ -219,7 +219,7 @@ preview
                                           *ddu-ui-filer-action-previewExecute*
 previewExecute
 		params:
-			{command}: 	Command to execute
+			{command}:	Command to execute
 
 		Execute command in preview window.
 
@@ -279,7 +279,7 @@ PARAMS                                                   *ddu-ui-filer-params*
                                              *ddu-ui-filer-param-checkPreview*
 checkPreview	(function)
 		It is called before |ddu-ui-filer-action-preview| is fired.
-		If it returns |v:true|, preview action is skipped.
+		If it returns true, the preview action is skipped.
 		NOTE: The function must be registered by
 		|denops#callback#register()|.
 
@@ -402,8 +402,10 @@ overwriteStatusline (boolean)
 overwriteTitle (boolean)
 		If it is true, the original 'titlestring' value is set on the
 		buffer.
-		NOTE: You can get the status line information by
-		"w:ddu_ui_filer_status" variable.
+		NOTE: You can get the status information from
+		"w:ddu_ui_filer_status".
+		The generated title string is stored in
+		"b:ddu_ui_filer_title".
 
 		Default:
 			v:false
@@ -580,7 +582,7 @@ sortCustom
 
                                            *ddu-ui-filer-param-sortTreesFirst*
 sortTreesFirst	(boolean)
-		Sort trees in the first than non tree items.
+		Sort tree items before non-tree items.
 
 		Default: v:false
 
@@ -799,7 +801,7 @@ A: >vim
                                                           *ddu-ui-filer-faq-7*
 Q: I want to open ddu-ui-filer automatically when |:edit| directory.
 
-A: I don't provide the solution.  Because it cannot be implmented properly.
+A: I don't provide the solution.  Because it cannot be implemented properly.
 
                                                           *ddu-ui-filer-faq-8*
 Q: I want to open the item by |:drop| command.
