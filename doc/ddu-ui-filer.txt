@@ -523,10 +523,11 @@ previewWidth	(number | string)
 
                                      *ddu-ui-filer-param-previewWindowOptions*
 previewWindowOptions	(list)
-		Set the window options of the |preview-window| in
-		|ddu-ui-filer-action-preview|.
-		If |ddu-ui-filer-param-previewFloating| is set, set the
-		options of the floating window.
+		Set the window options of the preview window.
+		If |ddu-ui-filer-param-previewFloating| is set, the options
+		are applied to the preview floating window.
+		Window appearance options such as border and title are
+		configured by the corresponding parameters.
 		See |options| for the detail.
 		NOTE: The options are applied in the array order.
 
