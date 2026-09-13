@@ -320,9 +320,9 @@ fileFilter	(string)
 
                                             *ddu-ui-filer-param-floatingBlend*
 floatingBlend	(number)
-		Specify popup window transparency.
-		The valid values are in the range of 0 for fully opaque
-		popupmenu (disabled) to 100.
+		Specify floating window transparency.
+		The valid values range from 0, which is fully opaque,
+		to 100.
 
 		NOTE: It is neovim only.
 
@@ -330,8 +330,7 @@ floatingBlend	(number)
 
                                            *ddu-ui-filer-param-floatingBorder*
 floatingBorder	(string | list)
-		Specify the style of the window border if
-		|ddu-ui-filer-param-split| is "floating".
+		Specify the border highlight of the floating window.
 		See |nvim_open_win()| for the detail.
 		NOTE: It is neovim only.
 
@@ -457,10 +456,9 @@ previewFloatingTitlePos	(string)
 
                                     *ddu-ui-filer-param-previewFloatingZindex*
 previewFloatingZindex		(number)
-		Specify the style of the preview window zindex if
-		|ddu-ui-filer-param-split| is "floating".
-		See |nvim_open_win()| for the detail.
+		Specify the z-index of the preview floating window.
 		NOTE: It is neovim only.
+		See |nvim_open_win()| for the detail.
 
 		Default: 100
 
