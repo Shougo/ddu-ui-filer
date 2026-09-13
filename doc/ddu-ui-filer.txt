@@ -59,7 +59,7 @@ autoAction	(dictionary)
 		Set 0 to disable debouncing.
 		NOTE: It does not work in the filter window.
 
-		Default: 10
+		Default: 100
 
 		name				(string)	(Required)
 		Action name
@@ -415,9 +415,11 @@ overwriteTitle (boolean)
 			v:true (When 'laststatus' is 0)
 
                                                *ddu-ui-filer-param-previewCol*
-previewCol	(number)
+previewCol	(number | string)
 		Set the column position of the preview window if
 		|ddu-ui-filer-param-previewFloating| is v:true.
+		If it is a string, it is evaluated as a Vim expression.
+		See |ddu-ui-filer-params-expression|.
 
 		Default: 0
 
@@ -471,13 +473,15 @@ previewFocusable (boolean)
 		Default: v:true
 
                                             *ddu-ui-filer-param-previewHeight*
-previewHeight	(number)
+previewHeight	(number | string)
 		Set the height of the |preview-window| in
 		|ddu-ui-filer-action-preview|.
 		If |ddu-ui-filer-param-previewFloating|, set the height of the
 		floating window.
 		NOTE: If |ddu-ui-filer-param-previewSplit| is "horizontal",
 		the value must be less than `&lines - 2`.
+		If it is a string, it is evaluated as a Vim expression.
+		See |ddu-ui-filer-params-expression|.
 
 		Default: 10
 
@@ -488,9 +492,11 @@ previewMaxSize	(number)
 		Default: 1000000
 
                                                *ddu-ui-filer-param-previewRow*
-previewRow	(number)
+previewRow	(number | string)
 		Set the row position of the preview window if
 		|ddu-ui-filer-param-previewFloating| is v:true.
+		If it is a string, it is evaluated as a Vim expression.
+		See |ddu-ui-filer-params-expression|.
 
 		Default: 0
 
@@ -507,11 +513,13 @@ previewSplit	(string)
 		Default: "horizontal"
 
                                              *ddu-ui-filer-param-previewWidth*
-previewWidth	(number)
+previewWidth	(number | string)
 		Set the width of the |preview-window| in
 		|ddu-ui-filer-action-preview|.
 		If |ddu-ui-filer-param-previewFloating|, set the width of the
 		floating window.
+		If it is a string, it is evaluated as a Vim expression.
+		See |ddu-ui-filer-params-expression|.
 
 		Default: 80
 
