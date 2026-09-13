@@ -8,7 +8,6 @@ CONTENTS                                               *ddu-ui-filer-contents*
 Introduction		|ddu-ui-filer-introduction|
 Install			|ddu-ui-filer-install|
 Interface		|ddu-ui-filer-interface|
-  Functions		  |ddu-ui-filer-functions|
   Actions		  |ddu-ui-filer-actions|
   Params		  |ddu-ui-filer-params|
   Params expression	  |ddu-ui-filer-params-expression|
@@ -39,9 +38,6 @@ installed on macOS. >
 ==============================================================================
 INTERFACE                                             *ddu-ui-filer-interface*
 
-
-------------------------------------------------------------------------------
-FUNCTIONS                                             *ddu-ui-filer-functions*
 
 ------------------------------------------------------------------------------
 ACTIONS                                                 *ddu-ui-filer-actions*
@@ -591,6 +587,12 @@ sortTreesFirst	(boolean)
                                            *ddu-ui-filer-param-splitDirection*
 splitDirection	(string)
 		Specify split direction.
+		Following values are available:
+
+		"belowright"
+		"aboveleft"
+		"topleft"
+		"botright"
 
 		Default: "aboveleft"
 
